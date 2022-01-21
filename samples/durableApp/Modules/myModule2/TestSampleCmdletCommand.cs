@@ -1,0 +1,101 @@
+﻿using System;
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
+
+namespace myModule2
+{
+    [Cmdlet(VerbsDiagnostic.Test,"SampleCmdlet")]
+    [OutputType(typeof(FavoriteStuff))]
+    public class TestSampleCmdletCommand : PSCmdlet
+    {
+        [Parameter(
+            Mandatory = true,
+            Position = 0,
+            ValueFromPipeline = true,
+            ValueFromPipelineByPropertyName = true)]
+        public int FavoriteNumber { get; set; }
+
+        [Parameter(
+            Position = 1,
+            ValueFromPipelineByPropertyName = true)]
+        [ValidateSet("Cat", "Dog", "Horse")]
+        public string FavoritePet { get; set; } = "Dog";
+
+        // This method gets called once for each cmdlet in the pipeline when the pipeline starts executing
+        protected override void BeginProcessing()
+        {
+            WriteVerbose("Begin!");
+        }
+
+        // This method will be called for each input received from the pipeline to this cmdlet; if no input is received, this method is not called
+        protected override void ProcessRecord()
+        {
+            WriteObject(new FavoriteStuff { 
+                FavoriteNumber = FavoriteNumber,
+                FavoritePet = FavoritePet
+            });
+        }
+
+        // This method will be called once at the end of pipeline execution; if no input is received, this method is not called
+        protected override void EndProcessing()
+        {
+            WriteVerbose("End!");
+        }
+    }
+
+    public class FavoriteStuff
+    {
+        public int FavoriteNumber { get; set; }
+        public string FavoritePet { get; set; }
+    }
+
+          /// <summary>
+    /// Invoke a durable activity.
+    /// </summary>
+    [Cmdlet("Invoke", "DurableActivity")]
+    public class InvokeDurableActivityCommand : PSCmdlet
+    {
+        /// <summary>
+        /// Gets and sets the activity function name.
+        /// </summary>
+        [Parameter(Mandatory = true)]
+        public string FunctionName { get; set; }
+
+        /// <summary>
+        /// Gets and sets the input for an activity function.
+        /// </summary>
+        [Parameter]
+        [ValidateNotNull]
+        public object Input { get; set; }
+
+        protected override void EndProcessing()
+        {
+          WriteObject("The future is now.");
+
+        }
+
+    }
+
+        /// <summary>
+    /// An orchestration action that represents calling an activity function.
+    /// </summary>
+    internal class CallActivityAction : OrchestrationAction
+    {
+        /// <summary>
+        /// The activity function name.
+        /// </summary>
+        public readonly string FunctionName;
+        
+        /// <summary>
+        /// The input to the activity function.
+        /// </summary>
+        public readonly object Input;
+
+        public CallActivityAction(string functionName, object input)
+            : base(ActionType.CallActivity)
+        {
+            FunctionName = functionName;
+            Input = input;
+        }
+    }
+}

@@ -1,7 +1,7 @@
 @{
 
     # Script module or binary module file associated with this manifest.
-    RootModule = 'myModule.psm1'
+    RootModule = '.\bin\Debug\netstandard2.0\myModule2.dll' #'myModule2.psm1'
     
     # Version number of this module.
     ModuleVersion = '0.0.1'
@@ -67,7 +67,8 @@
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @(
-        'Test-BinaryModuleCmdlet2'
+        'Invoke-DurableActivity',
+        'Test-SampleCmdlet'
     )
     
     # Variables to export from this module
