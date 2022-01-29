@@ -20,8 +20,8 @@ namespace WorkerDefinitions.Utility
         internal readonly static CmdletInfo ImportModuleCmdletInfo = new CmdletInfo("Import-Module", typeof(ImportModuleCommand));
         internal readonly static CmdletInfo RemoveModuleCmdletInfo = new CmdletInfo("Remove-Module", typeof(RemoveModuleCommand));
         internal readonly static CmdletInfo RemoveJobCmdletInfo = new CmdletInfo("Remove-Job", typeof(RemoveJobCommand));
-        internal readonly static CmdletInfo OutStringCmdletInfo = new CmdletInfo("Out-String", typeof(OutStringCommand));
-        internal readonly static CmdletInfo WriteInformationCmdletInfo = new CmdletInfo("Write-Information", typeof(WriteInformationCommand));
+        //internal readonly static CmdletInfo OutStringCmdletInfo = new CmdletInfo("Out-String", typeof(OutStringCommand));
+        //internal readonly static CmdletInfo WriteInformationCmdletInfo = new CmdletInfo("Write-Information", typeof(WriteInformationCommand));
 
         internal readonly static object BoxedTrue = (object)true;
         internal readonly static object BoxedFalse = (object)false;
@@ -33,7 +33,7 @@ namespace WorkerDefinitions.Utility
         /// <summary>
         /// Create a new PowerShell instance using our singleton InitialSessionState instance.
         /// </summary>
-        internal static PowerShell NewPwshInstance()
+        /*internal static PowerShell NewPwshInstance()
         {
             if (s_iss == null)
             {
@@ -76,7 +76,7 @@ namespace WorkerDefinitions.Utility
             }
 
             return pwsh;
-        }
+        }*/
 
         /// <summary>
         /// Clean up the global variables added by the function invocation.
@@ -214,7 +214,7 @@ namespace WorkerDefinitions.Utility
             return PowerShellWorkerConfiguration.GetBoolean("PSWorkerEnableExperimentalDurableFunctions") ?? true;
         }
 
-        internal static string GetPowerShellVersion(PowerShell pwsh)
+        /*internal static string GetPowerShellVersion(PowerShell pwsh)
         {
             const string versionTableVariableName = "PSVersionTable";
             const string versionPropertyName = "PSVersion";
@@ -222,6 +222,6 @@ namespace WorkerDefinitions.Utility
             var versionTableVariable = GetGlobalVariables(pwsh).First(v => string.CompareOrdinal(v.Name, versionTableVariableName) == 0);
             var versionTable = (PSVersionHashTable)versionTableVariable.Value;
             return versionTable[versionPropertyName].ToString();
-        }
+        }*/
     }
 }

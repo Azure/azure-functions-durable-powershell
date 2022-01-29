@@ -76,7 +76,7 @@ namespace Durable
                                         retryOptions.MaxNumberOfAttempts,
                                         onSuccess:
                                             result => {
-                                                output(TypeExtensions.ConvertFromJson(result));
+                                                output(result);//TypeExtensions.ConvertFromJson(result));
                                             },
                                         onFailure);
                                         
@@ -206,11 +206,11 @@ namespace Durable
             
             if (historyEvent.EventType == HistoryEventType.TaskCompleted)
             {
-                return TypeExtensions.ConvertFromJson(historyEvent.Result);
+                return historyEvent.Result; //TypeExtensions.ConvertFromJson(historyEvent.Result);
             }
             else if (historyEvent.EventType == HistoryEventType.EventRaised)
             {
-                return TypeExtensions.ConvertFromJson(historyEvent.Input);
+                return historyEvent.Input; //TypeExtensions.ConvertFromJson(historyEvent.Input);
             }
             return null;
         }
