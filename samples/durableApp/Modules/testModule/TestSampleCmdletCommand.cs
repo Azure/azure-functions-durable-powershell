@@ -2,7 +2,7 @@
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 
-namespace myModule2
+namespace testModule
 {
     [Cmdlet(VerbsDiagnostic.Test,"SampleCmdlet")]
     [OutputType(typeof(FavoriteStuff))]
@@ -74,28 +74,5 @@ namespace myModule2
 
         }
 
-    }
-
-        /// <summary>
-    /// An orchestration action that represents calling an activity function.
-    /// </summary>
-    internal class CallActivityAction : OrchestrationAction
-    {
-        /// <summary>
-        /// The activity function name.
-        /// </summary>
-        public readonly string FunctionName;
-        
-        /// <summary>
-        /// The input to the activity function.
-        /// </summary>
-        public readonly object Input;
-
-        public CallActivityAction(string functionName, object input)
-            : base(ActionType.CallActivity)
-        {
-            FunctionName = functionName;
-            Input = input;
-        }
     }
 }

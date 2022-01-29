@@ -1,0 +1,30 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
+
+namespace Durable
+{
+    internal class DurableFunctionInfo
+    {
+        public DurableFunctionInfo(DurableFunctionType type, string durableClientBindingName)
+        {
+            Type = type;
+            DurableClientBindingName = durableClientBindingName;
+        }
+
+        public bool IsDurableClient => DurableClientBindingName != null;
+
+        public bool IsOrchestrationFunction => Type == DurableFunctionType.OrchestrationFunction;
+
+        public string DurableClientBindingName { get; }
+
+        public DurableFunctionType Type
+        {
+            get;
+            internal set; // for testing purposes only
+        }
+
+        public bool ProvidesForcedDollarReturnValue => Type != DurableFunctionType.None;
+    }
+}
