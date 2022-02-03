@@ -2,9 +2,10 @@ param($Context)
 
 $output = @()
 
-Test-SampleCmdlet -FavoriteNumber 7 -FavoritePet Cat
-$output += Invoke-DurableActivity -FunctionName 'Hello' -Input 'Tokyo'
-# $output += Invoke-DurableActivity -FunctionName 'Hello' -Input 'Seattle'
-# $output += Invoke-DurableActivity -FunctionName 'Hello' -Input 'London'
+$Context.IsReplaying
+Invoke-DurableActivityExternal -FunctionName 'Hello' -Input 'Seattle'
+$Context.CurrentUtcDateTime
+Invoke-DurableActivityExternal -FunctionName 'Hello' -Input 'Tokyo'
+Invoke-DurableActivityExternal -FunctionName 'Hello' -Input $Context.InstanceId
 
-$output
+"success"
