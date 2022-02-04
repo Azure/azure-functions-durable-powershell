@@ -23,6 +23,8 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
 
         public Hashtable InvokeExternal(OrchestrationContext context, IPowerShellServices pwsh)
         {
+            pwsh.AddParameter("Context", context);
+            pwsh.TracePipelineObject();
             try
             {
                 var outputBuffer = new PSDataCollection<object>();

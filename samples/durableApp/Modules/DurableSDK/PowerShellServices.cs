@@ -21,6 +21,16 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
             _pwsh = pwsh;
         }
 
+        public void AddParameter(string paramName, object paramValue)
+        {
+            _pwsh.AddParameter(paramName, paramValue);
+        }
+
+        public void TracePipelineObject()
+        {
+            _pwsh.AddCommand("Microsoft.Azure.Functions.PowerShellWorker\\Trace-PipelineObject");
+        }
+
         public void SetDurableClient(object durableClient)
         {
             _pwsh.AddCommand(SetFunctionInvocationContextCommand)

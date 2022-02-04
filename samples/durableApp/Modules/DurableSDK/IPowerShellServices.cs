@@ -23,5 +23,10 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
         void StopInvoke();
 
         void ClearStreamsAndCommands();
+
+        void TracePipelineObject();
+
+        void AddParameter(string paramName, object paramValue);
+
     }
 }
