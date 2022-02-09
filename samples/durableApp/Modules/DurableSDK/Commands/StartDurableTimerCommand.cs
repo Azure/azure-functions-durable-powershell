@@ -32,7 +32,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
 
         protected override void EndProcessing()
         {
-            // Console.WriteLine("External");
+            // Console.WriteLine("ExternalTIMER");
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
             var context = (OrchestrationContext)privateData[SetFunctionInvocationContextCommand.ContextKey];
 

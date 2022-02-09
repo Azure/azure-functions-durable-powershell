@@ -7,6 +7,7 @@
 
 namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
 {
+    using System;
     using System.Collections;
     using System.Management.Automation;
     using Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks;
@@ -25,6 +26,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
 
         protected override void EndProcessing()
         {
+            // Console.WriteLine("EXTERNALWAIT");
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
             var context = (OrchestrationContext)privateData[SetFunctionInvocationContextCommand.ContextKey];
 
