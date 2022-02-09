@@ -63,7 +63,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
         }
     }
 
-        /// <summary>
+    /// <summary>
     /// Invoke a durable activity.
     /// </summary>
     [Cmdlet("Set", "BindingData")]

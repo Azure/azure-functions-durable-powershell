@@ -35,21 +35,20 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
         protected override void EndProcessing()
         {
 
-            var exists = false;
-            using (PowerShell ps = PowerShell.Create())
-            {
-                string moduleName = "MyModule2";
-                ps.AddScript($"Get-Module -ListAvailable -Name {moduleName}");
-                var result = ps.Invoke();
-                var mod = result[0];
-                var b = (Hashtable)mod.Properties["PrivateData"].Value;
-                b[ContextKey] = OrchestrationContext;
-                b[DurableClientKey] = DurableClient;
-                exists = result.Count > 0;
-                ps.AddScript($"Set-Bindings -FavoriteNumber 8 -FavoritePet Cat");
-                result = ps.Invoke();
-            }
-
+            // var exists = false;
+            // using (PowerShell ps = PowerShell.Create())
+            // {
+            //     string moduleName = "MyModule2";
+            //     ps.AddScript($"Get-Module -ListAvailable -Name {moduleName}");
+            //     var result = ps.Invoke();
+            //     var mod = result[0];
+            //     var b = (Hashtable)mod.Properties["PrivateData"].Value;
+            //     b[ContextKey] = OrchestrationContext;
+            //     b[DurableClientKey] = DurableClient;
+            //     exists = result.Count > 0;
+            //     ps.AddScript($"Set-Bindings -FavoriteNumber 8 -FavoritePet Cat");
+            //     result = ps.Invoke();
+            // }
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
             switch (ParameterSetName)
             {
