@@ -16,6 +16,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks
     using Microsoft.Azure.Functions.PowerShellWorker;
     using Microsoft.Azure.Functions.PowerShellWorker.Durable;
     using Microsoft.Azure.Functions.PowerShellWorker.Durable.Actions;
+    using Newtonsoft.Json;
 
     public class ActivityInvocationTask : DurableTask
     {
@@ -28,7 +29,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks
         internal ActivityInvocationTask(string functionName, object functionInput, RetryOptions retryOptions)
         {
             FunctionName = functionName;
-            Input = functionInput;
+            Input = JsonConvert.SerializeObject(functionInput);
             RetryOptions = retryOptions;
         }
 
