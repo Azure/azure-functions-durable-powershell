@@ -7,6 +7,7 @@
 
 namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
 {
+    using System;
     using System.Collections;
     using System.Management.Automation;
     using Microsoft.PowerShell.Commands;
@@ -14,7 +15,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
     /// <summary>
     /// Set the orchestration context.
     /// </summary>
-    [Cmdlet("Set", "FunctionInvocationContext")]
+    [Cmdlet("Set", "FunctionInvocationContextExternal")]
     public class SetFunctionInvocationContextCommand : PSCmdlet
     {
         internal const string ContextKey = "OrchestrationContext";
@@ -34,7 +35,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
 
         protected override void EndProcessing()
         {
-
+            Console.WriteLine("EXTERNAL CONTEXT SET");
             // var exists = false;
             // using (PowerShell ps = PowerShell.Create())
             // {

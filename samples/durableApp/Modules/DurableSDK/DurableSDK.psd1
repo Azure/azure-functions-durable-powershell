@@ -4,13 +4,13 @@
     # RootModule = '.\bin\Debug\net6.0\DurableSDK.dll' #'myModule2.psm1'
     
     # Version number of this module.
-    ModuleVersion = 'TODO'
+    ModuleVersion = '0.1.0'
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
     
     # ID used to uniquely identify this module
-    GUID = 'TODO'
+    GUID = '841fad61-94f5-4330-89be-613d54165289'
     
     # Author of this module
     Author = 'Microsoft Corporation'
@@ -58,16 +58,23 @@
     # FormatsToProcess = @()
     
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    NestedModules = @('DurableSDK.dll', 'DurableSDK.psm1')
+    NestedModules = @('.\bin\Debug\net6.0\DurableSDK.dll', 'DurableSDK.psm1', 'DurableSDK.psm1')
     
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
+        # 'Get-DurableStatus',
+        # 'New-DurableRetryOptions',
+        'New-DurableOrchestrationCheckStatusResponseExternal',
+        # 'Send-DurableExternalEvent',
+        'Start-DurableOrchestrationExternal'
+        # 'Stop-DurableOrchestration'
     )
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @(
        'Invoke-DurableActivity',
        'Set-BindingData',
+       'Set-FunctionInvocationContextExternal',
        'Start-DurableTimer',
        'Stop-DurableTimerTask',
        'Wait-DurableTask'
@@ -77,7 +84,12 @@
     VariablesToExport = '*'
     
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    # AliasesToExport = @()
+    AliasesToExport = @(
+        # 'Invoke-ActivityFunction',
+        'New-OrchestrationCheckStatusResponse',
+        'Start-NewOrchestration',
+        'Wait-ActivityFunction'
+    )
     
     # DSC resources to export from this module
     # DscResourcesToExport = @()
@@ -127,4 +139,4 @@
     # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
     # DefaultCommandPrefix = ''
     
-    }
+}
