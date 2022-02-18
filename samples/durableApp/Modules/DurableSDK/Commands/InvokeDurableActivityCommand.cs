@@ -16,7 +16,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
     /// <summary>
     /// Invoke a durable activity.
     /// </summary>
-    [Cmdlet("Invoke", "DurableActivityExternal")]
+    [Cmdlet("Invoke", "DurableActivity")]
     public class InvokeDurableActivityCommand : PSCmdlet
     {
         /// <summary>
@@ -43,7 +43,6 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
 
         protected override void EndProcessing()
         {
-            // WriteObject((Hashtable)MyInvocation.MyCommand.Module.PrivateData);
 
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
             var context = (OrchestrationContext)privateData[SetFunctionInvocationContextCommand.ContextKey];
@@ -63,7 +62,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
         }
     }
 
-        /// <summary>
+    /// <summary>
     /// Invoke a durable activity.
     /// </summary>
     [Cmdlet("Set", "BindingData")]

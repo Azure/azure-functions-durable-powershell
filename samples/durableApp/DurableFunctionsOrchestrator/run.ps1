@@ -2,19 +2,18 @@ param($Context)
 
 $output = @()
 
-# Write-Output($Context.IsReplaying)
-#Invoke-DurableActivityExternal -FunctionName 'Hello' -Input 'Seattle'
-#Invoke-DurableActivityExternal -FunctionName 'Hello' -Input 'Tokyo'
-#Write-Output($Context.IsReplaying)
-
-$t1 = @{a=1;b=2}
-$t2 = @{t1=$t1;c=3}
-$compareInput = @{
-    msList = $t1
-    dids = $t2
-}
-
-Invoke-DurableActivityExternal -FunctionName 'Hello' -Input $compareInput
-#Write-Output($Context.IsReplaying)
-
-"success"
+Write-Output($Context.IsReplaying)
+Invoke-DurableActivity -FunctionName 'HelloActivityFunction' -Input 'Seattle'
+$timer1 = Start-DurableTimer -Duration (New-Timespan -Seconds 10) -nowait
+Write-Host 'Started durable timer1'
+$timer2 = Start-DurableTimer -Duration (New-Timespan -Seconds 5) -nowait
+Write-Host "Started durable timer 2"
+Wait-DurableTask -Task $timer2
+Write-Host "Waited durable task"
+Stop-DurableTimerTask -Task $timer1
+Write-Host 'stopped durable timer'
+Invoke-DurableActivity -FunctionName 'HelloActivityFunction' -Input 'Tokyo'
+Write-Host($Context.IsReplaying)
+# Invoke-DurableActivity -FunctionName 'HelloActivityFunction' -Input $Context.InstanceId
+Write-Host "Success"
+$output

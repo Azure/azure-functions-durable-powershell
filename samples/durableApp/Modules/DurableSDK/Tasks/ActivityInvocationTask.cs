@@ -10,13 +10,13 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks
     using System;
     using System.Linq;
     using System.Collections.Generic;
+    using Newtonsoft.Json;
 
     // using WebJobs.Script.Grpc.Messages;
 
     using Microsoft.Azure.Functions.PowerShellWorker;
     using Microsoft.Azure.Functions.PowerShellWorker.Durable;
     using Microsoft.Azure.Functions.PowerShellWorker.Durable.Actions;
-    using Newtonsoft.Json;
 
     public class ActivityInvocationTask : DurableTask
     {
