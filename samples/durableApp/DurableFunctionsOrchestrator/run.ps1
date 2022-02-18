@@ -2,9 +2,19 @@ param($Context)
 
 $output = @()
 
-Test-SampleCmdlet -FavoriteNumber 7 -FavoritePet Cat
-$output += Invoke-DurableActivity -FunctionName 'Hello' -Input 'Tokyo'
-# $output += Invoke-DurableActivity -FunctionName 'Hello' -Input 'Seattle'
-# $output += Invoke-DurableActivity -FunctionName 'Hello' -Input 'London'
+# Write-Output($Context.IsReplaying)
+#Invoke-DurableActivityExternal -FunctionName 'Hello' -Input 'Seattle'
+#Invoke-DurableActivityExternal -FunctionName 'Hello' -Input 'Tokyo'
+#Write-Output($Context.IsReplaying)
 
-$output
+$t1 = @{a=1;b=2}
+$t2 = @{t1=$t1;c=3}
+$compareInput = @{
+    msList = $t1
+    dids = $t2
+}
+
+Invoke-DurableActivityExternal -FunctionName 'Hello' -Input $compareInput
+#Write-Output($Context.IsReplaying)
+
+"success"

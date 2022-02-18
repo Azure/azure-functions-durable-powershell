@@ -1,16 +1,16 @@
 @{
 
     # Script module or binary module file associated with this manifest.
-    RootModule = 'myModule.psm1'
+    # RootModule = '.\bin\Debug\net6.0\DurableSDK.dll' #'myModule2.psm1'
     
     # Version number of this module.
-    ModuleVersion = '0.0.1'
+    ModuleVersion = '1.0.0'
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
     
     # ID used to uniquely identify this module
-    GUID = '57cc9381-a066-4d4c-987f-6b3b8066465d'
+    GUID = '59cc9381-a066-4d4c-987f-6b3b8066465d'
     
     # Author of this module
     Author = 'Michael Peng'
@@ -58,7 +58,7 @@
     # FormatsToProcess = @()
     
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    # NestedModules = @()
+    NestedModules = @('.\bin\Debug\net6.0\DurableSDK.dll', 'DurableSDK.psm1')
     
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
@@ -67,7 +67,8 @@
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @(
-        'Test-BinaryModuleCmdlet2'
+       'Invoke-DurableActivityExternal',
+       'Set-BindingData'
     )
     
     # Variables to export from this module
