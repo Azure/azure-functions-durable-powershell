@@ -1,2 +1,2 @@
 param($name)
-"Success $name"
+"Hello $($name | ConvertTo-Json -Depth 100) !"
