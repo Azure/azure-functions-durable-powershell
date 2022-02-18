@@ -47,7 +47,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
                     var context = JsonConvert.DeserializeObject<OrchestrationContext>(OrchestrationContext);
                     var invoker = new OrchestrationInvoker(SetResult);
                     Action<object> invokerFunction =  (x) => invoker.InvokeExternal(context, new PowerShellServices((PowerShell)x));
-                    privateData[ContextKey] = OrchestrationContext;
+                    privateData[ContextKey] = context;
                     WriteObject(invokerFunction);
                     break;
 
