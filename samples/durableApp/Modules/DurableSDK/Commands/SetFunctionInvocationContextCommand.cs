@@ -11,6 +11,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
     using System.Collections;
     using System.Management.Automation;
     using Microsoft.PowerShell.Commands;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Set the orchestration context.
@@ -22,7 +23,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
         private const string DurableClientKey = "DurableClient";
 
         [Parameter(Mandatory = true, ParameterSetName = ContextKey)]
-        public OrchestrationContext OrchestrationContext { get; set; }
+        public string OrchestrationContext { get; set; }
 
         /// <summary>
         /// The orchestration client.
@@ -33,13 +34,21 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
         [Parameter(Mandatory = true, ParameterSetName = "Clear")]
         public SwitchParameter Clear { get; set; }
 
+        [Parameter(Mandatory = false)]
+        [ValidateNotNull]
+        public Action<object, bool> SetResult { get; set; }
+
         protected override void EndProcessing()
         {
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
             switch (ParameterSetName)
             {
                 case ContextKey:
+                    var context = JsonConvert.DeserializeObject<OrchestrationContext>(OrchestrationContext);
+                    var invoker = new OrchestrationInvoker(SetResult);
+                    Action<object> invokerFunction =  (x) => invoker.InvokeExternal(context, new PowerShellServices((PowerShell)x));
                     privateData[ContextKey] = OrchestrationContext;
+                    WriteObject(invokerFunction);
                     break;
 
                 case DurableClientKey:
