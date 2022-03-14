@@ -104,6 +104,7 @@ Invoke-RestMethod -Uri $coreToolsDownloadURL -OutFile $output
 Write-Host 'Extracting Functions Core Tools...'
 Expand-Archive $output -DestinationPath $FUNC_CLI_DIRECTORY
 
+<#
 if (-not $UseCoreToolsBuildFromIntegrationTests.IsPresent)
 {
     # For a regular test run, the binaries for the PowerShell worker get replaced after downloading and installing the Core Tools.
@@ -114,6 +115,7 @@ if (-not $UseCoreToolsBuildFromIntegrationTests.IsPresent)
     Copy-Item -Recurse -Force "$PSScriptRoot/../../src/bin/$configuration/$TARGET_FRAMEWORK/publish/" "$FUNC_CLI_DIRECTORY/workers/powershell/$POWERSHELL_VERSION"
     Copy-Item -Recurse -Force "$PSScriptRoot/../../src/bin/$configuration/$TARGET_FRAMEWORK/publish/worker.config.json" "$FUNC_CLI_DIRECTORY/workers/powershell"
 }
+#>
 
 Write-Host "Starting Functions Host..."
 
