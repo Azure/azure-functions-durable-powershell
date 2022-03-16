@@ -74,7 +74,7 @@
     CmdletsToExport = @(
        'Invoke-DurableActivity',
        'Set-BindingData',
-       'Set-FunctionInvocationContextExternal',
+       'Set-FunctionInvocationContext',
        'Start-DurableTimer',
        'Stop-DurableTimerTask',
        'Wait-DurableTask'
