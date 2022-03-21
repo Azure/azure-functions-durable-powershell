@@ -10,13 +10,12 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
     using System;
     using System.Collections;
     using System.Management.Automation;
-    using Microsoft.PowerShell.Commands;
     using Newtonsoft.Json;
 
     /// <summary>
     /// Set the orchestration context.
     /// </summary>
-    [Cmdlet("Set", "FunctionInvocationContextExternal")]
+    [Cmdlet("Set", "FunctionInvocationContext")]
     public class SetFunctionInvocationContextCommand : PSCmdlet
     {
         internal const string ContextKey = "OrchestrationContext";
@@ -34,10 +33,6 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
         [Parameter(Mandatory = true, ParameterSetName = "Clear")]
         public SwitchParameter Clear { get; set; }
 
-        [Parameter(Mandatory = false)]
-        [ValidateNotNull]
-        public Action<object, bool> SetResult { get; set; }
-
         protected override void EndProcessing()
         {
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
@@ -45,8 +40,8 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
             {
                 case ContextKey:
                     var context = JsonConvert.DeserializeObject<OrchestrationContext>(OrchestrationContext);
-                    var invoker = new OrchestrationInvoker(SetResult);
-                    Action<object> invokerFunction =  (x) => invoker.InvokeExternal(context, new PowerShellServices((PowerShell)x));
+                    OrchestrationInvoker orchestrationInvoker = new OrchestrationInvoker();
+                    Func<PowerShell, object> invokerFunction = (pwsh) => orchestrationInvoker.InvokeExternal(context, new PowerShellServices(pwsh));
                     privateData[ContextKey] = context;
                     WriteObject(invokerFunction);
                     break;
