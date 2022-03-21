@@ -16,15 +16,10 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
 
     internal class OrchestrationInvoker : IOrchestrationInvoker
     {
-        private Action<object, bool> setResult;
-        internal OrchestrationInvoker(Action<object, bool> setResult) {
-            this.setResult = setResult;
-        }
-
-        public Hashtable InvokeExternal(OrchestrationContext context, IPowerShellServices pwsh)
+        public Hashtable InvokeExternal(OrchestrationContext context, IPowerShellServices powerShellServices)
         {
-            pwsh.AddParameter("Context", context);
-            pwsh.TracePipelineObject();
+            powerShellServices.AddParameter("Context", context);
+            powerShellServices.TracePipelineObject();
             try
             {
                 var outputBuffer = new PSDataCollection<object>();
@@ -43,7 +38,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
                 // with a specific flag/signature that tells the worker to short-circuit
                 // its regular DF logic, and to return the value its been provided without further processing.
                 // All we need is to make the orchestrationBinding info viewable to the user-code. < This should be our next step
-                var asyncResult = pwsh.BeginInvoke(outputBuffer);
+                var asyncResult = powerShellServices.BeginInvoke(outputBuffer);
 
                 var (shouldStop, actions) =
                     context.OrchestrationActionCollector.WaitForActions(asyncResult.AsyncWaitHandle);
@@ -51,35 +46,29 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
                 if (shouldStop)
                 {
                     // The orchestration function should be stopped and restarted
-                    pwsh.StopInvoke();
-                    var finalResult =  CreateOrchestrationResult(isDone: false, actions, output: null, context.CustomStatus);
-                    this.setResult(finalResult, false);
-                    return finalResult;
+                    powerShellServices.StopInvoke();
+                    return CreateOrchestrationResult(isDone: false, actions, output: null, context.CustomStatus);
                 }
                 else
                 {
                     try
                     {
                         // The orchestration function completed
-                        pwsh.EndInvoke(asyncResult);
+                        powerShellServices.EndInvoke(asyncResult);
                         var result = CreateReturnValueFromFunctionOutput(outputBuffer);
-                        var finalResult =  CreateOrchestrationResult(isDone: true, actions, output: result, context.CustomStatus);
-                        this.setResult(finalResult, false);
-                        return finalResult;
+                        return CreateOrchestrationResult(isDone: true, actions, output: result, context.CustomStatus);
                     }
                     catch (Exception e)
                     {
                         // The orchestrator code has thrown an unhandled exception:
                         // this should be treated as an entire orchestration failure
-                        var finalResult = new OrchestrationFailureException(actions, context.CustomStatus, e);
-                        this.setResult(finalResult, true);
-                        throw finalResult;
+                        throw new OrchestrationFailureException(actions, context.CustomStatus, e);
                     }
                 }
             }
             finally
             {
-                pwsh.ClearStreamsAndCommands();
+                powerShellServices.ClearStreamsAndCommands();
             }
         }
 

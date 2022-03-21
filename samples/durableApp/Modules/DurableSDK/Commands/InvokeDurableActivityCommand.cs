@@ -61,42 +61,4 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
             _durableTaskHandler.Stop();
         }
     }
-
-    /// <summary>
-    /// Invoke a durable activity.
-    /// </summary>
-    [Cmdlet("Set", "BindingData")]
-    public class SetBindingDataCommand : PSCmdlet
-    {
-        /// <summary>
-        /// Gets and sets the activity function name.
-        /// </summary>
-        [Parameter(Mandatory = true)]
-        [ValidateNotNull]
-        public string Input { get; set; }
-
-        /// <summary>
-        /// Gets and sets the activity function name.
-        /// </summary>
-        [Parameter(Mandatory = true)]
-        [ValidateNotNull]
-        public Action<object, bool> SetResult { get; set; }
-
-        protected override void EndProcessing()
-        {
-            //WriteObject((Hashtable)MyInvocation.MyCommand.Module.PrivateData);
-            //WriteObject(MyInvocation.BoundParameters);
-            var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
-            var context = JsonConvert.DeserializeObject<OrchestrationContext>(Input);
-            
-            privateData["OrchestrationContext"] = context;
-            var invoker = new OrchestrationInvoker(SetResult);
-            Action<object> invokerFunction =  (x) => invoker.InvokeExternal(context, new PowerShellServices((PowerShell)x));
-            WriteObject(invokerFunction);
-        }
-
-        protected override void StopProcessing()
-        {
-        }
-    }
 }
