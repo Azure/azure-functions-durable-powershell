@@ -2,8 +2,12 @@ param($Context)
 
 $output = @()
 
-Write-Output($Context.IsReplaying)
-Invoke-DurableActivity -FunctionName 'HelloActivityFunction' -Input 'Seattle'
+Write-Output("Stage 0")
+$res1 = Invoke-DurableActivity -FunctionName 'HelloActivityFunction' -Input 'Seattle'
+Write-Output("Stage 1")
+$res2 = Invoke-DurableActivity -FunctionName 'HelloActivityFunction' -Input 'London'
+Write-Output("Stage 2")
+<#
 $timer1 = Start-DurableTimer -Duration (New-Timespan -Seconds 10) -nowait
 Write-Host 'Started durable timer1'
 $timer2 = Start-DurableTimer -Duration (New-Timespan -Seconds 5) -nowait
@@ -15,5 +19,5 @@ Write-Host 'stopped durable timer'
 Invoke-DurableActivity -FunctionName 'HelloActivityFunction' -Input 'Tokyo'
 Write-Host($Context.IsReplaying)
 Invoke-DurableActivity -FunctionName 'HelloActivityFunction' -Input $Context.InstanceId
-Write-Host "Success"
+#>
 $output
