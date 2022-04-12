@@ -28,10 +28,8 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks
 
         internal override HistoryEvent GetCompletedHistoryEvent(OrchestrationContext context, HistoryEvent taskScheduled)
         {
-            return context.History.FirstOrDefault(
-                    e => e.EventType == HistoryEventType.EventRaised &&
-                         e.Name == ExternalEventName &&
-                         !e.IsProcessed);
+            // TODO: rewrite to use DTFx context
+            return null;
         }
 
         internal override OrchestrationAction CreateOrchestrationAction()

@@ -40,20 +40,14 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks
 
         internal override HistoryEvent GetScheduledHistoryEvent(OrchestrationContext context)
         {
-            return context.History.FirstOrDefault(
-                e => e.EventType == HistoryEventType.TaskScheduled &&
-                     e.Name == FunctionName &&
-                     !e.IsProcessed);
+            // TODO: rewrite to use DTFx context
+            return null;
         }
 
         internal override HistoryEvent GetCompletedHistoryEvent(OrchestrationContext context, HistoryEvent scheduledHistoryEvent)
         {
-            return scheduledHistoryEvent == null
-                ? null
-                : context.History.FirstOrDefault(
-                    e => e.TaskScheduledId == scheduledHistoryEvent.EventId
-                         && (e.EventType == HistoryEventType.TaskCompleted
-                             || e.EventType == HistoryEventType.TaskFailed));
+            // TODO: rewrite to use DTFx context
+            return null;
         }
 
         internal override OrchestrationAction CreateOrchestrationAction()

@@ -8,8 +8,10 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Management.Automation;
     using System.Threading;
-
+    using System.Threading.Tasks;
+    using DurableSDK;
     using Microsoft.Azure.Functions.PowerShellWorker.Durable.Actions;
 
     internal class OrchestrationActionCollector
@@ -17,6 +19,10 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
         public readonly List<List<OrchestrationAction>> _actions = new();
 
         private readonly AutoResetEvent _stopEvent = new AutoResetEvent(initialState: false);
+        internal readonly AutoResetEvent cancelationToken = new AutoResetEvent(initialState: false);
+        internal readonly AutoResetEvent hasToAwait = new AutoResetEvent(initialState: false);
+
+        internal readonly AutoResetEvent startOfNewCmdLet = new AutoResetEvent(initialState: false);
 
         private bool _nextBatch = true;
 
@@ -30,6 +36,8 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
 
             _actions.Last().Add(action);
         }
+
+        public Task currTask;
 
         public void NextBatch()
         {

@@ -16,7 +16,10 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
 
     internal class DurableTaskHandler
     {
-        private readonly ManualResetEvent _waitForStop = new ManualResetEvent(initialState: false);
+        internal readonly ManualResetEvent _waitForStop = new ManualResetEvent(initialState: false);
+        internal readonly ManualResetEvent sendRes = new ManualResetEvent(initialState: false);
+        internal readonly ManualResetEvent actionPing = new ManualResetEvent(initialState: false);
+
 
         public void StopAndInitiateDurableTaskOrReplay(
             DurableTask task,
@@ -35,79 +38,11 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
             else
             {
                 context.OrchestrationActionCollector.NextBatch();
-
-                var scheduledHistoryEvent = task.GetScheduledHistoryEvent(context);
-                var completedHistoryEvent = task.GetCompletedHistoryEvent(context, scheduledHistoryEvent);
-
-                // We must check if the task has been completed first, otherwise external events will always wait upon replays
-                if (completedHistoryEvent != null)
-                {                         
-                    CurrentUtcDateTimeUpdater.UpdateCurrentUtcDateTime(context);
-
-                    if (scheduledHistoryEvent != null)
-                    {
-                        scheduledHistoryEvent.IsProcessed = true;
-                    }
-
-                    completedHistoryEvent.IsProcessed = true;
-                    context.IsReplaying = completedHistoryEvent.IsPlayed;
-
-                    switch (completedHistoryEvent.EventType)
-                    {
-                        case HistoryEventType.TaskCompleted:
-                            var eventResult = GetEventResult(completedHistoryEvent);
-                            if (eventResult != null)
-                            {
-                                output(eventResult);
-                            }
-                            break;
-                        case HistoryEventType.EventRaised:
-                            var eventRaisedResult = GetEventResult(completedHistoryEvent);
-                            if (eventRaisedResult != null)
-                            {
-                                output(eventRaisedResult);
-                            }
-                            break;
-
-                        case HistoryEventType.TaskFailed:
-                            if (retryOptions == null)
-                            {
-                                onFailure(completedHistoryEvent.Reason);
-                            }
-                            else
-                            {
-                                // Reset IsProcessed, let RetryProcessor handle these events instead.
-                                scheduledHistoryEvent.IsProcessed = false;
-                                completedHistoryEvent.IsProcessed = false;
-
-                                var shouldContinueProcessing =
-                                    RetryProcessor.Process(
-                                        context.History,
-                                        scheduledHistoryEvent,
-                                        retryOptions.MaxNumberOfAttempts,
-                                        onSuccess:
-                                            result => {
-                                                output(ConvertFromJson(result));
-                                            },
-                                        onFailure);
-                                        
-                                if (shouldContinueProcessing)
-                                {
-                                    InitiateAndWaitForStop(context);
-                                }
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    InitiateAndWaitForStop(context);
-                }
             }
         }
 
-        // Waits for all of the given DurableTasks to complete
-        public void WaitAll(
+            // Waits for all of the given DurableTasks to complete
+            public void WaitAll(
             IReadOnlyCollection<DurableTask> tasksToWaitFor,
             OrchestrationContext context,
             Action<object> output)
@@ -254,7 +189,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
             return retObj;
         }
 
-        private void InitiateAndWaitForStop(OrchestrationContext context)
+        internal void InitiateAndWaitForStop(OrchestrationContext context)
         {
             context.OrchestrationActionCollector.Stop();
             _waitForStop.WaitOne();

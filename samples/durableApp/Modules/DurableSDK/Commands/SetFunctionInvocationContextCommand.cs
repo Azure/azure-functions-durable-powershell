@@ -10,7 +10,10 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
     using System;
     using System.Collections;
     using System.Management.Automation;
+    using System.Threading.Tasks;
     using Newtonsoft.Json;
+    using Microsoft.Azure.Functions.Worker;
+
 
     /// <summary>
     /// Set the orchestration context.
@@ -39,9 +42,15 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
             switch (ParameterSetName)
             {
                 case ContextKey:
-                    var context = JsonConvert.DeserializeObject<OrchestrationContext>(OrchestrationContext);
+                    // De-serialize DTFx History event to the original type
+                    JsonSerializerSettings serializerSettings = new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.All
+                    };
+                    var context = JsonConvert.DeserializeObject<OrchestrationContext>(OrchestrationContext,serializerSettings);
                     OrchestrationInvoker orchestrationInvoker = new OrchestrationInvoker();
-                    Func<PowerShell, object> invokerFunction = (pwsh) => orchestrationInvoker.InvokeExternal(context, new PowerShellServices(pwsh));
+
+                    Func<PowerShell, object> invokerFunction = (pwsh) => orchestrationInvoker.InvokeExternal(context, new PowerShellServices(pwsh), privateData);
                     privateData[ContextKey] = context;
                     WriteObject(invokerFunction);
                     break;

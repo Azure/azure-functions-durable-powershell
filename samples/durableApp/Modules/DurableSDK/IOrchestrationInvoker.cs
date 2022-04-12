@@ -9,6 +9,6 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
 
     internal interface IOrchestrationInvoker
     {
-        public Hashtable InvokeExternal(OrchestrationContext context, IPowerShellServices pwsh);
+        public Hashtable InvokeExternal(OrchestrationContext context, IPowerShellServices pwsh, object privateData);
     }
 }

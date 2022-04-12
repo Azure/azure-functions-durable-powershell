@@ -12,6 +12,11 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
     using Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks;
     using Newtonsoft.Json;
     using System;
+    using Microsoft.Azure.Functions.Worker;
+    using DurableTask;
+    using System.Threading.Tasks;
+    using System.Linq;
+    using System.Threading;
 
     /// <summary>
     /// Invoke a durable activity.
@@ -41,24 +46,41 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
 
         private readonly DurableTaskHandler _durableTaskHandler = new DurableTaskHandler();
 
-        protected override void EndProcessing()
-        {
+        private OrchestrationContext myContext = null;
 
+        protected override async void EndProcessing()
+        {
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
             var context = (OrchestrationContext)privateData[SetFunctionInvocationContextCommand.ContextKey];
+            var dtfxContext = (TaskOrchestrationContext)privateData["dtfx"];
 
-            var task = new ActivityInvocationTask(FunctionName, Input, RetryOptions);
 
-            _durableTaskHandler.StopAndInitiateDurableTaskOrReplay(
-                task, context, NoWait.IsPresent,
-                output: WriteObject,
-                onFailure: failureReason => DurableActivityErrorHandler.Handle(this, failureReason),
-                retryOptions: RetryOptions);
+            // add to actions
+            var sdkTask = new ActivityInvocationTask(FunctionName, Input, RetryOptions);
+            context.OrchestrationActionCollector.Add(sdkTask.CreateOrchestrationAction());
+            context.OrchestrationActionCollector.NextBatch();
+
+            // signal to orchestration thread to await
+            context.OrchestrationActionCollector.hasToAwait.Set();
+
+            // wait for result
+            var handlers = new[] { context.OrchestrationActionCollector.cancelationToken }; //, taskHasResult };
+            WaitHandle.WaitAny(handlers);
+
+            // clear IAsync signals
+            context.OrchestrationActionCollector.currTask = null;
+            context.OrchestrationActionCollector.hasToAwait.Reset();
+
+            // send result to user code
+            WriteObject("tempResultValue");
+            context.OrchestrationActionCollector.startOfNewCmdLet.Set();
         }
 
         protected override void StopProcessing()
         {
-            _durableTaskHandler.Stop();
+            var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
+            var context = (OrchestrationContext)privateData[SetFunctionInvocationContextCommand.ContextKey];
+            context.OrchestrationActionCollector.cancelationToken.Set();
         }
     }
 }

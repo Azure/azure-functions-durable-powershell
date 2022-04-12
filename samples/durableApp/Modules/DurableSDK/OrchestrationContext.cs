@@ -29,7 +29,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
         public bool IsReplaying { get; set; }
 
         [DataMember]
-        internal HistoryEvent[] History { get; set; }
+        internal DurableTask.Core.History.HistoryEvent[] History { get; set; }
 
         public DateTime CurrentUtcDateTime { get; internal set; }
 

@@ -12,16 +12,8 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
         // Updates the CurrentUtcDateTime instance property of the OrchestrationContext to the next, unprocessed OrchestratorStarted event
         public static void UpdateCurrentUtcDateTime(OrchestrationContext context)
         {
-            var newOrchestrationStart = context.History.FirstOrDefault(
-                    e => e.EventType == HistoryEventType.OrchestratorStarted &&
-                        !e.IsProcessed
-                );
-            
-            if (newOrchestrationStart != null)
-            {
-                context.CurrentUtcDateTime = newOrchestrationStart.Timestamp.ToUniversalTime();
-                newOrchestrationStart.IsProcessed = true;
-            }
+            // TODO: rewrite to use DTFx context
+            return;
         }
     }
 }

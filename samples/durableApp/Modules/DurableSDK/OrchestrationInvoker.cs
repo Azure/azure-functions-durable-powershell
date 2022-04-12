@@ -13,63 +13,112 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
 
     // using PowerShellWorker.Utility;
     using Microsoft.Azure.Functions.PowerShellWorker.Durable.Actions;
+    using Microsoft.Azure.Functions.Worker;
+    //using DurableTask;
+    using System.Threading.Tasks;
+    using DurableTask;
+    using DurableTask.Core;
+    using System.Threading;
+    using DurableSDK;
+    using DurableTask.Core.Command;
 
     internal class OrchestrationInvoker : IOrchestrationInvoker
     {
-        public Hashtable InvokeExternal(OrchestrationContext context, IPowerShellServices powerShellServices)
+
+        private sealed class FunctionsWorkerContext : IWorkerContext
         {
-            powerShellServices.AddParameter("Context", context);
-            powerShellServices.TracePipelineObject();
-            try
+            public FunctionsWorkerContext(IDataConverter dataConverter)
             {
+                this.DataConverter = dataConverter;
+            }
+
+            public IDataConverter DataConverter { get; }
+        }
+
+        private sealed class OrchestratorState
+        {
+            public string? InstanceId { get; set; }
+
+            public IList<DurableTask.Core.History.HistoryEvent>? PastEvents { get; set; }
+
+            public IList<DurableTask.Core.History.HistoryEvent>? NewEvents { get; set; }
+
+            internal int? UpperSchemaVersion { get; set; }
+        }
+
+
+        public Hashtable InvokeExternal(OrchestrationContext context, IPowerShellServices powerShellServices, object privateData)
+        {
+            // var cSource = new TaskCompletionSource();
+            Func<TaskOrchestrationContext, int, Task<object>> orchestratorFunc = async (TaskOrchestrationContext dtxContent, int _) =>
+            {
+
+                // start user code
+                IAsyncResult asyncResult = null;
+                ((Hashtable)privateData)["dtfx"] = dtxContent;
+                powerShellServices.AddParameter("Context", context);
+                powerShellServices.TracePipelineObject();
                 var outputBuffer = new PSDataCollection<object>();
+                asyncResult = powerShellServices.BeginInvoke(outputBuffer);
 
-                // context.History should never be null when initializing CurrentUtcDateTime
-                var orchestrationStart = context.History.First(
-                    e => e.EventType == HistoryEventType.OrchestratorStarted);
-                context.CurrentUtcDateTime = orchestrationStart.Timestamp.ToUniversalTime();
-
-                // Marks the first OrchestratorStarted event as processed
-                orchestrationStart.IsProcessed = true;
-                
-                // IDEA:
-                // This seems to be where the user-code is allowed to run.
-                // When using the new SDK, we'll want the user-code to send an `asyncResult`
-                // with a specific flag/signature that tells the worker to short-circuit
-                // its regular DF logic, and to return the value its been provided without further processing.
-                // All we need is to make the orchestrationBinding info viewable to the user-code. < This should be our next step
-                var asyncResult = powerShellServices.BeginInvoke(outputBuffer);
-
-                var (shouldStop, actions) =
-                    context.OrchestrationActionCollector.WaitForActions(asyncResult.AsyncWaitHandle);
-
-                if (shouldStop)
+                // waiting for tasks to await
+                var loop = true;
+                while (loop)
                 {
-                    // The orchestration function should be stopped and restarted
-                    powerShellServices.StopInvoke();
-                    return CreateOrchestrationResult(isDone: false, actions, output: null, context.CustomStatus);
-                }
-                else
-                {
-                    try
+                    var gottaAwait = context.OrchestrationActionCollector.hasToAwait;
+                    var orchDone = asyncResult.AsyncWaitHandle;
+                    var index = WaitHandle.WaitAny(new[] { orchDone, gottaAwait });
+                    if (index == 0)
                     {
-                        // The orchestration function completed
                         powerShellServices.EndInvoke(asyncResult);
-                        var result = CreateReturnValueFromFunctionOutput(outputBuffer);
-                        return CreateOrchestrationResult(isDone: true, actions, output: result, context.CustomStatus);
+                        return null;
                     }
-                    catch (Exception e)
+                    var task = dtxContent.CallActivityAsync<object>("HelloActivityFunction", "Seattle");
+                    context.OrchestrationActionCollector.currTask = task;
+                    context.OrchestrationActionCollector.cancelationToken.Reset();
+
+                    // var task = context.OrchestrationActionCollector.currTask;
+                    await task;
+                    context.OrchestrationActionCollector.cancelationToken.Set();
+                    /*var winner = await Task.WhenAny(task, cSource.Task);
+                    if (winner == cSource.Task)
                     {
-                        // The orchestrator code has thrown an unhandled exception:
-                        // this should be treated as an entire orchestration failure
-                        throw new OrchestrationFailureException(actions, context.CustomStatus, e);
-                    }
+                        loop = false;
+                        context.OrchestrationActionCollector.goodToEnd.Set();
+                        return null;
+                    }*/
                 }
-            }
-            finally
+                return null;
+
+                // end user code thread
+                // powerShellServices.StopInvoke();
+                // return null;
+            };
+
+            OrchestratorState state = new OrchestratorState();
+            state.NewEvents = context.History;  // Simplfying assumption
+            state.InstanceId = context.InstanceId;
+            state.UpperSchemaVersion = 2;
+
+            FunctionsWorkerContext workerContext = new(JsonDataConverter.Default);
+
+            // Re-construct the orchestration state from the history.
+            OrchestrationRuntimeState runtimeState = new(state.PastEvents);
+            foreach (DurableTask.Core.History.HistoryEvent newEvent in state.NewEvents)
             {
-                powerShellServices.ClearStreamsAndCommands();
+                runtimeState.AddEvent(newEvent);
             }
+
+            TaskName orchestratorName = new TaskName(runtimeState.Name, runtimeState.Version);
+            FuncTaskOrchestrator<int, object> f = new(orchestratorFunc);
+            TaskOrchestrationShim orchestrator = new(workerContext, orchestratorName, f);
+            TaskOrchestrationExecutor executor = new(runtimeState, orchestrator, BehaviorOnContinueAsNew.Carryover);
+
+            OrchestratorExecutionResult result2 = executor.Execute();
+            powerShellServices.StopInvoke();
+
+            bool isDone = result2.Actions.All((x) => x.OrchestratorActionType == OrchestratorActionType.OrchestrationComplete);
+            return CreateOrchestrationResult(isDone: isDone, context.OrchestrationActionCollector._actions, output: null, context.CustomStatus);
         }
 
         public static object CreateReturnValueFromFunctionOutput(IList<object> pipelineItems)
