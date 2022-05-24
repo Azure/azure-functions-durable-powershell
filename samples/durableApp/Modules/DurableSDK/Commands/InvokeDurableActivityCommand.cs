@@ -5,24 +5,18 @@
 
 #pragma warning disable 1591 // Missing XML comment for publicly visible type or member 'member'
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
+namespace Microsoft.DurableTask.Commands
 {
-    using System.Collections;
     using System.Management.Automation;
-    using Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks;
-    using Newtonsoft.Json;
-    using System;
-    using Microsoft.Azure.Functions.Worker;
-    using DurableTask;
-    using System.Threading.Tasks;
-    using System.Linq;
-    using System.Threading;
+    using Microsoft.DurableTask.Tasks;
+    using DurableSDK.Commands;
+    using Microsoft.DurableTask;
 
     /// <summary>
     /// Invoke a durable activity.
     /// </summary>
     [Cmdlet("Invoke", "DurableActivity")]
-    public class InvokeDurableActivityCommand : PSCmdlet
+    public class InvokeDurableActivityCommand : DFCmdlet
     {
         /// <summary>
         /// Gets and sets the activity function name.
@@ -38,49 +32,15 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
         public object Input { get; set; }
 
         [Parameter]
-        public SwitchParameter NoWait { get; set; }
-
-        [Parameter]
         [ValidateNotNull]
         public RetryOptions RetryOptions { get; set; }
 
-        private readonly DurableTaskHandler _durableTaskHandler = new DurableTaskHandler();
-
-        private OrchestrationContext myContext = null;
-
-        protected override async void EndProcessing()
+        internal override DurableSDKTask GetTask()
         {
-            var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
-            var context = (OrchestrationContext)privateData[SetFunctionInvocationContextCommand.ContextKey];
-            var dtfxContext = (TaskOrchestrationContext)privateData["dtfx"];
-
-
-            // add to actions
-            var sdkTask = new ActivityInvocationTask(FunctionName, Input, RetryOptions);
-            context.OrchestrationActionCollector.Add(sdkTask.CreateOrchestrationAction());
-            context.OrchestrationActionCollector.NextBatch();
-
-            // signal to orchestration thread to await
-            context.OrchestrationActionCollector.hasToAwait.Set();
-
-            // wait for result
-            var handlers = new[] { context.OrchestrationActionCollector.cancelationToken }; //, taskHasResult };
-            WaitHandle.WaitAny(handlers);
-
-            // clear IAsync signals
-            context.OrchestrationActionCollector.currTask = null;
-            context.OrchestrationActionCollector.hasToAwait.Reset();
-
-            // send result to user code
-            WriteObject("tempResultValue");
-            context.OrchestrationActionCollector.startOfNewCmdLet.Set();
-        }
-
-        protected override void StopProcessing()
-        {
-            var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
-            var context = (OrchestrationContext)privateData[SetFunctionInvocationContextCommand.ContextKey];
-            context.OrchestrationActionCollector.cancelationToken.Set();
+            var context = getDTFxContext();
+            var context2= getOrchestrationContext();
+            var task = new ActivityInvocationTask(FunctionName, Input, RetryOptions, context, context2);
+            return task;
         }
     }
 }

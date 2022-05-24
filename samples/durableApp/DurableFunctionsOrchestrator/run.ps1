@@ -2,11 +2,28 @@ param($Context)
 
 $output = @()
 
-Write-Output("Stage 0")
-$res1 = Invoke-DurableActivity -FunctionName 'HelloActivityFunction' -Input 'Seattle'
-Write-Output("Stage 1")
-$res2 = Invoke-DurableActivity -FunctionName 'HelloActivityFunction' -Input 'London'
-Write-Output("Stage 2")
+while($true){
+
+}
+#Write-Output("Stage 00")
+$res1 = Invoke-DurableActivity -FunctionName 'Hello' -Input 'Seattle' -NoWait
+#Write-Output($res1)
+#Write-Output("Stage 1")
+$res2 = Invoke-DurableActivity -FunctionName 'Hello' -Input 'London' -NoWait
+#Write-Output($res2)
+#Write-Output("Stage 2")
+$res3 = Wait-DurableTask -Task @($res1, $res2)
+#Write-Output("Stage 3")
+Write-Output($res3)
+#$res4 = Wait-Durabletask -Task @($res3)
+#Write-Output($res4)
+
+
+#$duration = New-TimeSpan -Seconds 30
+#Start-DurableTimer -Duration $duration
+#Write-Output("Stage 4")
+#Start-DurableExternalEventListener -EventName "hello"
+#Write-Output("Stage 5")
 <#
 $timer1 = Start-DurableTimer -Duration (New-Timespan -Seconds 10) -nowait
 Write-Host 'Started durable timer1'

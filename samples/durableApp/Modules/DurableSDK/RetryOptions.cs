@@ -7,7 +7,7 @@
 
 using System;
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
+namespace Microsoft.DurableTask
 {
     public class RetryOptions
     {

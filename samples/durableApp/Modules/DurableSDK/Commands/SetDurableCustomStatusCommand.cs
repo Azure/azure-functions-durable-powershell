@@ -5,7 +5,7 @@
 
 #pragma warning disable 1591 // Missing XML comment for publicly visible type or member 'member'
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
+namespace Microsoft.DurableTask.Commands
 {
     using System.Collections;
     using System.Management.Automation;

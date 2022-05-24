@@ -5,49 +5,52 @@
 
 #pragma warning disable 1591 // "Missing XML comments for publicly visible type"
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks
+namespace Microsoft.DurableTask.Tasks
 {
-    using System;
-    using System.Linq;
-    using System.Collections.Generic;
     using Newtonsoft.Json;
+    using Microsoft.DurableTask;
+    using Microsoft.DurableTask.Actions;
+    using System.Threading.Tasks;
+    using global::DurableTask;
+    using System;
 
-    // using WebJobs.Script.Grpc.Messages;
-
-    using Microsoft.Azure.Functions.PowerShellWorker;
-    using Microsoft.Azure.Functions.PowerShellWorker.Durable;
-    using Microsoft.Azure.Functions.PowerShellWorker.Durable.Actions;
-
-    public class ActivityInvocationTask : DurableTask
+    public class ActivityInvocationTask : DurableSDKTask
     {
         internal string FunctionName { get; }
 
-        private object Input { get; }
+        internal object Input { get; }
 
         private RetryOptions RetryOptions { get; }
 
-        internal ActivityInvocationTask(string functionName, object functionInput, RetryOptions retryOptions)
+        private TaskOrchestrationContext context;
+        private OrchestrationContext context2;
+
+        internal ActivityInvocationTask(string functionName, object functionInput, RetryOptions retryOptions, TaskOrchestrationContext context, OrchestrationContext context2)
         {
             FunctionName = functionName;
             Input = JsonConvert.SerializeObject(functionInput);
             RetryOptions = retryOptions;
+            this.context = context;
+            this.context2 = context2;
         }
 
-        internal ActivityInvocationTask(string functionName, object functionInput)
-            : this(functionName, functionInput, retryOptions: null)
+        internal override Task getDTFxTask()
         {
-        }
-
-        internal override HistoryEvent GetScheduledHistoryEvent(OrchestrationContext context)
-        {
-            // TODO: rewrite to use DTFx context
-            return null;
-        }
-
-        internal override HistoryEvent GetCompletedHistoryEvent(OrchestrationContext context, HistoryEvent scheduledHistoryEvent)
-        {
-            // TODO: rewrite to use DTFx context
-            return null;
+            if (this.dtfxTask != null)
+            {
+                return this.dtfxTask;
+            }
+            else if (RetryOptions != null)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                this.dtfxTask = this.context.CallActivityAsync<object>(FunctionName, Input);
+                context2.OrchestrationActionCollector.taskMap.Add(dtfxTask, this);
+                return dtfxTask;
+                
+            }
         }
 
         internal override OrchestrationAction CreateOrchestrationAction()

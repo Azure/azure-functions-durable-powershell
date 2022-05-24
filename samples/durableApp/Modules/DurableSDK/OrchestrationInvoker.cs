@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
+namespace Microsoft.DurableTask
 {
     using System;
     using System.Collections;
@@ -11,16 +11,12 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
     using System.Linq;
     using System.Management.Automation;
 
-    // using PowerShellWorker.Utility;
-    using Microsoft.Azure.Functions.PowerShellWorker.Durable.Actions;
-    using Microsoft.Azure.Functions.Worker;
-    //using DurableTask;
+    using Microsoft.DurableTask.Actions;
     using System.Threading.Tasks;
-    using DurableTask;
-    using DurableTask.Core;
     using System.Threading;
-    using DurableSDK;
-    using DurableTask.Core.Command;
+    using global::DurableTask;
+    using global::DurableTask.Core;
+    using global::DurableTask.Core.Command;
 
     internal class OrchestrationInvoker : IOrchestrationInvoker
     {
@@ -39,23 +35,23 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
         {
             public string? InstanceId { get; set; }
 
-            public IList<DurableTask.Core.History.HistoryEvent>? PastEvents { get; set; }
+            public IList<global::DurableTask.Core.History.HistoryEvent>? PastEvents { get; set; }
 
-            public IList<DurableTask.Core.History.HistoryEvent>? NewEvents { get; set; }
+            public IList<global::DurableTask.Core.History.HistoryEvent>? NewEvents { get; set; }
 
             internal int? UpperSchemaVersion { get; set; }
         }
-
 
         public Hashtable InvokeExternal(OrchestrationContext context, IPowerShellServices powerShellServices, object privateData)
         {
             // var cSource = new TaskCompletionSource();
             Func<TaskOrchestrationContext, int, Task<object>> orchestratorFunc = async (TaskOrchestrationContext dtxContent, int _) =>
             {
-
+                var myFunc = () => dtxContent.CallActivityAsync<object>("Hello", "Seattle");
                 // start user code
                 IAsyncResult asyncResult = null;
                 ((Hashtable)privateData)["dtfx"] = dtxContent;
+                context.innercontext = dtxContent;
                 powerShellServices.AddParameter("Context", context);
                 powerShellServices.TracePipelineObject();
                 var outputBuffer = new PSDataCollection<object>();
@@ -73,12 +69,14 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
                         powerShellServices.EndInvoke(asyncResult);
                         return null;
                     }
-                    var task = dtxContent.CallActivityAsync<object>("HelloActivityFunction", "Seattle");
-                    context.OrchestrationActionCollector.currTask = task;
+
+                    var sdkTask = context.OrchestrationActionCollector.currTask;
+                    //var task = sdkTask.getDTFxTask();
+
                     context.OrchestrationActionCollector.cancelationToken.Reset();
 
-                    // var task = context.OrchestrationActionCollector.currTask;
-                    await task;
+                    var task = context.OrchestrationActionCollector.currTask;
+                    await task.getDTFxTask();
                     context.OrchestrationActionCollector.cancelationToken.Set();
                     /*var winner = await Task.WhenAny(task, cSource.Task);
                     if (winner == cSource.Task)
@@ -104,7 +102,7 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
 
             // Re-construct the orchestration state from the history.
             OrchestrationRuntimeState runtimeState = new(state.PastEvents);
-            foreach (DurableTask.Core.History.HistoryEvent newEvent in state.NewEvents)
+            foreach (global::DurableTask.Core.History.HistoryEvent newEvent in state.NewEvents)
             {
                 runtimeState.AddEvent(newEvent);
             }

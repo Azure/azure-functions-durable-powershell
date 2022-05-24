@@ -6,7 +6,7 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
+namespace Microsoft.DurableTask
 {
     using System.Management.Automation;
 

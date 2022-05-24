@@ -77,7 +77,8 @@
        'Set-FunctionInvocationContext',
        'Start-DurableTimer',
        'Stop-DurableTimerTask',
-       'Wait-DurableTask'
+       'Wait-DurableTask',
+       'Start-DurableExternalEventListener'
     )
     
     # Variables to export from this module

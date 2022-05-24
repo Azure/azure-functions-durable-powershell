@@ -3,13 +3,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
+namespace Microsoft.DurableTask
 {
     using System;
     using System.Collections.Generic;
     using Newtonsoft.Json;
 
-    using Microsoft.Azure.Functions.PowerShellWorker.Durable.Actions;
+    using Microsoft.DurableTask.Actions;
 
     /// <summary>
     /// OrchestrationFailureException should be propagated back to the Host when an orchestrator function

@@ -5,36 +5,45 @@
 
 #pragma warning disable 1591 // "Missing XML comments for publicly visible type"
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks
+namespace Microsoft.DurableTask.Tasks
 {
-    using System.Linq;
+    using System.Threading.Tasks;
+    using DurableTask;
+    using global::DurableTask;
+    using Microsoft.DurableTask.Actions;
 
-    using Microsoft.Azure.Functions.PowerShellWorker.Durable.Actions;
-
-    public class ExternalEventTask : DurableTask
+    public class ExternalEventTask : DurableSDKTask
     {
         internal string ExternalEventName { get; }
 
-        public ExternalEventTask(string externalEventName)
+        private TaskOrchestrationContext context;
+        private OrchestrationContext context2;
+
+        public ExternalEventTask(string externalEventName, TaskOrchestrationContext context, OrchestrationContext context2)
         {
             ExternalEventName = externalEventName;
-        }
-
-        // There is no corresponding history event for an expected external event
-        internal override HistoryEvent GetScheduledHistoryEvent(OrchestrationContext context)
-        {
-            return null;
-        }
-
-        internal override HistoryEvent GetCompletedHistoryEvent(OrchestrationContext context, HistoryEvent taskScheduled)
-        {
-            // TODO: rewrite to use DTFx context
-            return null;
+            this.context = context;
+            this.context2 = context2;
         }
 
         internal override OrchestrationAction CreateOrchestrationAction()
         {
             return new ExternalEventAction(ExternalEventName);
+        }
+
+        internal override Task getDTFxTask()
+        {
+            if (this.dtfxTask != null)
+            {
+                return this.dtfxTask;
+            }
+            else
+            {
+                this.dtfxTask = this.context.WaitForExternalEvent<object>(ExternalEventName);
+                context2.OrchestrationActionCollector.taskMap.Add(dtfxTask, this);
+                return dtfxTask;
+
+            }
         }
     }
 }

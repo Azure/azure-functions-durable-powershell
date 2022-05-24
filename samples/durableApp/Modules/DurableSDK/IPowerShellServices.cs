@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
+namespace Microsoft.DurableTask
 {
     using System;
     using System.Management.Automation;

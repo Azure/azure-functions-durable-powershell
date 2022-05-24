@@ -5,8 +5,9 @@
 
 #pragma warning disable 1591 // Missing XML comment for publicly visible type or member 'member'
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
+namespace Microsoft.DurableTask
 {
+    using global::DurableTask;
     using System;
     using System.Runtime.Serialization;
 
@@ -29,12 +30,19 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
         public bool IsReplaying { get; set; }
 
         [DataMember]
-        internal DurableTask.Core.History.HistoryEvent[] History { get; set; }
+        internal global::DurableTask.Core.History.HistoryEvent[] History { get; set; }
 
-        public DateTime CurrentUtcDateTime { get; internal set; }
+        public DateTime CurrentUtcDateTime
+        { get
+          {
+                return this.innercontext.CurrentDateTimeUtc;
+          }
+          internal set { }
+        }
 
         internal OrchestrationActionCollector OrchestrationActionCollector { get; } = new OrchestrationActionCollector();
 
         internal object CustomStatus { get; set; }
+        internal TaskOrchestrationContext innercontext;
     }
 }

@@ -5,43 +5,37 @@
 
 #pragma warning disable 1591 // Missing XML comment for publicly visible type or member 'member'
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
+namespace Microsoft.DurableTask.Commands
 {
-    using System;
-    using System.Collections;
     using System.Management.Automation;
-    using Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks;
+    using DurableSDK.Commands;
+    using Microsoft.DurableTask.Tasks;
 
     [Cmdlet("Wait", "DurableTask")]
-    public class WaitDurableTaskCommand : PSCmdlet
+    public class WaitDurableTaskCommand : DFCmdlet
     {
         [Parameter(Mandatory = true)]
         [ValidateNotNull]
-        public DurableTask[] Task { get; set; }
+        public DurableSDKTask[] Task { get; set; }
 
         [Parameter]
         public SwitchParameter Any { get; set; }
 
-        private readonly DurableTaskHandler _durableTaskHandler = new DurableTaskHandler();
-
-        protected override void EndProcessing()
+        internal override DurableSDKTask GetTask()
         {
-            var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
-            var context = (OrchestrationContext)privateData[SetFunctionInvocationContextCommand.ContextKey];
-
-            if (Any.IsPresent)
+            var context = getDTFxContext();
+            var context2 = getOrchestrationContext();
+            DurableSDKTask task = null;
+            if (Any)
             {
-                _durableTaskHandler.WaitAny(Task, context, WriteObject);
+                task = new WhenAnyTask(Task, context, context2);
             }
             else
             {
-                _durableTaskHandler.WaitAll(Task, context, WriteObject);
+                task = new WhenAllTask(Task, context, context2);
             }
+            return task;
         }
 
-        protected override void StopProcessing()
-        {
-            _durableTaskHandler.Stop();
-        }
     }
 }

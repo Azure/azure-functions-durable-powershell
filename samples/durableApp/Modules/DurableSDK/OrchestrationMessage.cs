@@ -3,11 +3,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable
+namespace Microsoft.DurableTask
 {
     using System.Collections.Generic;
 
-    using Microsoft.Azure.Functions.PowerShellWorker.Durable.Actions;
+    using Microsoft.DurableTask.Actions;
 
     /// <summary>
     /// Represent an orchestration message to be sent to the host.

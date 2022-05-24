@@ -5,18 +5,18 @@
 
 #pragma warning disable 1591 // Missing XML comment for publicly visible type or member 'member'
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
+namespace Microsoft.DurableTask.Commands
 {
     using System;
-    using System.Collections;
     using System.Management.Automation;
-    using Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks;
+    using DurableSDK.Commands;
+    using Microsoft.DurableTask.Tasks;
 
     /// <summary>
     /// Start the Durable Functions timer
     /// </summary>
     [Cmdlet("Start", "DurableTimer")]
-    public class StartDurableTimerCommand : PSCmdlet
+    public class StartDurableTimerCommand : DFCmdlet
     {
         /// <summary>
         /// Gets and sets the duration of the Durable Timer.
@@ -28,23 +28,14 @@ namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
         [Parameter]
         public SwitchParameter NoWait { get; set; }
 
-        private readonly DurableTaskHandler _durableTaskHandler = new DurableTaskHandler();
-
-        protected override void EndProcessing()
+        internal override DurableSDKTask GetTask()
         {
-            var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
-            var context = (OrchestrationContext)privateData[SetFunctionInvocationContextCommand.ContextKey];
-
-            DateTime fireAt = context.CurrentUtcDateTime.Add(Duration);
-            var task = new DurableTimerTask(fireAt);
-
-            _durableTaskHandler.StopAndInitiateDurableTaskOrReplay(
-                task, context, NoWait.IsPresent, WriteObject, failureReason => DurableActivityErrorHandler.Handle(this, failureReason));
+            var context = getDTFxContext();
+            var context2 = getOrchestrationContext();
+            DateTime fireAt = context2.CurrentUtcDateTime.Add(Duration);
+            var task = new DurableTimerTask(fireAt, context, context2);
+            return task;
         }
 
-        protected override void StopProcessing()
-        {
-            _durableTaskHandler.Stop();
-        }
     }
 }

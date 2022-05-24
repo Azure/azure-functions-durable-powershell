@@ -5,11 +5,10 @@
 
 #pragma warning disable 1591 // Missing XML comment for publicly visible type or member 'member'
 
-namespace Microsoft.Azure.Functions.PowerShellWorker.Durable.Commands
+namespace Microsoft.DurableTask.Commands
 {
-    using System;
     using System.Management.Automation;
-    using Microsoft.Azure.Functions.PowerShellWorker.Durable.Tasks;
+    using Microsoft.DurableTask.Tasks;
 
     /// <summary>
     /// Stop the Durable timeout task

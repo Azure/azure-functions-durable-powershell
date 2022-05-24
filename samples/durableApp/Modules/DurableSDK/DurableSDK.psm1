@@ -319,7 +319,7 @@ function New-DurableOrchestrationCheckStatusResponseExternal {
 #     [timespan]
 #     $RetryTimeout) {
 
-#     [Microsoft.Azure.Functions.PowerShellWorker.Durable.RetryOptions]::new(
+#     [Microsoft.DurableTask.RetryOptions]::new(
 #         $FirstRetryInterval,
 #         $MaxNumberOfAttempts,
 #         $PSBoundParameters.ContainsKey('BackoffCoefficient') ? $BackoffCoefficient : $null,

@@ -1,2 +1,0 @@
-param($name)
-"Success $name"
