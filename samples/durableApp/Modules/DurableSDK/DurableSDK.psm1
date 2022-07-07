@@ -4,8 +4,8 @@
 #
 
 # Set aliases for cmdlets to export
-Set-Alias -Name Wait-ActivityFunction -Value Wait-DurableTask
-Set-Alias -Name Invoke-ActivityFunction -Value Invoke-DurableActivity
+# Set-Alias -Name Wait-ActivityFunction -Value Wait-DurableTask
+# Set-Alias -Name Invoke-ActivityFunction -Value Invoke-DurableActivity
 Set-Alias -Name New-OrchestrationCheckStatusResponse -Value New-DurableOrchestrationCheckStatusResponseExternal
 Set-Alias -Name Start-NewOrchestration -Value Start-DurableOrchestrationExternal
 

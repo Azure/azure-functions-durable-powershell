@@ -2,19 +2,25 @@ param($Context)
 
 $output = @()
 
-while($true){
+#1/0
+#throw "err"
+$Context.IsReplaying
+$Context.CurrentUtcDateTime
+Write-Output("Stage 00")
+$task = @(Invoke-DurableActivityE -FunctionName 'Hello' -Input 'Seattle' -NoWait)
+Write-Output("got that task")
+Wait-DurableTaskE -Task $task
+$Context.CurrentUtcDateTime
+$Context.IsReplaying
+#Write-Output("got that track 2 replay")
 
-}
-#Write-Output("Stage 00")
-$res1 = Invoke-DurableActivity -FunctionName 'Hello' -Input 'Seattle' -NoWait
-#Write-Output($res1)
-#Write-Output("Stage 1")
-$res2 = Invoke-DurableActivity -FunctionName 'Hello' -Input 'London' -NoWait
+#1/0
+#$res2 = Invoke-DurableActivity -FunctionName 'Hello' -Input 'London' -NoWait
 #Write-Output($res2)
 #Write-Output("Stage 2")
-$res3 = Wait-DurableTask -Task @($res1, $res2)
+#$res3 = Wait-DurableTask -Task @($res1, $res2)
 #Write-Output("Stage 3")
-Write-Output($res3)
+#Write-Output($res3)
 #$res4 = Wait-Durabletask -Task @($res3)
 #Write-Output($res4)
 

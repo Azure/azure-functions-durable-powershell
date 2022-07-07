@@ -58,7 +58,7 @@
     # FormatsToProcess = @()
     
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    NestedModules = @('.\bin\Debug\net6.0\DurableSDK.dll', 'DurableSDK.psm1')
+    NestedModules = @('.\out\DurableSDK.dll', 'DurableSDK.psm1')
     
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
@@ -72,12 +72,12 @@
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @(
-       'Invoke-DurableActivity',
+       'Invoke-DurableActivityE',
        'Set-BindingData',
        'Set-FunctionInvocationContext',
        'Start-DurableTimer',
        'Stop-DurableTimerTask',
-       'Wait-DurableTask',
+       'Wait-DurableTaskE',
        'Start-DurableExternalEventListener'
     )
     

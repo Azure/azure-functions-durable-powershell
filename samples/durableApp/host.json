@@ -11,6 +11,5 @@
   "managedDependency": {
     "enabled": true
   },
-  "functionTimeout": "00:00:30",
-  "extensions": { "durableTask": { "hubName": "taskhubtest76" }}
+  "extensions": { "durableTask": { "hubName": "taskhubtttt3" }}
 }

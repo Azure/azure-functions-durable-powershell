@@ -10,11 +10,11 @@
     <None Include="local.settings.json" />
   </ItemGroup>
   <ItemGroup>
-    <!--<ProjectReference Include="C:\Users\dajusto.REDMOND\source\repos\azure-functions-durable-extension\src\WebJobs.Extensions.DurableTask\WebJobs.Extensions.DurableTask.csproj" />-->
+    <!--ProjectReference Include="C:\Users\dajusto.REDMOND\source\repos\extension2\azure-functions-durable-extension\src\WebJobs.Extensions.DurableTask\WebJobs.Extensions.DurableTask.csproj" />-->
   </ItemGroup>
   <ItemGroup>
-  <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="2.7.1-internal-preview" />
-    <!--<PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="99.7.0" />-->
-    <PackageReference Include="Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator" Version="4.0.*" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="100.7.0" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator" Version="4.0.1" />
+    <!--<PackageReference Include="Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator" Version="4.0.*" />-->
   </ItemGroup>
 </Project>
