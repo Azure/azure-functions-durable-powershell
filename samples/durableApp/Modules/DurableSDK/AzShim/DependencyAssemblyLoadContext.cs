@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -8,13 +7,11 @@ namespace DurableSDK
 {
     internal class DependencyAssemblyLoadContext : AssemblyLoadContext
     {
-        private static readonly string s_psHome = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-
-        private static readonly ConcurrentDictionary<string, DependencyAssemblyLoadContext> s_dependencyLoadContexts = new ConcurrentDictionary<string, DependencyAssemblyLoadContext>();
+        private static readonly ConcurrentDictionary<string, DependencyAssemblyLoadContext> s_directoryToDependencyALCsMap = new ConcurrentDictionary<string, DependencyAssemblyLoadContext>();
 
         internal static DependencyAssemblyLoadContext GetForDirectory(string directoryPath)
         {
-            return s_dependencyLoadContexts.GetOrAdd(directoryPath, (path) => new DependencyAssemblyLoadContext(path));
+            return s_directoryToDependencyALCsMap.GetOrAdd(directoryPath, (path) => new DependencyAssemblyLoadContext(path));
         }
 
         private readonly string _dependencyDirPath;
@@ -27,15 +24,13 @@ namespace DurableSDK
 
         protected override Assembly Load(AssemblyName assemblyName)
         {
-            string assemblyFileName = $"{assemblyName.Name}.dll";
-
-            // Now try to load the assembly from the dependency directory
-            string dependencyAsmPath = Path.Join(_dependencyDirPath, assemblyFileName);
-            if (File.Exists(dependencyAsmPath))
+            // Try to load the assembly with the given name from the dependency directory
+            string assemblyPath = Path.Join(_dependencyDirPath, $"{assemblyName.Name}.dll");
+            if (File.Exists(assemblyPath))
             {
-                return LoadFromAssemblyPath(dependencyAsmPath);
+                return LoadFromAssemblyPath(assemblyPath);
             }
-
+            // Return null for other assemblies to allow assembly resolution to continue
             return null;
         }
  
