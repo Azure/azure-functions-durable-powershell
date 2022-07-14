@@ -1,14 +1,12 @@
 ﻿using DurableEngine;
-using Microsoft.PowerShell.Commands;
-using System.Collections;
 using System.Management.Automation;
 
-namespace DurableSDK.Commands.APIs
+namespace DurableSDK.Commands
 {
-    public abstract class DFCmdlet : PSCmdlet
+    public abstract class DurableSDKCmdlet : PSCmdlet
     {
-        internal abstract DFCommand GetCommand();
-        private DFCommand cmd;
+        internal abstract DurableEngineCommand GetCommand();
+        private DurableEngineCommand cmd;
 
         protected override void EndProcessing()
         {

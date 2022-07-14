@@ -1,14 +1,13 @@
 ﻿using Microsoft.DurableTask;
 using System;
 using System.Collections;
-using System.Linq;
 using System.Management.Automation;
 
 namespace DurableEngine
 {
-    public abstract class DFCommand
+    public abstract class DurableEngineCommand
     {
-        public DFCommand(SwitchParameter noWait, Hashtable privateData)
+        public DurableEngineCommand(SwitchParameter noWait, Hashtable privateData)
         {
             NoWait = noWait;
             PrivateData = privateData;
