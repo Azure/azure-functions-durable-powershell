@@ -14,7 +14,7 @@ namespace DurableSDK.Commands.APIs
     using System.Management.Automation;
 
     [Cmdlet("Wait", "DurableTaskE")]
-    public class WaitDurableTaskCommand : DFCmdlet
+    public class WaitDurableTaskCommand : DurableSDKCmdlet
     {
 
         [Parameter]
@@ -27,7 +27,7 @@ namespace DurableSDK.Commands.APIs
         [ValidateNotNull]
         public DurableSDKTask[] Task { get; set; }
 
-        internal override DFCommand GetCommand()
+        internal override DurableEngineCommand GetCommand()
         {
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
             var cmd = new WaitDurableTaskCommand2(Task, Any, NoWait, privateData);

@@ -7,9 +7,9 @@ $output = @()
 $Context.IsReplaying
 $Context.CurrentUtcDateTime
 Write-Output("Stage 00")
-$task = @(Invoke-DurableActivityE -FunctionName 'Hello' -Input 'Seattle' -NoWait)
+$res = Invoke-DurableActivityE -FunctionName 'Hello' -Input 'Seattle'
 Write-Output("got that task")
-Wait-DurableTaskE -Task $task
+# Wait-DurableTaskE -Task $task
 $Context.CurrentUtcDateTime
 $Context.IsReplaying
 #Write-Output("got that track 2 replay")

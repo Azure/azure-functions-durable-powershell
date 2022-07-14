@@ -11,7 +11,7 @@ namespace DurableEngine.Commands
     using System.Collections;
     using System.Management.Automation;
 
-    public class WaitDurableTaskCommand2 : DFCommand
+    public class WaitDurableTaskCommand2 : DurableEngineCommand
     {
         public WaitDurableTaskCommand2(DurableSDKTask[] task, SwitchParameter any, SwitchParameter noWait, Hashtable privateData) : base(noWait, privateData)
         {

@@ -14,7 +14,7 @@ namespace DurableEngine.Commands
     /// <summary>
     /// Invoke a durable activity.
     /// </summary>
-    public class InvokeDurableActivityCommand2 : DFCommand
+    public class InvokeDurableActivityCommand2 : DurableEngineCommand
     {
         public InvokeDurableActivityCommand2(string functionName, object input, RetryOptions retryOptions, SwitchParameter NoWait, Hashtable privateData)
             : base(NoWait, privateData)
