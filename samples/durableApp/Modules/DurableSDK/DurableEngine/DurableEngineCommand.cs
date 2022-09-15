@@ -2,109 +2,107 @@
 using System;
 using System.Collections;
 using System.Management.Automation;
+using System.Threading.Tasks;
 
 namespace DurableEngine
 {
+    // Wrapper class for Durable Task
     public abstract class DurableEngineCommand
     {
+        internal Task<object> DTFxTask;
+
         public DurableEngineCommand(SwitchParameter noWait, Hashtable privateData)
         {
-            NoWait = noWait;
-            PrivateData = privateData;
+            NoWait = noWait.IsPresent;
+            // MICHAELPENG TOASK: This OrchestrationContext should be passed by reference; does casting preserve this?
+            OrchestrationContext = (OrchestrationContext)privateData[OrchestrationInvoker.ContextKey];
+            TaskOrchestrationContext = OrchestrationContext.DTFxContext;
         }
 
-        public SwitchParameter NoWait { get; set; }
+        public bool NoWait { get; set; }
 
-        public Hashtable PrivateData { get; set; }
+        internal OrchestrationContext OrchestrationContext { get; set; }
 
-        internal OrchestrationContext getOrchestrationContext()
+        internal TaskOrchestrationContext TaskOrchestrationContext { get; set; }
+
+        internal abstract Task<object> CreateDTFxTask();
+
+        internal virtual object Result
         {
-            //var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
-            var privateData = PrivateData;
-            var context = (OrchestrationContext)privateData["OrchestrationContext"];
-            return context;
+            get { return DTFxTask.Result; }
         }
 
-        internal TaskOrchestrationContext getDTFxContext()
+        internal virtual Exception Exception
         {
-            //var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
-            var privateData = PrivateData;
-            TaskOrchestrationContext context = (TaskOrchestrationContext)privateData["dtfx"];
-            return context;
+            get { return DTFxTask.Exception; }
         }
 
-        internal abstract DurableSDKTask GetTask();
-
-        public void Exec(Action<object> write, Action<ErrorRecord> writeErr)
+        public Task<object> GetDTFxTask()
         {
-            DurableSDKTask task = GetTask();
-            object result = null;
+            if (DTFxTask == null)
+            {
+                DTFxTask = CreateDTFxTask();
+            }
+            return DTFxTask;
+        }
+
+        internal abstract OrchestrationAction CreateOrchestrationAction();
+
+        public void Execute(Action<object> output, Action<ErrorRecord> writeError)
+        {
+            OrchestrationContext.OrchestrationActionCollector.CurrentDurableEngineCommand = this;
+            OrchestrationContext.OrchestrationActionCollector.Add(CreateOrchestrationAction());
+            var task = GetDTFxTask();
 
             if (NoWait)
             {
-                result = task;
-                write(result);
+                output(task);
             }
             else
             {
-                var context = getOrchestrationContext();
+                OrchestrationContext.OrchestrationActionCollector.NextBatch();
 
-                context.OrchestrationActionCollector.currTask = task;
-                context.OrchestrationActionCollector.Add(task.CreateOrchestrationAction());
-                context.OrchestrationActionCollector.NextBatch();
-                //var dtfxTask = task.getDTFxTask();
-                //context.OrchestrationActionCollector.taskMap.Add(dtfxTask, task);
-
-
-                // signal to orchestration thread to await
-                context.OrchestrationActionCollector.hasToAwait.Set();
-
-                // wait for result
-                //var handlers = new[] { context.OrchestrationActionCollector.cancelationToken }; //, taskHasResult };
-                //WaitHandle.WaitAny(handlers);
-                context.OrchestrationActionCollector.cancelationToken.WaitOne();
-
-                // logic (this wil lbock cuz of .Result) do this in invoker!
-                var sdkTask = context.OrchestrationActionCollector.currTask;
-                if (sdkTask.hasResult())
-                {  // works for failed?
-                    if (sdkTask.isFaulted())
+                // Output the result if the Durable cmdlet does not have NoWait and the task has been completed
+                if (HasResult())
+                {
+                    if (IsFaulted())
                     {
-                        var errorMessage = context.OrchestrationActionCollector.currTask.Exception.Message;
+                        var errorMessage = Exception.Message;
                         const string ErrorId = "Functions.Durable.ActivityFailure";
                         var exception = new ActivityFailureException(errorMessage);
                         var errorRecord = new ErrorRecord(exception, ErrorId, ErrorCategory.NotSpecified, null);
 
-                        // clear IAsync signals
-                        context.OrchestrationActionCollector.currTask = null;
-                        context.OrchestrationActionCollector.hasToAwait.Reset();
-
-                        // send result to user code
-                        context.OrchestrationActionCollector.startOfNewCmdLet.Set();
-                        writeErr(errorRecord);
+                        writeError(errorRecord);
                     }
                     else
                     {
-                        result = context.OrchestrationActionCollector.currTask.Result;
-
-                        // clear IAsync signals
-                        context.OrchestrationActionCollector.currTask = null;
-                        context.OrchestrationActionCollector.hasToAwait.Reset();
-
-                        // send result to user code
-                        context.OrchestrationActionCollector.startOfNewCmdLet.Set();
-                        write(result);
+                        output(Result);
                     }
                 }
+                else
+                {
+                    OrchestrationContext.OrchestrationActionCollector.ResumeOrchestrator();
+                    OrchestrationContext.OrchestrationActionCollector.WaitForActivityResult();
+                }
             }
-            //write(result);
+
+            // Reset the current Durable Engine task to null once the invocation completes
+            OrchestrationContext.OrchestrationActionCollector.CurrentDurableEngineCommand = null;
         }
 
         public void Stop()
         {
-            var context = getOrchestrationContext();
-            context.OrchestrationActionCollector.cancelationToken.Set();
+            OrchestrationContext.OrchestrationActionCollector._cancelationToken.Set();
         }
 
+        internal virtual bool HasResult()
+        {
+            return DTFxTask != null && DTFxTask.IsCompleted;
+        }
+
+        internal virtual bool IsFaulted()
+        {
+            return DTFxTask != null && DTFxTask.IsFaulted;
+        }
     }
 }

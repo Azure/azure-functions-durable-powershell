@@ -7,13 +7,12 @@
 
 namespace DurableEngine
 {
-    using Newtonsoft.Json;
     using Microsoft.DurableTask;
+    using System.Collections;
+    using System.Management.Automation;
     using System.Threading.Tasks;
-    using System;
-    using DurableEngine.Tasks;
 
-    internal class ActivityInvocationTask : AtomicTask
+    public class ActivityInvocationTask : DurableEngineCommand
     {
         internal string FunctionName { get; }
 
@@ -21,27 +20,22 @@ namespace DurableEngine
 
         private RetryOptions RetryOptions { get; }
 
-        private TaskOrchestrationContext context;
-
-        internal ActivityInvocationTask(string functionName, object functionInput, RetryOptions retryOptions, TaskOrchestrationContext context, OrchestrationContext sdkContext) : base(sdkContext)
+        public ActivityInvocationTask(
+            string functionName,
+            object input,
+            RetryOptions retryOptions,
+            SwitchParameter noWait,
+            Hashtable privateData)
+            : base(noWait, privateData)
         {
             FunctionName = functionName;
-            Input = JsonConvert.SerializeObject(functionInput);
+            Input = input;
             RetryOptions = retryOptions;
-            this.context = context;
         }
 
-        internal override Task createDTFxTask()
+        internal override Task<object> CreateDTFxTask()
         {
-            if (RetryOptions != null)
-            {
-                throw new NotImplementedException();
-            }
-            else
-            {
-                return this.context.CallActivityAsync<object>(FunctionName, Input);
-
-            }
+            return TaskOrchestrationContext.CallActivityAsync<object>(FunctionName, Input);
         }
 
         internal override OrchestrationAction CreateOrchestrationAction()

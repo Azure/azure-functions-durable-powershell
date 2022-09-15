@@ -5,18 +5,19 @@ namespace DurableSDK.Commands
 {
     public abstract class DurableSDKCmdlet : PSCmdlet
     {
-        internal abstract DurableEngineCommand GetCommand();
-        private DurableEngineCommand cmd;
+        private DurableEngineCommand durableTask;
+
+        protected abstract DurableEngineCommand CreateDurableTask();
 
         protected override void EndProcessing()
         {
-            cmd = GetCommand();
-            cmd.Exec(WriteObject, WriteError);
+            durableTask = CreateDurableTask();
+            durableTask.Execute(WriteObject, WriteError);
         }
 
         protected override void StopProcessing()
         {
-            cmd.Stop();
+            durableTask.Stop();
         }
     }
 }

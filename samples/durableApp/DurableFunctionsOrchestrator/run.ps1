@@ -4,14 +4,17 @@ $output = @()
 
 #1/0
 #throw "err"
-$Context.IsReplaying
-$Context.CurrentUtcDateTime
-Write-Output("Stage 00")
-$res = Invoke-DurableActivityE -FunctionName 'Hello' -Input 'Seattle'
-Write-Output("got that task")
+# $Context.IsReplaying
+# $Context.CurrentUtcDateTime
+# Write-Output("Stage 00")
+Write-Host "Beginning first activity function"
+$output += Invoke-DurableActivityExternal -FunctionName 'Hello' -Input 'Seattle'
+Write-Host "Passed first activity function"
+
+# Write-Output("got that task")
 # Wait-DurableTaskE -Task $task
-$Context.CurrentUtcDateTime
-$Context.IsReplaying
+# $Context.CurrentUtcDateTime
+# $Context.IsReplaying
 #Write-Output("got that track 2 replay")
 
 #1/0

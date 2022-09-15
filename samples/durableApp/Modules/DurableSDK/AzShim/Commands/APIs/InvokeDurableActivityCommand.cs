@@ -9,15 +9,13 @@
 namespace DurableSDK.Commands.APIs
 {
     using DurableEngine;
-    using DurableEngine.Commands;
-    using System;
     using System.Collections;
     using System.Management.Automation;
 
     /// <summary>
     /// Invoke a durable activity.
     /// </summary>
-    [Cmdlet("Invoke", "DurableActivityE")]
+    [Cmdlet("Invoke", "DurableActivityExternal")]
     public class InvokeDurableActivityCommand : DurableSDKCmdlet
     {
         /// <summary>
@@ -34,17 +32,16 @@ namespace DurableSDK.Commands.APIs
         public object Input { get; set; }
 
         [Parameter]
+        public SwitchParameter NoWait { get; set; }
+
+        [Parameter]
         [ValidateNotNull]
         public RetryOptions RetryOptions { get; set; }
 
-        [Parameter]
-        public SwitchParameter NoWait { get; set; }
-
-        internal override DurableEngineCommand GetCommand()
+        protected override DurableEngineCommand CreateDurableTask()
         {
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
-            var cmd = new InvokeDurableActivityCommand2(FunctionName, Input, null, NoWait, privateData);
-            return cmd;
+            return new ActivityInvocationTask(FunctionName, Input, RetryOptions, NoWait, privateData);
         }
     }
 }

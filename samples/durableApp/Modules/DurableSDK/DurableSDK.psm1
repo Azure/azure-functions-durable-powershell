@@ -100,6 +100,7 @@ function Start-DurableOrchestrationExternal {
             ValueFromPipelineByPropertyName=$true)]
         [object] $DurableClient
     )
+    # MICHAELPENG TODO: Remove this line before publishing
     Write-Host "EXTERNAL START ORCHESTRATION"
 
     $ErrorActionPreference = 'Stop'
@@ -185,7 +186,7 @@ function New-DurableOrchestrationCheckStatusResponseExternal {
             ValueFromPipelineByPropertyName=$true)]
         [object] $DurableClient
     )
-
+    # MICHAELPENG TODO: Remove this before publishing
     Write-Host "EXTERNAL CHECK STATUS"
     
     if ($null -eq $DurableClient) {

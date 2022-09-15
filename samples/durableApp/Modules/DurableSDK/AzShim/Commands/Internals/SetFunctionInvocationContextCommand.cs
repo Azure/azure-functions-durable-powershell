@@ -8,9 +8,11 @@
 
 namespace DurableSDK.Commands.Internals
 {
+    using System;
     using System.Collections;
     using System.Management.Automation;
     using DurableEngine;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Set the orchestration context.
@@ -18,7 +20,9 @@ namespace DurableSDK.Commands.Internals
     [Cmdlet("Set", "FunctionInvocationContext")]
     public class SetFunctionInvocationContextCommand : PSCmdlet
     {
-        internal const string ContextKey = "OrchestrationContext";
+        // We define ContextKey in the DurableEngine because we want to ensure that the key used to access the OrchestrationContext
+        // matches the key used to set the OrchestrationContext without hard-coding it in two separate places
+        public const string ContextKey = DurableEngine.OrchestrationInvoker.ContextKey;
         private const string DurableClientKey = "DurableClient";
 
         [Parameter(Mandatory = true, ParameterSetName = ContextKey)]
@@ -39,9 +43,22 @@ namespace DurableSDK.Commands.Internals
             switch (ParameterSetName)
             {
                 case ContextKey:
-                    OrchestrationInvoker orchestrationInvoker = new OrchestrationInvoker();
-                    var obj = orchestrationInvoker.Go(OrchestrationContext, privateData);
-                    WriteObject(obj);
+                    // MICHAELPENG TOASK: How does deserialization work here? It is not sufficient to set IsReplaying: we need to generate an appropriate DTFxContext
+                    // so that the getter agrees with the underlying value
+                    // ANSWER: No context passed to the host; we expose the context to the user here
+                    // Deserialize the OrchestratorContext data string
+                    JsonSerializerSettings serializerSettings = new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.All
+                    };
+                    var context = JsonConvert.DeserializeObject<OrchestrationContext>(OrchestrationContext, serializerSettings);
+
+
+                    // context = (TaskOrchestrationContext)orchestrationContext;
+                    privateData[ContextKey] = context;
+                    IOrchestrationInvoker orchestrationInvoker = new OrchestrationInvoker(privateData);
+                    Func<PowerShell, object> invokerFunction = orchestrationInvoker.CreateInvokerFunction();
+                    WriteObject(invokerFunction);
                     break;
 
                 case DurableClientKey:

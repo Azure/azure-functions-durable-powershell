@@ -5,10 +5,13 @@
 
 namespace DurableEngine
 {
+    using System;
     using System.Collections;
+    using System.Management.Automation;
 
     public interface IOrchestrationInvoker
     {
-        internal Hashtable InvokeExternal(OrchestrationContext context, IPowerShellServices pwsh, object privateData);
+        public Func<PowerShell, object> CreateInvokerFunction();
+        internal Hashtable Invoke(IPowerShellServices pwsh);
     }
 }

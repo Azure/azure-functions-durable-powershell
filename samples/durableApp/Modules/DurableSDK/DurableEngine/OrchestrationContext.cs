@@ -29,7 +29,7 @@ namespace DurableEngine
         [DataMember]
         public bool IsReplaying
         {
-            get => this.innercontext.IsReplaying; 
+            get => DTFxContext.IsReplaying; 
         }
 
         [DataMember]
@@ -37,12 +37,13 @@ namespace DurableEngine
 
         public DateTime CurrentUtcDateTime
         {
-            get => this.innercontext.CurrentUtcDateTime;
+            get => DTFxContext.CurrentUtcDateTime;
         }
 
         internal OrchestrationActionCollector OrchestrationActionCollector { get; } = new OrchestrationActionCollector();
 
         public object CustomStatus { get; set; }
-        internal TaskOrchestrationContext innercontext;
+        
+        internal TaskOrchestrationContext DTFxContext;
     }
 }
