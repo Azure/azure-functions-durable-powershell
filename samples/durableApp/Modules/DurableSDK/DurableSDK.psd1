@@ -1,7 +1,7 @@
 @{
 
     # Script module or binary module file associated with this manifest.
-    # RootModule = '.\bin\Debug\net6.0\DurableSDK.dll' #'myModule2.psm1'
+    # RootModule = ''
     
     # Version number of this module.
     ModuleVersion = '0.1.0'
