@@ -1,20 +1,29 @@
+# This build script is designed to work with the ALC-based PowerShell guidance for dependency isolation.
+# https://docs.microsoft.com/en-us/powershell/scripting/dev-cross-plat/resolving-dependency-conflicts?view=powershell-7.2#loading-through-net-core-assembly-load-contexts
 param(
     [ValidateSet('Debug', 'Release')]
     [string]
     $Configuration = 'Debug'
 )
 
-$netCoreTFM = 'net6.0'
 $shimPath = "$PSScriptRoot/AzShim"
 $durableEnginePath = "$PSScriptRoot/DurableEngine"
-$outputPath = "$PSScriptRoot/out/Dependencies/"
 
-if (Test-Path $outputPath)
+$outputPath = "$PSScriptRoot/out/"
+$sharedDependenciesPath = "$outputPath/Dependencies/"
+
+$netCoreTFM = 'net6.0'
+$publishPathSuffix = "bin/$Configuration/$netCoreTFM/publish"
+
+# Remove previous build, if it exists
+if (Test-Path $sharedDependenciesPath)
 {
-    Remove-Item -Path $outputPath -Recurse
+    Remove-Item -Path $sharedDependenciesPath -Recurse
 }
-New-Item -Path $outputPath -ItemType Directory
+# Create output folder and its inner dependencies directory
+New-Item -Path $sharedDependenciesPath -ItemType Directory
 
+# Build Durable Engine project
 Push-Location $durableEnginePath
 try
 {
@@ -25,6 +34,7 @@ finally
     Pop-Location
 }
 
+# Build Durable SDK project
 Push-Location $shimPath
 try
 {
@@ -37,10 +47,12 @@ finally
 
 $commonFiles = [System.Collections.Generic.HashSet[string]]::new()
 
-Get-ChildItem -Path "$PSScriptRoot/DurableEngine/bin/$Configuration/net6.0/publish" |
+# Copy all assemblies from Durable Engine project into shared dependencies directory
+Get-ChildItem -Path "$durableEnginePath/$publishPathSuffix" |
     Where-Object { $_.Extension -in '.dll','.pdb' } |
-    ForEach-Object { [void]$commonFiles.Add($_.Name); Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
+    ForEach-Object { [void]$commonFiles.Add($_.Name); Copy-Item -LiteralPath $_.FullName -Destination $sharedDependenciesPath }
 
-Get-ChildItem -Path "$PSScriptRoot/AzShim/bin/$Configuration/$netCoreTFM/publish" |
+# Copy all *unique* assemblies from Durable SDK into output directory
+Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
     Where-Object { $_.Extension -in '.dll','.pdb' -and -not $commonFiles.Contains($_.Name) } |
-    ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination "$outputPath/.." }
+    ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
