@@ -23,6 +23,22 @@ namespace DurableEngine
 
     public class OrchestrationInvoker //: IOrchestrationInvoker
     {
+        public const string ContextKey = "OrchestrationContext";
+        private OrchestrationContext context;
+
+        public OrchestrationInvoker(Hashtable privateData)
+        {
+            context = (OrchestrationContext)privateData[ContextKey];
+        }
+
+        public Func<PowerShell, object> CreateInvokerFunction()
+        {
+            // return (pwsh) => Invoke(new PowerShellServices(pwsh, _orchestrationContext));
+            return (pwsh) => InvokeExternal(new PowerShellServices(pwsh));
+        }
+
+
+
 
         /*private sealed class FunctionsWorkerContext : IWorkerContext
         {
@@ -33,19 +49,6 @@ namespace DurableEngine
 
             internal IDataConverter DataConverter { get; }
         }*/
-        public Func<PowerShell, object> Go(string OrchestrationContext, Hashtable privateData)
-        {
-            JsonSerializerSettings serializerSettings = new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.All
-            };
-            var context = JsonConvert.DeserializeObject<OrchestrationContext>(OrchestrationContext,serializerSettings);
-            OrchestrationInvoker orchestrationInvoker = new OrchestrationInvoker();
-
-            Func<PowerShell, object> invokerFunction = (pwsh) => orchestrationInvoker.InvokeExternal(context, new PowerShellServices(pwsh), privateData);
-            privateData["OrchestrationContext"] = context;
-            return invokerFunction;
-        }
 
 private sealed class OrchestratorState
 {
@@ -58,7 +61,7 @@ internal IList<global::DurableTask.Core.History.HistoryEvent>? NewEvents { get; 
 internal int? UpperSchemaVersion { get; set; }
 }
 
-internal Hashtable InvokeExternal(OrchestrationContext context, IPowerShellServices powerShellServices, object privateData)
+internal Hashtable InvokeExternal(IPowerShellServices powerShellServices)
 {
             object dfOutput = null;
             Exception dfEx = null;
@@ -69,7 +72,6 @@ internal Hashtable InvokeExternal(OrchestrationContext context, IPowerShellServi
                 var myFunc = () => dtxContent.CallActivityAsync<object>("Hello", "Seattle");
                 // start user code
                 IAsyncResult asyncResult = null;
-                ((Hashtable)privateData)["dtfx"] = dtxContent;
                 context.innercontext = dtxContent;
                 powerShellServices.AddParameter("Context", context);
                 powerShellServices.TracePipelineObject();
