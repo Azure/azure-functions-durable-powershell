@@ -9,19 +9,19 @@ param(
 $shimPath = "$PSScriptRoot/DurableSDK"
 $durableEnginePath = "$PSScriptRoot/DurableEngine"
 
-$outputPath = "$PSScriptRoot/out/Dependencies/"
-$sharedDependenciesPath = "$outputPath/Dependencies"
+$outputPath = "$PSScriptRoot/out/"
+$sharedDependenciesPath = "$outputPath/Dependencies/"
 
 $netCoreTFM = 'net6.0'
 $publishPathSuffix = "bin/$Configuration/$netCoreTFM/publish"
 
-# Remove output folder, if it exists
-if (Test-Path $outputPath)
+# Remove previous build, if it exists
+if (Test-Path $sharedDependenciesPath)
 {
-    Remove-Item -Path $outputPath -Recurse
+    Remove-Item -Path $sharedDependenciesPath -Recurse
 }
-# Create output folder
-New-Item -Path $outputPath -ItemType Directory
+# Create output folder and its inner dependencies directory
+New-Item -Path $sharedDependenciesPath -ItemType Directory
 
 # Build Durable Engine project
 Push-Location $durableEnginePath
