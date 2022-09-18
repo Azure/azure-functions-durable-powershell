@@ -37,32 +37,19 @@ namespace DurableEngine
             return (pwsh) => InvokeExternal(new PowerShellServices(pwsh));
         }
 
-
-
-
-        /*private sealed class FunctionsWorkerContext : IWorkerContext
+        private sealed class OrchestratorState
         {
-            internal FunctionsWorkerContext(IDataConverter dataConverter)
-            {
-                this.DataConverter = dataConverter;
-            }
+        internal string? InstanceId { get; set; }
 
-            internal IDataConverter DataConverter { get; }
-        }*/
+        internal IList<global::DurableTask.Core.History.HistoryEvent>? PastEvents { get; set; }
 
-private sealed class OrchestratorState
-{
-internal string? InstanceId { get; set; }
+        internal IList<global::DurableTask.Core.History.HistoryEvent>? NewEvents { get; set; }
 
-internal IList<global::DurableTask.Core.History.HistoryEvent>? PastEvents { get; set; }
+        internal int? UpperSchemaVersion { get; set; }
+        }
 
-internal IList<global::DurableTask.Core.History.HistoryEvent>? NewEvents { get; set; }
-
-internal int? UpperSchemaVersion { get; set; }
-}
-
-internal Hashtable InvokeExternal(IPowerShellServices powerShellServices)
-{
+        internal Hashtable InvokeExternal(IPowerShellServices powerShellServices)
+        {
             object dfOutput = null;
             Exception dfEx = null;
             bool failed = false;
@@ -72,7 +59,7 @@ internal Hashtable InvokeExternal(IPowerShellServices powerShellServices)
                 var myFunc = () => dtxContent.CallActivityAsync<object>("Hello", "Seattle");
                 // start user code
                 IAsyncResult asyncResult = null;
-                context.innercontext = dtxContent;
+                context.DTFxContext = dtxContent;
                 powerShellServices.AddParameter("Context", context);
                 powerShellServices.TracePipelineObject();
                 var outputBuffer = new PSDataCollection<object>();

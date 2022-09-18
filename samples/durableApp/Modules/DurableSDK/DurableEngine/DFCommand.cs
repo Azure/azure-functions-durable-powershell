@@ -31,7 +31,7 @@ namespace DurableEngine
             //var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
             var privateData = PrivateData;
             var context2 = getOrchestrationContext();
-            TaskOrchestrationContext context = context2.innercontext;
+            TaskOrchestrationContext context = context2.DTFxContext;
             return context;
         }
 
