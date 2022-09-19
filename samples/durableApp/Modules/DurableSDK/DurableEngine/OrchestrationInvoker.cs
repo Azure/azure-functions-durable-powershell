@@ -109,7 +109,7 @@ namespace DurableEngine
 
                     try
                     {
-                        await task.getDTFxTask();
+                        await task.GetDTFxTask();
                     }
                     catch { }
                     context.OrchestrationActionCollector.cancelationToken.Set();

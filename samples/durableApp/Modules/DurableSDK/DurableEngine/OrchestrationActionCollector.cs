@@ -17,8 +17,8 @@ namespace DurableEngine
 
         internal readonly AutoResetEvent cancelationToken = new AutoResetEvent(initialState: false);
         internal readonly AutoResetEvent hasToAwait = new AutoResetEvent(initialState: false);
-        internal DurableSDKTask currTask = null;
-        internal Dictionary<Task, DurableSDKTask> taskMap = new ();
+        internal DFCommand currTask = null;
+        internal Dictionary<Task, DFCommand> taskMap = new ();
         internal Hashtable data = null;
 
 

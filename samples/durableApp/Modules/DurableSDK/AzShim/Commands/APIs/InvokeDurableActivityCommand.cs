@@ -43,8 +43,8 @@ namespace DurableSDK.Commands.APIs
         internal override DFCommand GetCommand()
         {
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
-            var cmd = new InvokeDurableActivityCommand2(FunctionName, Input, null, NoWait, privateData);
-            return cmd;
+            ActivityInvocationTask task = new ActivityInvocationTask(FunctionName, Input, null, NoWait, privateData);
+            return task;
         }
     }
 }

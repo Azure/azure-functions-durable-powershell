@@ -50,7 +50,7 @@ namespace DurableEngine
             if (this.dtfxTask == null)
             {
                 this.dtfxTask = createDTFxTask();
-                this.sdkContext.OrchestrationActionCollector.taskMap.Add(this.dtfxTask, this);
+                // this.sdkContext.OrchestrationActionCollector.taskMap.Add(this.dtfxTask, this);
 
             }
             return this.dtfxTask;

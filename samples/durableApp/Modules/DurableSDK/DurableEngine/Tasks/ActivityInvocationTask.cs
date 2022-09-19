@@ -12,8 +12,10 @@ namespace DurableEngine
     using System.Threading.Tasks;
     using System;
     using DurableEngine.Tasks;
+    using System.Collections;
+    using System.Management.Automation;
 
-    internal class ActivityInvocationTask : AtomicTask
+    public class ActivityInvocationTask : DFCommand
     {
         internal string FunctionName { get; }
 
@@ -23,15 +25,15 @@ namespace DurableEngine
 
         private TaskOrchestrationContext context;
 
-        internal ActivityInvocationTask(string functionName, object functionInput, RetryOptions retryOptions, TaskOrchestrationContext context, OrchestrationContext sdkContext) : base(sdkContext)
+        public ActivityInvocationTask(string functionName, object functionInput, RetryOptions retryOptions, SwitchParameter noWait,
+            Hashtable privateData) : base(noWait, privateData)
         {
             FunctionName = functionName;
             Input = JsonConvert.SerializeObject(functionInput);
             RetryOptions = retryOptions;
-            this.context = context;
         }
 
-        internal override Task createDTFxTask()
+        internal override Task CreateDTFxTask()
         {
             if (RetryOptions != null)
             {

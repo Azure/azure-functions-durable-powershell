@@ -14,10 +14,9 @@ namespace DurableEngine.Commands
     /// <summary>
     /// Invoke a durable activity.
     /// </summary>
-    public class InvokeDurableActivityCommand2 : DFCommand
+    public class InvokeDurableActivityCommand2
     {
         public InvokeDurableActivityCommand2(string functionName, object input, RetryOptions retryOptions, SwitchParameter NoWait, Hashtable privateData)
-            : base(NoWait, privateData)
         {
             FunctionName = functionName;
             Input = input;
@@ -36,12 +35,12 @@ namespace DurableEngine.Commands
 
         internal RetryOptions RetryOptions { get; set; }
 
-        internal override DurableSDKTask GetTask()
-        {
-            var context = getDTFxContext();
-            var context2= getOrchestrationContext();
-            var task = new ActivityInvocationTask(FunctionName, Input, RetryOptions, context, context2);
-            return task;
-        }
+        //internal DFCommand GetTask()
+        //{
+        //    var context = getDTFxContext();
+        //    var context2= getOrchestrationContext();
+        //    var task = new ActivityInvocationTask(FunctionName, Input, RetryOptions, context, context2);
+        //    return task;
+        //}
     }
 }

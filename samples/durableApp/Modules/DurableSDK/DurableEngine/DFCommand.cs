@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using System.Management.Automation;
+using System.Threading.Tasks;
 
 namespace DurableEngine
 {
@@ -12,7 +13,12 @@ namespace DurableEngine
         {
             NoWait = noWait;
             PrivateData = privateData;
+            OrchestrationContext = (OrchestrationContext)privateData[OrchestrationInvoker.ContextKey];
+            TaskOrchestrationContext = OrchestrationContext.DTFxContext;
         }
+
+        internal OrchestrationContext OrchestrationContext { get; set; }
+        internal TaskOrchestrationContext TaskOrchestrationContext { get; set; }
 
         public SwitchParameter NoWait { get; set; }
 
@@ -35,11 +41,9 @@ namespace DurableEngine
             return context;
         }
 
-        internal abstract DurableSDKTask GetTask();
-
         public void Exec(Action<object> write, Action<ErrorRecord> writeErr)
         {
-            DurableSDKTask task = GetTask();
+            DFCommand task = this;
 
             if (NoWait)
             {
@@ -56,10 +60,10 @@ namespace DurableEngine
                 context.OrchestrationActionCollector.WaitForActivityResult();
 
                 var sdkTask = context.OrchestrationActionCollector.currTask;
-                if (sdkTask.hasResult())
+                if (sdkTask.HasResult())
                 {
                     object result = null;
-                    if (sdkTask.isFaulted())
+                    if (sdkTask.IsFaulted())
                     {
                         var errorMessage = context.OrchestrationActionCollector.currTask.Exception.Message;
                         const string ErrorId = "Functions.Durable.ActivityFailure";
@@ -86,6 +90,42 @@ namespace DurableEngine
             var context = getOrchestrationContext();
             context.OrchestrationActionCollector.cancelationToken.Set();
         }
+
+        internal virtual object Result
+        {
+            get { return ((Task<object>)DTFxTask).Result; }
+        }
+
+        internal virtual Exception Exception
+        {
+            get { return DTFxTask.Exception; }
+        }
+
+        internal abstract Task CreateDTFxTask();
+
+        public Task GetDTFxTask()
+        {
+            if (DTFxTask == null)
+            {
+                DTFxTask = CreateDTFxTask();
+                this.OrchestrationContext.OrchestrationActionCollector.taskMap.Add(DTFxTask, this);
+            }
+            return DTFxTask;
+        }
+
+        internal Task DTFxTask;
+
+        internal virtual bool HasResult()
+        {
+            return DTFxTask != null && DTFxTask.IsCompleted;
+        }
+
+        internal virtual bool IsFaulted()
+        {
+            return DTFxTask != null && DTFxTask.IsFaulted;
+        }
+
+        internal abstract OrchestrationAction CreateOrchestrationAction();
 
     }
 }
