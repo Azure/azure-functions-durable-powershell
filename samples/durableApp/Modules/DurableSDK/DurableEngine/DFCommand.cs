@@ -41,7 +41,7 @@ namespace DurableEngine
             return context;
         }
 
-        public void Exec(Action<object> write, Action<ErrorRecord> writeErr)
+        public void Execute(Action<object> write, Action<ErrorRecord> writeErr)
         {
             DFCommand task = this;
 

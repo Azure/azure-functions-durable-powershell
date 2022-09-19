@@ -18,7 +18,7 @@ namespace DurableSDK.Commands.APIs
     /// Invoke a durable activity.
     /// </summary>
     [Cmdlet("Invoke", "DurableActivityE")]
-    public class InvokeDurableActivityCommand : DFCmdlet
+    public class InvokeDurableActivityCommand : DurableSDKCmdlet
     {
         /// <summary>
         /// Gets and sets the activity function name.
@@ -40,7 +40,7 @@ namespace DurableSDK.Commands.APIs
         [Parameter]
         public SwitchParameter NoWait { get; set; }
 
-        internal override DFCommand GetCommand()
+        internal override DFCommand CreateDurableTask()
         {
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
             ActivityInvocationTask task = new ActivityInvocationTask(FunctionName, Input, null, NoWait, privateData);
