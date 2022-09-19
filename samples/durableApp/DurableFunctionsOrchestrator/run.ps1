@@ -7,9 +7,15 @@ $output = @()
 # $Context.IsReplaying
 # $Context.CurrentUtcDateTime
 # Write-Output("Stage 00")
+Write-Host $Context.IsReplaying
 Write-Host "Beginning first activity function"
 $output += Invoke-DurableActivityE -FunctionName 'Hello' -Input 'Seattle'
 Write-Host "Passed first activity function"
+Write-Host $Context.IsReplaying
+Write-Host "Beginning second activity function"
+$output += Invoke-DurableActivityE -FunctionName 'Hello' -Input 'Seattle'
+Write-Host "Passed second activity function"
+Write-Host $Context.IsReplaying
 
 # Write-Output("got that task")
 #Wait-DurableTaskE -Task $task

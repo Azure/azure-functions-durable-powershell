@@ -32,6 +32,7 @@ namespace DurableSDK.AssemblyLoader
             AssemblyLoadContext.Default.Resolving -= ResolveDurableEngineAssembly;
         }
 
+        // Internal handler that establishes the Assembly Load Context for this module.
         private static Assembly ResolveDurableEngineAssembly(
             AssemblyLoadContext assemblyLoadContext,
             AssemblyName assemblyName)

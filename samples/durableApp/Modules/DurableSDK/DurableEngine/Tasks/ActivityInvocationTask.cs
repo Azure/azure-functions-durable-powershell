@@ -14,16 +14,15 @@ namespace DurableEngine
     using DurableEngine.Tasks;
     using System.Collections;
     using System.Management.Automation;
+    using DurableEngine.Models;
 
-    public class ActivityInvocationTask : DFCommand
+    public class ActivityInvocationTask : DurableTask
     {
         internal string FunctionName { get; }
 
         internal object Input { get; }
 
         private RetryOptions RetryOptions { get; }
-
-        private TaskOrchestrationContext context;
 
         public ActivityInvocationTask(string functionName, object functionInput, RetryOptions retryOptions, SwitchParameter noWait,
             Hashtable privateData) : base(noWait, privateData)
@@ -41,7 +40,7 @@ namespace DurableEngine
             }
             else
             {
-                return this.context.CallActivityAsync<object>(FunctionName, Input);
+                return this.TaskOrchestrationContext.CallActivityAsync<object>(FunctionName, Input);
 
             }
         }

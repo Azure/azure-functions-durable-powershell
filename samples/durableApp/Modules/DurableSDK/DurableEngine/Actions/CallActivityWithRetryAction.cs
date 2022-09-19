@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using DurableEngine.Models;
 
 namespace DurableEngine
 {
@@ -16,17 +17,17 @@ namespace DurableEngine
         /// <summary>
         /// The activity function name.
         /// </summary>
-        internal readonly string FunctionName;
+        public readonly string FunctionName;
 
         /// <summary>
         /// The input to the activity function.
         /// </summary>
-        internal readonly object Input;
+        public readonly object Input;
 
         /// <summary>
         /// Retry options.
         /// </summary>
-        internal readonly Dictionary<string, object> RetryOptions;
+        public readonly Dictionary<string, object> RetryOptions;
 
         internal CallActivityWithRetryAction(string functionName, object input, RetryOptions retryOptions)
             : base(ActionType.CallActivityWithRetry)

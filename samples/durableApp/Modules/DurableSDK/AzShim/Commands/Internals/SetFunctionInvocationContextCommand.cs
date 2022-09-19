@@ -12,17 +12,21 @@ namespace DurableSDK.Commands.Internals
     using System.Collections;
     using System.Management.Automation;
     using DurableEngine;
+    using DurableEngine.Models;
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Set the orchestration context.
+    /// May set or clear, either orchestration context or the durableClient, in the privateData of this module.
     /// </summary>
     [Cmdlet("Set", "FunctionInvocationContext")]
     public class SetFunctionInvocationContextCommand : PSCmdlet
     {
-        internal const string ContextKey = "OrchestrationContext";
+        private const string ContextKey = "OrchestrationContext";
         private const string DurableClientKey = "DurableClient";
 
+        /// <summary>
+        /// The orchestration context.
+        /// </summary>
         [Parameter(Mandatory = true, ParameterSetName = ContextKey)]
         public string OrchestrationContext { get; set; }
 
@@ -32,6 +36,9 @@ namespace DurableSDK.Commands.Internals
         [Parameter(Mandatory = true, ParameterSetName = DurableClientKey)]
         public object DurableClient { get; set; }
 
+        /// <summary>
+        /// Whether or not to clear the privateData of this module.
+        /// </summary>
         [Parameter(Mandatory = true, ParameterSetName = "Clear")]
         public SwitchParameter Clear { get; set; }
 
@@ -42,15 +49,18 @@ namespace DurableSDK.Commands.Internals
             switch (ParameterSetName)
             {
                 case ContextKey:
-
+                    // De-serialize the orchestration context
                     JsonSerializerSettings serializerSettings = new JsonSerializerSettings
                     {
                         TypeNameHandling = TypeNameHandling.All
                     };
 
                     var context = JsonConvert.DeserializeObject<OrchestrationContext>(OrchestrationContext, serializerSettings);
+
+                    // save orchestration context to privateData
                     privateData[ContextKey] = context;
 
+                    // construct and return orchestrator invoker that will utilize the de-serialized context
                     OrchestrationInvoker orchestrationInvoker = new OrchestrationInvoker(privateData);
                     Func<PowerShell, object> invokerFunction = orchestrationInvoker.CreateInvokerFunction();
                     WriteObject(invokerFunction);

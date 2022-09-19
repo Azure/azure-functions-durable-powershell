@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-namespace DurableEngine
+namespace DurableEngine.Models
 {
     using System;
     using System.Collections.Generic;
@@ -30,6 +30,13 @@ namespace DurableEngine
         {
         }
 
+        /// <summary>
+        /// Construct orchestration failure payload.
+        /// </summary>
+        /// <param name="actions">The actions scheduled in this replay.</param>
+        /// <param name="customStatus">The orchestrator customstatus.</param>
+        /// <param name="exception">The uncaught exception.</param>
+        /// <returns></returns>
         private static string FormatOrchestrationFailureMessage(
             List<List<OrchestrationAction>> actions,
             object customStatus,

@@ -1,15 +1,16 @@
-﻿using Microsoft.DurableTask;
+﻿using DurableEngine.Models;
+using Microsoft.DurableTask;
 using System;
 using System.Collections;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
 
-namespace DurableEngine
+namespace DurableEngine.Tasks
 {
-    public abstract class DFCommand
+    public abstract class DurableTask
     {
-        public DFCommand(SwitchParameter noWait, Hashtable privateData)
+        public DurableTask(SwitchParameter noWait, Hashtable privateData)
         {
             NoWait = noWait;
             PrivateData = privateData;
@@ -43,7 +44,7 @@ namespace DurableEngine
 
         public void Execute(Action<object> write, Action<ErrorRecord> writeErr)
         {
-            DFCommand task = this;
+            DurableTask task = this;
 
             if (NoWait)
             {
@@ -53,19 +54,19 @@ namespace DurableEngine
             {
                 var context = getOrchestrationContext();
 
-                context.OrchestrationActionCollector.currTask = task;
-                context.OrchestrationActionCollector.Add(task.CreateOrchestrationAction());
+                context.SharedMemory.currTask = task;
+                context.SharedMemory.Add(task.CreateOrchestrationAction());
 
                 // signal to orchestration thread to await
-                context.OrchestrationActionCollector.WaitForActivityResult();
+                context.SharedMemory.YieldToInvokerThread();
 
-                var sdkTask = context.OrchestrationActionCollector.currTask;
+                var sdkTask = context.SharedMemory.currTask;
                 if (sdkTask.HasResult())
                 {
                     object result = null;
                     if (sdkTask.IsFaulted())
                     {
-                        var errorMessage = context.OrchestrationActionCollector.currTask.Exception.Message;
+                        var errorMessage = context.SharedMemory.currTask.Exception.Message;
                         const string ErrorId = "Functions.Durable.ActivityFailure";
                         var exception = new ActivityFailureException(errorMessage);
                         var errorRecord = new ErrorRecord(exception, ErrorId, ErrorCategory.NotSpecified, null);
@@ -73,13 +74,13 @@ namespace DurableEngine
                     }
                     else
                     {
-                        result = context.OrchestrationActionCollector.currTask.Result;
+                        result = context.SharedMemory.currTask.Result;
                         write(result);
                     }
                 }
                 // Reset the current Durable Engine task to null once the invocation completes
-                context.OrchestrationActionCollector.currTask = null;
-                context.OrchestrationActionCollector.ResumeInvoker(); //TODO: ensure no race condition here. Maybe use semaphore?
+                context.SharedMemory.currTask = null;
+                //context.OrchestrationActionCollector.BlockInvokerThread(); //TODO: ensure no race condition here. Maybe use semaphore?
 
 
             }
@@ -88,7 +89,7 @@ namespace DurableEngine
         public void Stop()
         {
             var context = getOrchestrationContext();
-            context.OrchestrationActionCollector.cancelationToken.Set();
+            context.SharedMemory.userCodeThreadTurn.Set();
         }
 
         internal virtual object Result
@@ -108,7 +109,7 @@ namespace DurableEngine
             if (DTFxTask == null)
             {
                 DTFxTask = CreateDTFxTask();
-                this.OrchestrationContext.OrchestrationActionCollector.taskMap.Add(DTFxTask, this);
+                OrchestrationContext.SharedMemory.taskMap.Add(DTFxTask, this);
             }
             return DTFxTask;
         }

@@ -9,8 +9,8 @@
 namespace DurableSDK.Commands.APIs
 {
     using DurableEngine;
-    using DurableEngine.Commands;
-    using System;
+    using DurableEngine.Models;
+    using DurableEngine.Tasks;
     using System.Collections;
     using System.Management.Automation;
 
@@ -21,26 +21,33 @@ namespace DurableSDK.Commands.APIs
     public class InvokeDurableActivityCommand : DurableSDKCmdlet
     {
         /// <summary>
-        /// Gets and sets the activity function name.
+        /// Name of the Activity to invoke.
         /// </summary>
         [Parameter(Mandatory = true)]
         public string FunctionName { get; set; }
 
         /// <summary>
-        /// Gets and sets the input for an activity function.
+        /// The input for the Activity.
         /// </summary>
         [Parameter]
         [ValidateNotNull]
         public object Input { get; set; }
 
+        /// <summary>
+        /// Retry configuration for the Activity.
+        /// </summary>
         [Parameter]
         [ValidateNotNull]
         public RetryOptions RetryOptions { get; set; }
 
+        /// <summary>
+        /// If provided, the Task will block and be scheduled immediately.
+        /// Otherwise, a Task object is returned and the Task is not scheduled yet.
+        /// </summary>
         [Parameter]
         public SwitchParameter NoWait { get; set; }
 
-        internal override DFCommand CreateDurableTask()
+        internal override DurableTask CreateDurableTask()
         {
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
             ActivityInvocationTask task = new ActivityInvocationTask(FunctionName, Input, null, NoWait, privateData);

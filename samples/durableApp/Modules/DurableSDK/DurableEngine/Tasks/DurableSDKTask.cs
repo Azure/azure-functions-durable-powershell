@@ -9,6 +9,7 @@ namespace DurableEngine
 {
     using System;
     using System.Threading.Tasks;
+    using DurableEngine.Models;
 
     public abstract class DurableSDKTask
     {
