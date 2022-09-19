@@ -40,12 +40,10 @@ namespace DurableEngine
         public void Exec(Action<object> write, Action<ErrorRecord> writeErr)
         {
             DurableSDKTask task = GetTask();
-            object result = null;
 
             if (NoWait)
             {
-                result = task;
-                write(result);
+                write(task);
             }
             else
             {
@@ -53,53 +51,34 @@ namespace DurableEngine
 
                 context.OrchestrationActionCollector.currTask = task;
                 context.OrchestrationActionCollector.Add(task.CreateOrchestrationAction());
-                context.OrchestrationActionCollector.NextBatch();
-                //var dtfxTask = task.getDTFxTask();
-                //context.OrchestrationActionCollector.taskMap.Add(dtfxTask, task);
-
 
                 // signal to orchestration thread to await
-                context.OrchestrationActionCollector.hasToAwait.Set();
+                context.OrchestrationActionCollector.WaitForActivityResult();
 
-                // wait for result
-                //var handlers = new[] { context.OrchestrationActionCollector.cancelationToken }; //, taskHasResult };
-                //WaitHandle.WaitAny(handlers);
-                context.OrchestrationActionCollector.cancelationToken.WaitOne();
-
-                // logic (this wil lbock cuz of .Result) do this in invoker!
                 var sdkTask = context.OrchestrationActionCollector.currTask;
                 if (sdkTask.hasResult())
-                {  // works for failed?
+                {
+                    object result = null;
                     if (sdkTask.isFaulted())
                     {
                         var errorMessage = context.OrchestrationActionCollector.currTask.Exception.Message;
                         const string ErrorId = "Functions.Durable.ActivityFailure";
                         var exception = new ActivityFailureException(errorMessage);
                         var errorRecord = new ErrorRecord(exception, ErrorId, ErrorCategory.NotSpecified, null);
-
-                        // clear IAsync signals
-                        context.OrchestrationActionCollector.currTask = null;
-                        context.OrchestrationActionCollector.hasToAwait.Reset();
-
-                        // send result to user code
-                        context.OrchestrationActionCollector.startOfNewCmdLet.Set();
                         writeErr(errorRecord);
                     }
                     else
                     {
                         result = context.OrchestrationActionCollector.currTask.Result;
-
-                        // clear IAsync signals
-                        context.OrchestrationActionCollector.currTask = null;
-                        context.OrchestrationActionCollector.hasToAwait.Reset();
-
-                        // send result to user code
-                        context.OrchestrationActionCollector.startOfNewCmdLet.Set();
                         write(result);
                     }
                 }
+                // Reset the current Durable Engine task to null once the invocation completes
+                context.OrchestrationActionCollector.currTask = null;
+                context.OrchestrationActionCollector.ResumeInvoker(); //TODO: ensure no race condition here. Maybe use semaphore?
+
+
             }
-            //write(result);
         }
 
         public void Stop()

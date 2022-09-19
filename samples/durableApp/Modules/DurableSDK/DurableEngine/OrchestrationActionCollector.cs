@@ -35,6 +35,7 @@ namespace DurableEngine
             }
 
             _actions.Last().Add(action);
+            NextBatch();
         }
 
         internal void NextBatch()
@@ -42,5 +43,17 @@ namespace DurableEngine
             _nextBatch = true;
         }
 
+        public void WaitForActivityResult()
+        {
+            hasToAwait.Set();
+            cancelationToken.WaitOne();
+        }
+
+        public void ResumeInvoker()
+        {
+            hasToAwait.Reset();
+            startOfNewCmdLet.Set();
+
+        }
     }
 }
