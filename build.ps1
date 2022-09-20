@@ -6,10 +6,15 @@ param(
     $Configuration = 'Debug'
 )
 
-$shimPath = "$PSScriptRoot/DurableSDK"
-$durableEnginePath = "$PSScriptRoot/DurableEngine"
+$shimPath = "$PSScriptRoot/src/DurableSDK"
+$durableEnginePath = "$PSScriptRoot/src/DurableEngine"
+$durableAppPath = "$PSScriptRoot/samples/durableApp/Modules/DurableSDK"
 
-$outputPath = "$PSScriptRoot/out/"
+$outputPath = "$PSScriptRoot/src/out/"
+if ($Configuration -eq "Debug")
+{
+    $outputPath = $durableAppPath
+}
 $sharedDependenciesPath = "$outputPath/Dependencies/"
 
 $netCoreTFM = 'net6.0'

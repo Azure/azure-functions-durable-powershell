@@ -1,0 +1,15 @@
+bin/
+obj/
+.vs/
+
+# VSCode directories that are not at the repository root
+/**/.vscode/
+
+# Ignore binaries and symbols
+*.pdb
+*.dll
+
+local.settings.json
+
+# Temporary output folder for Durable SDK binaries
+**/src/out
