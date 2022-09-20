@@ -55,7 +55,14 @@ namespace DurableEngine
         /// </summary>
         CallHttp = 8,
 
+        /// <summary>
+        /// Wait for first result in a set of Tasks.
+        /// </summary>
         WhenAny = 11,
+
+        /// <summary>
+        /// Wait for a set of Tasks to complete.
+        /// </summary>
         WhenAll = 12
     }
 }

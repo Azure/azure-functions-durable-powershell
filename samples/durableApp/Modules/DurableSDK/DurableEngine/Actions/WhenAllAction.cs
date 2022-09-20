@@ -5,7 +5,9 @@
 
 namespace DurableEngine
 {
-
+    /// <summary>
+    /// Represents a WhenAll Task.
+    /// </summary>
     internal class WhenAllAction : OrchestrationAction
     {
 
