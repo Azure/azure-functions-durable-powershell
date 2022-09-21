@@ -16,7 +16,7 @@ namespace DurableSDK.Commands.Internals
     using Newtonsoft.Json;
 
     /// <summary>
-    /// May set or clear, either orchestration context or the durableClient, in the privateData of this module.
+    /// Sets either the orchestration context or the durableClient in the privateData of this module or clears both.
     /// </summary>
     [Cmdlet("Set", "FunctionInvocationContext")]
     public class SetFunctionInvocationContextCommand : PSCmdlet
