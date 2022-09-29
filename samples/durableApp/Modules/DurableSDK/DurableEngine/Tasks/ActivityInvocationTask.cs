@@ -5,14 +5,18 @@
 
 #pragma warning disable 1591 // "Missing XML comments for publicly visible type"
 
-namespace DurableEngine
+
+namespace DurableEngine.Tasks
 {
+    using Newtonsoft.Json;
     using Microsoft.DurableTask;
+    using System.Threading.Tasks;
+    using System;
     using System.Collections;
     using System.Management.Automation;
-    using System.Threading.Tasks;
+    using DurableEngine.Models;
 
-    public class ActivityInvocationTask : DurableEngineCommand
+    public class ActivityInvocationTask : DurableTask
     {
         internal string FunctionName { get; }
 
@@ -20,22 +24,26 @@ namespace DurableEngine
 
         private RetryOptions RetryOptions { get; }
 
-        public ActivityInvocationTask(
-            string functionName,
-            object input,
-            RetryOptions retryOptions,
-            SwitchParameter noWait,
-            Hashtable privateData)
-            : base(noWait, privateData)
+        public ActivityInvocationTask(string functionName, object functionInput, RetryOptions retryOptions, SwitchParameter noWait,
+            Hashtable privateData) : base(noWait, privateData)
         {
             FunctionName = functionName;
-            Input = input;
+            Input = JsonConvert.SerializeObject(functionInput);
             RetryOptions = retryOptions;
         }
 
-        internal override Task<object> CreateDTFxTask()
+        internal override Task CreateDTFxTask()
         {
-            return TaskOrchestrationContext.CallActivityAsync<object>(FunctionName, Input);
+            if (RetryOptions != null)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                var DTFxContext = OrchestrationContext.DTFxContext;
+                return DTFxContext.CallActivityAsync<object>(FunctionName, Input);
+
+            }
         }
 
         internal override OrchestrationAction CreateOrchestrationAction()
