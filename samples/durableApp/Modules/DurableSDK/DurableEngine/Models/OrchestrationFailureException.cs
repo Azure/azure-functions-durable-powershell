@@ -34,7 +34,7 @@ namespace DurableEngine.Models
         /// Construct orchestration failure payload.
         /// </summary>
         /// <param name="actions">The actions scheduled in this replay.</param>
-        /// <param name="customStatus">The orchestrator customstatus.</param>
+        /// <param name="customStatus">The orchestrator custom status.</param>
         /// <param name="exception">The uncaught exception.</param>
         /// <returns></returns>
         private static string FormatOrchestrationFailureMessage(
