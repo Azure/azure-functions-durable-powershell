@@ -15,12 +15,12 @@ namespace DurableEngine
         /// <summary>
         /// The DateTime at which the timer will fire.
         /// </summary>
-        internal readonly DateTime FireAt;
+        public readonly DateTime FireAt;
 
         /// <summary>
         /// Indicates whether the timer has been canceled.
         /// </summary>
-        internal bool IsCanceled;
+        public bool IsCanceled;
 
         internal CreateDurableTimerAction (DateTime fireAt, bool isCanceled = false)
             : base(ActionType.CreateTimer)

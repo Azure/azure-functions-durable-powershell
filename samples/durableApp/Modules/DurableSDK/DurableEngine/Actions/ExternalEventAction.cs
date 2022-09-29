@@ -13,12 +13,12 @@ namespace DurableEngine
         /// <summary>
         /// The external event name.
         /// </summary>
-        internal readonly string ExternalEventName;
+        public readonly string ExternalEventName;
 
         /// <summary>
         /// Reason for the action. This field is necessary for the Durable extension to recognize the ExternalEventAction.
         /// </summary>
-        internal readonly string Reason = "ExternalEvent";
+        public readonly string Reason = "ExternalEvent";
 
         internal ExternalEventAction(string externalEventName)
             : base(ActionType.WaitForExternalEvent)

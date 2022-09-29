@@ -12,150 +12,162 @@ namespace DurableEngine
     using System.Management.Automation;
 
     using System.Threading.Tasks;
-    using System.Text.Json;
     using Microsoft.Extensions.Logging.Abstractions;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.DurableTask;
+    using DurableEngine.Utilities;
+    using DurableEngine.Models;
+    using OrchestrationContext = Models.OrchestrationContext;
+    using static DurableEngine.Utilities.DTFxUtilities;
     using DurableTask.Core;
     using DurableTask.Core.Command;
 
-    public class OrchestrationInvoker : IOrchestrationInvoker
+    public class OrchestrationInvoker
     {
         public const string ContextKey = "OrchestrationContext";
-        private OrchestrationContext _orchestrationContext;
-        private bool failed = false;
-        private object dfOutput = null;
-        private Exception dfEx = null;
+        private OrchestrationContext context;
+
+        private bool orchestratorFailed = false;
+        private object orchestratorOutput = null;
+        private Exception orchestratorException = null;
+
 
         public OrchestrationInvoker(Hashtable privateData)
         {
-            _orchestrationContext = (OrchestrationContext)privateData[ContextKey];
-        }
-
-        private sealed class OrchestratorState
-        {
-            internal string? InstanceId { get; set; }
-
-            internal IList<global::DurableTask.Core.History.HistoryEvent>? PastEvents { get; set; }
-
-            internal IList<global::DurableTask.Core.History.HistoryEvent>? NewEvents { get; set; }
-
-            internal int? UpperSchemaVersion { get; set; }
+            context = (OrchestrationContext)privateData[ContextKey];
         }
 
         public Func<PowerShell, object> CreateInvokerFunction()
         {
-            // return (pwsh) => Invoke(new PowerShellServices(pwsh, _orchestrationContext));
             return (pwsh) => Invoke(new PowerShellServices(pwsh));
         }
 
-        public Hashtable Invoke(IPowerShellServices powerShellServices)
+        /// <summary>
+        /// Manages the execution of the DF orchestrator.
+        /// </summary>
+        internal Hashtable Invoke(IPowerShellServices powerShellServices)
         {
-            
-            // Is wrapping the user's orchestration function with this orchestration function necessary?
-            Func<TaskOrchestrationContext, object, Task<object>> orchestratorFunction = async (TaskOrchestrationContext taskOrchestrationContext, object _) =>
+            // A C# orchestrator Function that translates PowerShell DF APIs into C# DF APIs.
+            // We need this function because DTFx expects an orchestrator implemented in C#. Therefore, this is that orchestrator.
+            // This function receives DTFx Tasks to `await` on behalf of the PS orchestrator, which runs on a parallel thread.
+            //
+            // This function will block its thread until the user-code thread (the PS orchestrator) returns or requests the result of
+            // DF API.
+            // Similarly, the user code thread / PS orchestrator will block its own thread until this function is done `await`'ing
+            // the requested APIs.
+            Func<TaskOrchestrationContext, int, Task<object>> apiInvokerFunction = async (TaskOrchestrationContext DTFxContext, int _) =>
             {
-                // MICHAELPENG TOASK: How can we ensure that the taskOrchestrationContext fields (IsReplaying) agrees with the OrchestrationContext that is passed in?
-                _orchestrationContext.DTFxContext = taskOrchestrationContext;
-                // MICHAELPENG TOASK: Double check to make sure that _orchestrationContext is not able to be changed by the user at runtime
-                powerShellServices.AddParameter("Context", _orchestrationContext);
-                // MICHAELPENG TOASK: What does this do, exactly?
+                context.DTFxContext = DTFxContext;
+
+                // Parameterize user code thread with DF context object
+                powerShellServices.AddParameter("Context", context);
                 powerShellServices.TracePipelineObject();
+
+                // Start user-code thread, which contains the "actual" PS orchestrator
                 var outputBuffer = new PSDataCollection<object>();
                 var asyncResult = powerShellServices.BeginInvoke(outputBuffer);
+                var orchestratorReturnedHandle = asyncResult.AsyncWaitHandle;
 
+                // waiting for tasks to await
                 while (true)
                 {
-                    var (shouldStop, actions) = _orchestrationContext.OrchestrationActionCollector.WaitForActions(asyncResult.AsyncWaitHandle);
-
-                    // The orchestrator should only await when we reach a new Durable activity; at this point, the thread corresponding to execution
-                    // of the user code should be waiting
-                    if (shouldStop)
+                    // block this thread until user-code thread (the PS orchestrator) invokes a DF CmdLet or completes.
+                    var orchestratorReturned = context.SharedMemory.YieldToUserCodeThread(orchestratorReturnedHandle);
+                    if (orchestratorReturned)
                     {
-                        // Stop the user code
-                        powerShellServices.StopInvoke();
-                        var task = _orchestrationContext.OrchestrationActionCollector.CurrentDurableEngineCommand;
-                        object taskResult = null;
-
-                        // MICHAELPENG TOASK: Ask how do these resources ever get freed if the DTFxTask never reaches a final value
-                        // This does not schedule the activity; returning actions at the end schedules the invocation of activities (worker-powered)
-
-                        // Try to read and return the result if the task has been completed
-                        taskResult = await task.GetDTFxTask();
-                        return taskResult;
-                    }
-                    // The orchestration has completed
-                    else
-                    {
+                        // The PS orchestrator has a return value, there's no more DF APIs to await.
                         try
                         {
-                            // MICHAELPENG TOASK: Why do we need to call EndInvoke if the asyncResult has already completed?
-                            // Cross-reference this with what is present in the PS Worker
+                            // Collect the result from the user-code thread.
                             powerShellServices.EndInvoke(asyncResult);
-                            return CreateReturnValueFromFunctionOutput(outputBuffer);
+                            orchestratorOutput = CreateReturnValueFromFunctionOutput(outputBuffer);
+                            return null;
                         }
                         catch (Exception e)
                         {
-                            // The orchestrator code has thrown an unhandled exception: this should be treated as an entire orchestration failure
-                            // MICHAELPENG TOASK: How can we ensure that this exception is handled properly upon being returned?
-                            throw new OrchestrationFailureException(actions, _orchestrationContext.CustomStatus, e);
+                            // The orchestrator code has thrown an unhandled exception.
+                            // We record it and return.
+                            orchestratorException = e;
+                            orchestratorFailed = true;
+                            return null;
                         }
                     }
+
+                    // The PS orchestrator is requesting a DF Task to be awaited.
+                    var task = context.SharedMemory.currTask;
+
+                    try
+                    {
+                        // Invoke the DTFx API corresponding to this Task.
+                        // If there's already a result in the History, then the loop will continue.
+                        // If there's no result in the History, DTFx will terminate this thread and will return from its
+                        // `Execute` method.
+                        await task.GetDTFxTask();
+                    } // Exceptions are ignored at this point, they will be re-surfaced by the PS code if left unhandled.
+                    catch { }
                 }
             };
-
-            var durableTaskExecutor = CreateOrchestrationExecutor(_orchestrationContext, orchestratorFunction);
-            // var durableTaskExecutor = CreateOrchestrationExecutor(_orchestrationContext, powershellServices.BeginInvoke());
-
-            OrchestratorExecutionResult orchestratorExecutionResult = durableTaskExecutor.Execute();
             
-            return CreateOrchestrationResult(orchestratorExecutionResult);
+            // Construct and then invoke DTFx executor, which will replay for us.
+            TaskOrchestrationExecutor executor = CreateTaskOrchestrationExecutor(apiInvokerFunction);
+            var DTFxResult = executor.Execute();
+
+            // After the DTFx executor completes, we can terminate the user-code thread and construct
+            // the orchestrator output payload
+            powerShellServices.StopInvoke();
+            var result = CreateOrchestrationResult(DTFxResult);
+            return result;
         }
 
-        private Hashtable CreateOrchestrationResult(OrchestratorExecutionResult result)
+        /// <summary>
+        /// Creates a DTFx orchestrator executor, which allows DTFx to manage orchestration replay.
+        /// Most of the code here is unavoidable boilerplate to prepare DTFx for invocation.
+        /// </summary>
+        /// <param name="apiInvokerFunction">A C# Function that calls DF APIs.</param>
+        /// <returns>An orchestrator executor implementing DF replay.</returns>
+        private TaskOrchestrationExecutor CreateTaskOrchestrationExecutor(Func<TaskOrchestrationContext, int, Task<object>> apiInvokerFunction)
         {
-            bool isDone = result.Actions.All((x) => x.OrchestratorActionType == OrchestratorActionType.OrchestrationComplete);
-
-            var actions = _orchestrationContext.OrchestrationActionCollector._actions;
-            if (failed)
-            {
-                throw new OrchestrationFailureException(actions, _orchestrationContext.CustomStatus, dfEx);
-            }
-
-            return CreateOrchestrationResult(isDone: isDone, actions, output: dfOutput, _orchestrationContext.CustomStatus);
-        }
-
-        private TaskOrchestrationExecutor CreateOrchestrationExecutor(
-            OrchestrationContext context,
-            Func<TaskOrchestrationContext, object, Task<object>> orchestratorFunction)
-        {
+            // Construct the OrchestratorState object. The key here is to correctly distinguish new events from past ones.
             OrchestratorState state = new OrchestratorState();
-            state.NewEvents = context.History;  // Simplfying assumption
+            var lastPlayedIndex = Array.FindLastIndex(context.History, (historyEvent) => historyEvent.IsPlayed == true);
+            var newEventsIndex = lastPlayedIndex + 1;
+            state.PastEvents = context.History[..newEventsIndex];
+            state.NewEvents = context.History[newEventsIndex..];
             state.InstanceId = context.InstanceId;
             state.UpperSchemaVersion = 2;
 
-            // Re-construct the orchestration state from the history.
+            // Re-construct the runtime state from the history.
             OrchestrationRuntimeState runtimeState = new(state.PastEvents);
             foreach (global::DurableTask.Core.History.HistoryEvent newEvent in state.NewEvents)
             {
                 runtimeState.AddEvent(newEvent);
             }
 
-            IServiceProvider emptyServiceProvider = new ServiceCollection().BuildServiceProvider();
-            JsonDataConverter dataConverter = JsonDataConverter.Default;
-            var logger = NullLoggerFactory.Instance.CreateLogger("gg"); //Extensions.Logging.Abstractions.NullLoggerFactory.Instance.CreateLogger("PowerShell DF: ");
-            //ILogger logger2 = new NullLogger();
-
+            // Construct worker context.
+            // Since we're only utilizing the DTFx executor to manage replay for us,
+            // we construct it minimally. This means we pass in a NullLogger and an emptyService provider.
+            var dataConverter = JsonDataConverter.Default;
+            var logger = NullLoggerFactory.Instance.CreateLogger("");
+            var emptyServiceProvider = new ServiceCollection().BuildServiceProvider();
             WorkerContext workerContext = new(dataConverter, logger, emptyServiceProvider);
 
-
+            // construct orchestration shim, a DTFx concept.
             TaskName orchestratorName = new TaskName(runtimeState.Name, runtimeState.Version);
-            FuncTaskOrchestrator<object, object> f = new(orchestratorFunction);
-            TaskOrchestrationShim orchestrator = new(workerContext, orchestratorName, f);
-            return new(runtimeState, orchestrator, BehaviorOnContinueAsNew.Carryover);
+            FuncTaskOrchestrator<int, object> functionTaskOrchestrator = new(apiInvokerFunction);
+            TaskOrchestrationShim orchestratorShim = new(workerContext, orchestratorName, functionTaskOrchestrator);
+
+            // construct executor
+            TaskOrchestrationExecutor executor = new(runtimeState, orchestratorShim, BehaviorOnContinueAsNew.Carryover);
+            return executor;
         }
 
-        internal static object CreateReturnValueFromFunctionOutput(IList<object> pipelineItems)
+
+        /// <summary>
+        /// Extract the orchestrator return-value from the PS pipeline.
+        /// </summary>
+        /// <param name="pipelineItems">The pipeline items.</param>
+        /// <returns>The elements of the pipeline if any exist. Otherwise null.</returns>
+        private object CreateReturnValueFromFunctionOutput(IList<object> pipelineItems)
         {
             if (pipelineItems == null || pipelineItems.Count <= 0)
             {
@@ -165,55 +177,30 @@ namespace DurableEngine
             return pipelineItems.Count == 1 ? pipelineItems[0] : pipelineItems.ToArray();
         }
 
-        private static Hashtable CreateOrchestrationResult(
-            bool isDone,
-            List<List<OrchestrationAction>> actions,
-            object output,
-            object customStatus)
+        /// <summary>
+        /// Create the orchestrator result payload that the PS worker will communicate to the DF Extension.
+        /// </summary>
+        /// <param name="result">The DTFx executor result.</param>
+        /// <returns>The return payload, if the orchestrator was successful.</returns>
+        /// <exception cref="OrchestrationFailureException">A formatted exception, if the orchestrator failed.</exception>
+        private Hashtable CreateOrchestrationResult(OrchestratorExecutionResult result)
         {
-            var orchestrationMessage = new OrchestrationMessage(isDone, actions, output, customStatus);
+            // If the orchestrator is complete, then DTFx result will be a single action of type OrchestrationComplete
+            bool isDone = result.Actions.All((x) => x.OrchestratorActionType == OrchestratorActionType.OrchestrationComplete);
+
+            // For legacy reasons, the DF extension expects the actions array to be a doubly-nested list.
+            var actions = context.SharedMemory.actions;
+            var extensionActions = new List<List<OrchestrationAction>>();
+            extensionActions.Add(actions);
+            
+            if (orchestratorFailed)
+            {
+                throw new OrchestrationFailureException(extensionActions, context.CustomStatus, orchestratorException);
+            }
+
+            var orchestrationMessage = new OrchestrationMessage(isDone, extensionActions, orchestratorOutput, context.CustomStatus);
             return new Hashtable { { "$return", orchestrationMessage } };
         }
 
-
-        internal class JsonDataConverter : DataConverter
-        {
-            // WARNING: Changing default serialization options could potentially be breaking for in-flight orchestrations.
-            static readonly JsonSerializerOptions DefaultOptions = new()
-            {
-                IncludeFields = true,
-            };
-
-            /// <summary>
-            /// An instance of the <see cref="JsonDataConverter"/> with default configuration.
-            /// </summary>
-            internal static JsonDataConverter Default { get; } = new JsonDataConverter();
-
-            readonly JsonSerializerOptions? options;
-
-            JsonDataConverter(JsonSerializerOptions? options = null)
-            {
-                if (options != null)
-                {
-                    this.options = options;
-                }
-                else
-                {
-                    this.options = DefaultOptions;
-                }
-            }
-
-            /// <inheritdoc/>
-            public override string? Serialize(object? value)
-            {
-                return value != null ? System.Text.Json.JsonSerializer.Serialize(value, this.options) : null;
-            }
-
-            /// <inheritdoc/>
-            public override object? Deserialize(string? data, Type targetType)
-            {
-                return data != null ? System.Text.Json.JsonSerializer.Deserialize(data, targetType, this.options) : null;
-            }
-        }
     }
 }
