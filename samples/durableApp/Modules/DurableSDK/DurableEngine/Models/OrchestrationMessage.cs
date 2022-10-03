@@ -3,12 +3,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-namespace DurableEngine
+namespace DurableEngine.Models
 {
     using System.Collections.Generic;
 
     /// <summary>
-    /// Represent an orchestration message to be sent to the host.
+    /// Represent an orchestration message to be sent to the Extension.
     /// </summary>
     internal class OrchestrationMessage
     {
@@ -52,6 +52,9 @@ namespace DurableEngine
         /// </summary>
         public readonly object CustomStatus;
 
+        /// <summary>
+        /// The DF Out-Of-Process payload-schema version being used.
+        /// </summary>
         public readonly object SchemaVersion;
     }
 }

@@ -8,7 +8,7 @@ $output = @()
 # $Context.CurrentUtcDateTime
 # Write-Output("Stage 00")
 Write-Host "Beginning first activity function"
-$output += Invoke-DurableActivityExternal -FunctionName 'Hello' -Input 'Seattle'
+$output += Invoke-DurableActivityE -FunctionName 'Hello' -Input 'Seattle'
 Write-Host "Passed first activity function"
 
 # Write-Output("got that task")

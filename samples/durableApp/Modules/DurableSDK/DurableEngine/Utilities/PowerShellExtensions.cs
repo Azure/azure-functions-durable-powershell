@@ -6,7 +6,7 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 
-namespace DurableEngine
+namespace DurableEngine.Utilities
 {
     using System.Management.Automation;
 
