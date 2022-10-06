@@ -1,74 +1,72 @@
-﻿// //
-// // Copyright (c) Microsoft. All rights reserved.
-// // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// //
+﻿//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
-// #pragma warning disable 1591 // "Missing XML comments for publicly visible type"
+#pragma warning disable 1591 // "Missing XML comments for publicly visible type"
 
-// namespace DurableEngine
-// {
-//     using System;
-//     using System.Collections;
-//     using System.Collections.Generic;
-//     using System.Linq;
-//     using System.Management.Automation;
-//     using System.Threading.Tasks;
+namespace DurableEngine.Tasks
+{
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Management.Automation;
+    using System.Threading.Tasks;
+    using DurableEngine.Models;
 
-//     public class WhenAllTask : DurableEngineCommand
-//     {
-//         public DurableEngineCommand[] Task;
+    public class WhenAllTask : DurableTask
+    {
+        internal DurableTask[] Tasks { get; set; }
+        private RetryOptions RetryOptions { get; }
 
-//         private RetryOptions RetryOptions { get; }
+        public WhenAllTask(
+            DurableTask[] tasks,
+            RetryOptions retryOptions,
+            // Should this task also be able to be awaited?
+            SwitchParameter noWait,
+            Hashtable privateData)
+            : base(noWait, privateData)
+        {
+            Tasks = tasks;
+            RetryOptions = retryOptions;
+        }
 
-//         public WhenAllTask(
-//             DurableEngineCommand[] task,
-//             RetryOptions retryOptions,
-//             SwitchParameter noWait,
-//             Hashtable privateData)
-//             : base(noWait, privateData)
-//         {
-//             Task = task;
-//             RetryOptions = retryOptions;
-//         }
+        internal override object Result {
+            get
+            {
+                List<object> allResults = new List<object>();
+                foreach (var task in Tasks)
+                {
+                    allResults.Add(task.Result);
+                }
+                return allResults; // cache
+            }
+        }
 
-//         internal override object Result {
-//             get
-//             {
-//                 List<object> allResults = new List<object>();
-//                 foreach (var subTask in Task)
-//                 {
-//                     allResults.Add(subTask.Result);
-//                 }
-//                 return allResults; // cache
-//             }
-//         }
+        internal override bool HasResult()
+        {
+            foreach (var task in Tasks)
+            {
+                if (!task.HasResult())
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
 
-//         internal override bool HasResult()
-//         {
-//             var allTasksComplete = true;
-//             foreach (var subTask in Task)
-//             {
-//                 if (!subTask.HasResult())
-//                 {
-//                     allTasksComplete = false;
-//                 }
-//             }
-//             return allTasksComplete;
-//         }
+        internal override OrchestrationAction CreateOrchestrationAction()
+        {
+            var compoundActions = Tasks.Select((task) => task.CreateOrchestrationAction()).ToArray();
+            var orchestrationAction = new WhenAllAction(compoundActions);
+            return orchestrationAction;
+        }
 
-//         internal override OrchestrationAction CreateOrchestrationAction()
-//         {
-//             var compoundActions = tasks.Select((task) => {
-
-//                 return task.CreateOrchestrationAction();
-//             }).ToArray();
-//             var action = new WhenAllAction(compoundActions);
-//             return action;
-//         }
-
-//         internal override Task CreateDTFxTask()
-//         {
-//             return TaskOrchestrationContext.CallActivityAsync<object>(FunctionName, Input);
-//         }
-//     }
-// }
+        internal override Task CreateDTFxTask()
+        {
+            var DTFxTasks = Tasks.Select(task => task.GetDTFxTask());
+            var task = Task.WhenAll(DTFxTasks);
+            return task;
+        }
+    }
+}

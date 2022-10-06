@@ -6,26 +6,27 @@ $output = @()
 #throw "err"
 # $Context.IsReplaying
 # $Context.CurrentUtcDateTime
-# Write-Output("Stage 00")
-Write-Host "Beginning first activity function"
-$output += Invoke-DurableActivityE -FunctionName 'Hello' -Input 'Seattle'
-Write-Host "Passed first activity function"
+# Write-Host "Beginning first activity function"
+$res1 = Invoke-DurableActivityE -FunctionName 'Hello' -Input 'Seattle' -NoWait
+# Write-Host "Passed first activity function"
 
 # Write-Output("got that task")
 # Wait-DurableTaskE -Task $task
 # $Context.CurrentUtcDateTime
 # $Context.IsReplaying
-#Write-Output("got that track 2 replay")
+# Write-Output("got that track 2 replay")
 
-#1/0
-#$res2 = Invoke-DurableActivity -FunctionName 'Hello' -Input 'London' -NoWait
-#Write-Output($res2)
-#Write-Output("Stage 2")
-#$res3 = Wait-DurableTask -Task @($res1, $res2)
-#Write-Output("Stage 3")
-#Write-Output($res3)
-#$res4 = Wait-Durabletask -Task @($res3)
-#Write-Output($res4)
+# 1/0
+$res2 = Invoke-DurableActivityE -FunctionName 'Hello' -Input 'London' -NoWait
+$res3 = Invoke-DurableActivityE -FunctionName 'Sleep' -Input 'Dreaming' -NoWait
+# Write-Output($res2)
+# Write-Output("Stage 2")
+$output += Wait-DurableTaskE -Task @($res2, $res3)
+# $output += $res3
+# Write-Output("Stage 3")
+# Write-Output($res3)
+# $res4 = Wait-Durabletask -Task @($res3)
+# Write-Output($res4)
 
 
 #$duration = New-TimeSpan -Seconds 30

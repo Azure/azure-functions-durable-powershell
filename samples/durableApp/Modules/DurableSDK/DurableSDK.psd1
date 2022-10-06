@@ -77,7 +77,7 @@
        'Set-FunctionInvocationContext'
     #    'Start-DurableTimer',
     #    'Stop-DurableTimerTask',
-    #    'Wait-DurableTaskE',
+       'Wait-DurableTaskE'
     #    'Start-DurableExternalEventListener'
     )
     
