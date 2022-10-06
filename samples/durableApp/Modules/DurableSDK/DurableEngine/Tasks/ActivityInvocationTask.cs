@@ -9,7 +9,6 @@
 namespace DurableEngine.Tasks
 {
     using Newtonsoft.Json;
-    using Microsoft.DurableTask;
     using System.Threading.Tasks;
     using System;
     using System.Collections;
@@ -24,7 +23,11 @@ namespace DurableEngine.Tasks
 
         private RetryOptions RetryOptions { get; }
 
-        public ActivityInvocationTask(string functionName, object functionInput, RetryOptions retryOptions, SwitchParameter noWait,
+        public ActivityInvocationTask(
+            string functionName,
+            object functionInput,
+            RetryOptions retryOptions,
+            SwitchParameter noWait,
             Hashtable privateData) : base(noWait, privateData)
         {
             FunctionName = functionName;
@@ -32,18 +35,14 @@ namespace DurableEngine.Tasks
             RetryOptions = retryOptions;
         }
 
-        internal override Task CreateDTFxTask()
+        internal override Task<object> CreateDTFxTask()
         {
             if (RetryOptions != null)
             {
                 throw new NotImplementedException();
             }
-            else
-            {
-                var DTFxContext = OrchestrationContext.DTFxContext;
-                return DTFxContext.CallActivityAsync<object>(FunctionName, Input);
-
-            }
+            var DTFxContext = OrchestrationContext.DTFxContext;
+            return DTFxContext.CallActivityAsync<object>(FunctionName, Input);
         }
 
         internal override OrchestrationAction CreateOrchestrationAction()
