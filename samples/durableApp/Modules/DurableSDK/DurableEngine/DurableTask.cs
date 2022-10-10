@@ -1,5 +1,4 @@
 ﻿using DurableEngine.Models;
-using Microsoft.DurableTask;
 using System;
 using System.Collections;
 using System.Management.Automation;
@@ -39,44 +38,43 @@ namespace DurableEngine.Tasks
         /// <param name="writeErr">Function to write an exception to the pipeline.</param>
         public void Execute(Action<object> write, Action<ErrorRecord> writeErr)
         {
-            DurableTask task = this;
-
             if (NoWait)
             {
                 // Task doesn't need to be awaited, just feed it to pipeline
-                write(task);
+                write(this);
             }
             else
             {
+                var sharedMemory = OrchestrationContext.SharedMemory;
                 // Flag this task as the current "task-to-await"
-                OrchestrationContext.SharedMemory.currTask = task;
-                OrchestrationContext.SharedMemory.Add(task.CreateOrchestrationAction());
+                sharedMemory.currTask = this;
+                sharedMemory.Add(CreateOrchestrationAction());
 
                 // Signal orchestration thread to await the Task.
                 // This is necessary for DTFx to determine if a result exists for the Task.
-                OrchestrationContext.SharedMemory.YieldToInvokerThread();
+                sharedMemory.YieldToInvokerThread();
 
-                var sdkTask = OrchestrationContext.SharedMemory.currTask;
-                if (sdkTask.HasResult())
+                if (DTFxTask.IsCompleted)
                 {
-                    if (sdkTask.IsFaulted())
+                    if (IsFaulted())
                     {
                         // Feed formatted exception to pipeline
-                        var errorMessage = OrchestrationContext.SharedMemory.currTask.Exception.Message;
+                        var errorMessage = Exception.Message;
                         const string ErrorId = "Functions.Durable.ActivityFailure";
                         var exception = new ActivityFailureException(errorMessage);
                         var errorRecord = new ErrorRecord(exception, ErrorId, ErrorCategory.NotSpecified, null);
                         writeErr(errorRecord);
                     }
-                    else
+                    // Some tasks (like DurableTimers may not have results). In these cases, we should continue
+                    // once the task completes
+                    else if (HasResult())
                     {
                         // Feed result to pipeline
-                        var result = OrchestrationContext.SharedMemory.currTask.Result;
-                        write(result);
+                        write(Result);
                     }
                 }
                 // Reset the current task-to-await once the invocation completes
-                OrchestrationContext.SharedMemory.currTask = null;
+                sharedMemory.currTask = null;
             }
         }
 

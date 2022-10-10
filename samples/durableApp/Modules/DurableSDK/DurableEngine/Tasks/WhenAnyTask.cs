@@ -30,27 +30,13 @@ namespace DurableEngine.Tasks
             RetryOptions = retryOptions;
         }
 
-        internal override object Result {
-            get
-            {
-                var firstDTFxTaskToComplete = ((Task<Task>)GetDTFxTask()).Result;
-                OrchestrationContext.SharedMemory.taskMap.TryGetValue(firstDTFxTaskToComplete, out DurableTask firstDurableTaskToComplete);
-                return firstDurableTaskToComplete.Result;
-            }
-        }
-
-        internal override bool HasResult()
+        internal override Task CreateDTFxTask()
         {
-            foreach (var task in Tasks)
-            {
-                if (task.HasResult())
-                {
-                    return true;
-                }
-            }
-            return false;
+            var DTFxTasks = Tasks.Select(task => task.GetDTFxTask());
+            var task = Task.WhenAny(DTFxTasks);
+            return task;
         }
-
+        
         internal override OrchestrationAction CreateOrchestrationAction()
         {
             var compoundActions = Tasks.Select((task) => task.CreateOrchestrationAction()).ToArray();
@@ -58,11 +44,26 @@ namespace DurableEngine.Tasks
             return action;
         }
 
-        internal override Task CreateDTFxTask()
+        internal override object Result {
+            get
+            {
+                var firstDTFxTaskToComplete = ((Task<Task>)GetDTFxTask()).Result;
+                OrchestrationContext.SharedMemory.taskMap.TryGetValue(firstDTFxTaskToComplete, out DurableTask firstDurableTaskToComplete);
+                // Return the first task to complete, rather than its result
+                return firstDurableTaskToComplete;
+            }
+        }
+
+        internal override bool HasResult()
         {
-            var DTFxTasks = Tasks.Select(task => task.GetDTFxTask());
-            var task = Task.WhenAny(DTFxTasks);
-            return task;
+            foreach (var task in Tasks)
+            {
+                if (task.DTFxTask.IsCompleted)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

@@ -31,6 +31,20 @@ namespace DurableEngine.Tasks
             RetryOptions = retryOptions;
         }
 
+        internal override Task CreateDTFxTask()
+        {
+            var DTFxTasks = Tasks.Select(task => task.GetDTFxTask());
+            var task = Task.WhenAll(DTFxTasks);
+            return task;
+        }
+
+        internal override OrchestrationAction CreateOrchestrationAction()
+        {
+            var compoundActions = Tasks.Select((task) => task.CreateOrchestrationAction()).ToArray();
+            var orchestrationAction = new WhenAllAction(compoundActions);
+            return orchestrationAction;
+        }
+
         internal override object Result {
             get
             {
@@ -53,20 +67,6 @@ namespace DurableEngine.Tasks
                 }
             }
             return true;
-        }
-
-        internal override OrchestrationAction CreateOrchestrationAction()
-        {
-            var compoundActions = Tasks.Select((task) => task.CreateOrchestrationAction()).ToArray();
-            var orchestrationAction = new WhenAllAction(compoundActions);
-            return orchestrationAction;
-        }
-
-        internal override Task CreateDTFxTask()
-        {
-            var DTFxTasks = Tasks.Select(task => task.GetDTFxTask());
-            var task = Task.WhenAll(DTFxTasks);
-            return task;
         }
     }
 }
