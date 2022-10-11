@@ -130,7 +130,8 @@ namespace DurableEngine.Tasks
         internal Task DTFxTask;
 
         /// <summary>
-        /// Whether this Task finished executing.
+        /// Whether this Task finished executing and has an output result. This should
+        /// always be called before getting Result.
         /// </summary>
         internal virtual bool HasResult()
         {

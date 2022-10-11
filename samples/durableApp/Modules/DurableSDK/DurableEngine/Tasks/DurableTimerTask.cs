@@ -5,79 +5,51 @@
 
 #pragma warning disable 1591 // "Missing XML comments for publicly visible type"
 
-namespace DurableEngine
+namespace DurableEngine.Tasks
 {
-    using Microsoft.DurableTask;
     using System;
+    using System.Collections;
+    using System.Management.Automation;
     using System.Threading;
     using System.Threading.Tasks;
 
-
     // Returned by the Start-DurableTimer cmdlet if the NoWait flag is present, representing a timeout task
     // All DurableTimerTasks must be complete or canceled for the orchestration to complete
-    /*internal class DurableTimerTask : DurableSDKTask
+    public class DurableTimerTask : DurableTask
     {
-        internal DateTime FireAt { get; }
-
-        private CreateDurableTimerAction Action { get; }
-
-        private TaskOrchestrationContext context;
-        private OrchestrationContext context2;
-        private CancellationTokenSource cancellationToken;
-
+        internal TimeSpan Duration { get; }
+        private DateTime FireAt { get; set; }
+        private readonly CancellationTokenSource _cancelationTokenSource = new CancellationTokenSource();
 
         // Only incomplete, uncanceled DurableTimerTasks should be created
-        internal DurableTimerTask(
-            DateTime fireAt, TaskOrchestrationContext context, OrchestrationContext context2)
+        public DurableTimerTask(
+            TimeSpan duration,
+            SwitchParameter noWait,
+            Hashtable privateData) : base(noWait, privateData)
         {
-            FireAt = fireAt;
-            Action = new CreateDurableTimerAction(FireAt);
-            this.context = context;
-            this.context2 = context2;
-            this.cancellationToken = new CancellationTokenSource();
+            Duration = duration;
+            FireAt = OrchestrationContext.CurrentUtcDateTime.Add(Duration);
         }
 
+        internal override Task CreateDTFxTask()
+        {
+            var dtfxContext = OrchestrationContext.DTFxContext;
+            return dtfxContext.CreateTimer(Duration, _cancelationTokenSource.Token);
+        }
 
         internal override OrchestrationAction CreateOrchestrationAction()
         {
-            return Action;
+            return new CreateDurableTimerAction(FireAt);
         }
 
-        // Indicates that the task has been canceled; without this, the orchestration will not terminate until the timer has expired
-        internal void Cancel()
+        internal override bool HasResult()
         {
-            Action.IsCanceled = true;
-            this.cancellationToken.Cancel();
+            return false;
         }
 
-        private Task _task;
-
-        internal override object Result
+        public void Cancel()
         {
-            get
-            {
-                return null;
-            }
+            _cancelationTokenSource.Cancel();
         }
-
-
-        internal override Task getDTFxTask()
-        {
-            if (this._task != null)
-            {
-                return this._task;
-            }
-            else
-            {
-                this._task = this.context.CreateTimer(this.FireAt, this.cancellationToken.Token);
-                context2.OrchestrationActionCollector.taskMap.Add(_task, this);
-                return _task;
-            }
-        }
-
-        internal override bool hasResult()
-        {
-            return _task != null ? _task.IsCompleted : false;
-        }
-    }*/
+    }
 }
