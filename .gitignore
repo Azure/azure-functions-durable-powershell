@@ -13,3 +13,6 @@ local.settings.json
 
 # Temporary output folder for Durable SDK binaries
 **/src/out
+
+# VS publish settings
+*.pubxml
