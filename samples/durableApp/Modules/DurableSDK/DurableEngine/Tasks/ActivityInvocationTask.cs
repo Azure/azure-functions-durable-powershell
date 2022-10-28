@@ -35,7 +35,7 @@ namespace DurableEngine.Tasks
             RetryOptions = retryOptions;
         }
 
-        internal override Task CreateDTFxTask()
+        internal override Task<object> CreateDTFxTask()
         {
             if (RetryOptions != null)
             {

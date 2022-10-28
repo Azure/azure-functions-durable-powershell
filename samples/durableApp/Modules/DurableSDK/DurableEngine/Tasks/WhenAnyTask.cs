@@ -58,6 +58,8 @@ namespace DurableEngine.Tasks
         {
             foreach (var task in Tasks)
             {
+                // The winning task need not have a result itself for WaitAny to have a result; in cases of DurableTimers, for example,
+                // the task itself is returned
                 if (task.DTFxTask.IsCompleted)
                 {
                     return true;

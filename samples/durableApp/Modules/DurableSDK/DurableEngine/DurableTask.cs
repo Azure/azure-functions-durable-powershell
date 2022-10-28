@@ -60,6 +60,7 @@ namespace DurableEngine.Tasks
                     {
                         // Feed formatted exception to pipeline
                         var errorMessage = Exception.Message;
+                        // TODO: Replace this error ID with something more indicative
                         const string ErrorId = "Functions.Durable.ActivityFailure";
                         var exception = new ActivityFailureException(errorMessage);
                         var errorRecord = new ErrorRecord(exception, ErrorId, ErrorCategory.NotSpecified, null);
@@ -92,7 +93,7 @@ namespace DurableEngine.Tasks
         /// </summary>
         internal virtual object Result
         {
-            get { return ((Task<object>)DTFxTask).Result; }
+            get { return ((Task<object>) DTFxTask).Result; }
         }
 
         /// <summary>
@@ -102,7 +103,6 @@ namespace DurableEngine.Tasks
         {
             get { return DTFxTask.Exception; }
         }
-
 
         /// <summary>
         /// Obtain  a new DTFx Task corresponding to this SDK-level Task.
@@ -130,7 +130,7 @@ namespace DurableEngine.Tasks
         internal Task DTFxTask;
 
         /// <summary>
-        /// Whether this Task finished executing and has an output result. This should
+        /// Whether this Task finished executing AND has an output result. This should
         /// always be called before getting Result.
         /// </summary>
         internal virtual bool HasResult()

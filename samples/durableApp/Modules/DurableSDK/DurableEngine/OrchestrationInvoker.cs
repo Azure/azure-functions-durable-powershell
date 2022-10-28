@@ -24,6 +24,7 @@ namespace DurableEngine
 
     public class OrchestrationInvoker
     {
+        // TODO: Consider adding ContextKey to a .resx or a constants file
         public const string ContextKey = "OrchestrationContext";
         private OrchestrationContext context;
 

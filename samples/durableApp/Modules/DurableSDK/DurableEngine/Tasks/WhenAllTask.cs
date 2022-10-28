@@ -18,6 +18,7 @@ namespace DurableEngine.Tasks
     {
         internal DurableTask[] Tasks { get; set; }
         private RetryOptions RetryOptions { get; }
+        private List<object> allResults = new List<object>();
 
         public WhenAllTask(
             DurableTask[] tasks,
@@ -48,25 +49,24 @@ namespace DurableEngine.Tasks
         internal override object Result {
             get
             {
-                List<object> allResults = new List<object>();
-                foreach (var task in Tasks)
-                {
-                    allResults.Add(task.Result);
-                }
-                return allResults; // cache
+                return allResults;
             }
         }
 
         internal override bool HasResult()
         {
+            if (DTFxTask.IsCompleted)
+            {
+                return false;
+            }
             foreach (var task in Tasks)
             {
-                if (!task.HasResult())
+                if (task.HasResult())
                 {
-                    return false;
+                    allResults.Add(task.Result);
                 }
             }
-            return true;
+            return allResults.Count > 0;
         }
     }
 }

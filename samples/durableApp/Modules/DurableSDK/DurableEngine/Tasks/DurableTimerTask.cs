@@ -19,6 +19,7 @@ namespace DurableEngine.Tasks
     {
         internal TimeSpan Duration { get; }
         private DateTime FireAt { get; set; }
+        private CreateDurableTimerAction Action { get; set; }
         private readonly CancellationTokenSource _cancelationTokenSource = new CancellationTokenSource();
 
         // Only incomplete, uncanceled DurableTimerTasks should be created
@@ -39,7 +40,8 @@ namespace DurableEngine.Tasks
 
         internal override OrchestrationAction CreateOrchestrationAction()
         {
-            return new CreateDurableTimerAction(FireAt);
+            Action = new CreateDurableTimerAction(FireAt);
+            return Action;
         }
 
         internal override bool HasResult()
@@ -49,6 +51,7 @@ namespace DurableEngine.Tasks
 
         public void Cancel()
         {
+            Action.IsCanceled = true;
             _cancelationTokenSource.Cancel();
         }
     }
