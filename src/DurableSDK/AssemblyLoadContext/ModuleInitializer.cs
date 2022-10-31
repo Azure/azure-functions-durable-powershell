@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System;
 using System.IO;
 using System.Management.Automation;
 using System.Reflection;
@@ -15,10 +16,30 @@ namespace DurableSDK.AssemblyLoader
     // for more detail.
     public class ModuleInitializer : IModuleAssemblyInitializer, IModuleAssemblyCleanup
     {
+        /// <summary>
+        /// Location of assemblies to load in our custom Assembly Load Context (A:C).
+        /// </summary>
         private static string sharedDependenciesPath = Path.GetFullPath(
             Path.Combine(
                 Path.GetDirectoryName(typeof(ModuleInitializer).Assembly.Location),
             "Dependencies"));
+
+
+        /// <summary>
+        /// Lazy ALC initializer, used to instantiate a singleton ALC in the dependencies path.
+        /// </summary>
+        private static Lazy<DependencyAssemblyLoadContext> lazyALC = new(() => new DependencyAssemblyLoadContext(sharedDependenciesPath));
+
+        /// <summary>
+        /// Singleton ALC.
+        /// </summary>
+        private static DependencyAssemblyLoadContext singletonALC
+        {
+            get
+            {
+                return lazyALC.Value;
+            }
+        }
 
         public void OnImport()
         {
@@ -46,7 +67,7 @@ namespace DurableSDK.AssemblyLoader
             // We load the Durable Engine assembly through the Dependency ALC, the context in which
             // all of its dependencies will be resolved (preventing potential conflicts with the
             // PowerShell worker's dependencies).
-            return DependencyAssemblyLoadContext.GetForDirectory(sharedDependenciesPath).LoadFromAssemblyName(assemblyName);
+            return singletonALC.LoadFromAssemblyName(assemblyName);
         }
     }
 }

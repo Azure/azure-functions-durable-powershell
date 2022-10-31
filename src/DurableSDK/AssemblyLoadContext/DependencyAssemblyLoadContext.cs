@@ -12,13 +12,6 @@ namespace DurableSDK.AssemblyLoader
 {
     internal class DependencyAssemblyLoadContext : AssemblyLoadContext
     {
-        private static readonly ConcurrentDictionary<string, DependencyAssemblyLoadContext> directoryToDependencyALCsMap = new ConcurrentDictionary<string, DependencyAssemblyLoadContext>();
-
-        internal static DependencyAssemblyLoadContext GetForDirectory(string directoryPath)
-        {
-            return directoryToDependencyALCsMap.GetOrAdd(directoryPath, (path) => new DependencyAssemblyLoadContext(path));
-        }
-
         private readonly string _dependencyDirPath;
 
         public DependencyAssemblyLoadContext(string dependencyDirPath)
