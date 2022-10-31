@@ -17,7 +17,7 @@ namespace DurableSDK.AssemblyLoader
     {
         private static string sharedDependenciesPath = Path.GetFullPath(
             Path.Combine(
-                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                Path.GetDirectoryName(typeof(ModuleInitializer).Assembly.Location),
             "Dependencies"));
 
         public void OnImport()
