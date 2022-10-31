@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -8,6 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DurableTask.Client" Version="0.5.0-beta" />
-    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.1" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.1" PrivateAssets="all" />
   </ItemGroup>
 </Project>
