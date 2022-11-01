@@ -17,7 +17,7 @@ namespace DurableSDK.Commands.APIs
     public class StopDurableTimerCommand : PSCmdlet
     {
         /// <summary>
-        /// Gets and sets the task to be stopped.
+        /// Gets and sets the timer to be stopped.
         /// </summary>
         [Parameter(Mandatory = true)]
         [ValidateNotNullOrEmpty]
