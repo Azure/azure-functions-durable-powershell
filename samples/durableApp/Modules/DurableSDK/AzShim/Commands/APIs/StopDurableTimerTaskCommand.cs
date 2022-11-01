@@ -11,7 +11,7 @@ namespace DurableSDK.Commands.APIs
     using System.Management.Automation;
 
     /// <summary>
-    /// Stop the Durable timeout task
+    /// Stop the Durable Timer
     /// </summary>
     [Cmdlet("Stop", "DurableTimerTaskE")]
     public class StopDurableTimerCommand : PSCmdlet
