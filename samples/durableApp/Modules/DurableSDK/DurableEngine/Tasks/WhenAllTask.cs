@@ -55,7 +55,7 @@ namespace DurableEngine.Tasks
 
         internal override bool HasResult()
         {
-            if (DTFxTask.IsCompleted)
+            if (!DTFxTask.IsCompleted)
             {
                 return false;
             }
