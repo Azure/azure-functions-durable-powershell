@@ -93,7 +93,7 @@ namespace DurableEngine.Tasks
         /// </summary>
         internal virtual object Result
         {
-            get { return ((Task<object>) DTFxTask).Result; }
+            get { return ((Task<object>)DTFxTask).Result; }
         }
 
         /// <summary>
