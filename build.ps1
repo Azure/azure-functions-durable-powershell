@@ -13,6 +13,7 @@ $durableAppPath = "$PSScriptRoot/samples/durableApp/Modules/DurableSDK"
 $outputPath = "$PSScriptRoot/src/out/"
 if ($Configuration -eq "Debug")
 {
+    # Publish directly to the sample function app for testing
     $outputPath = $durableAppPath
 }
 $sharedDependenciesPath = "$outputPath/Dependencies/"
@@ -20,44 +21,49 @@ $sharedDependenciesPath = "$outputPath/Dependencies/"
 $netCoreTFM = 'net6.0'
 $publishPathSuffix = "bin/$Configuration/$netCoreTFM/publish"
 
-# Remove previous build, if it exists
-if (Test-Path $sharedDependenciesPath)
+Import-Module "$PSScriptRoot/tools/helper.psm1" -Force
+
+Write-Log "Build started. Configuration '$Configuration' and output folder '$outputPath' with shared dependencies folder '$sharedDependenciesPath'..."
+
+# Map from project names to the folder containing the corresponding .csproj
+$projects = @{
+    'Durable SDK' = $shimPath
+    'Durable Engine' = $durableEnginePath
+}
+
+# Remove previous build if it exists
+Write-Log "Removing previous build from $outputPath if it exists..."
+if (Test-Path $outputPath)
 {
-    Remove-Item -Path $sharedDependenciesPath -Recurse
+    Remove-Item -Path $outputPath -Recurse
 }
 # Create output folder and its inner dependencies directory
+Write-Log "Creating a new output and shared dependencies folder at $outputPath and $sharedDependenciesPath..."
 New-Item -Path $sharedDependenciesPath -ItemType Directory
 
-# Build Durable Engine project
-Push-Location $durableEnginePath
-try
-{
-    dotnet publish
-}
-finally
-{
-    Pop-Location
-}
-
-# Build Durable SDK project
-Push-Location $shimPath
-try
-{
-    dotnet publish -f $netCoreTFM
-}
-finally
-{
-    Pop-Location
+# Build the Durable SDK and Durable Engine project
+foreach ($project in $projects.GetEnumerator()) {
+    Write-Log "Building $($project.Name) project with target framework $netCoreTFM...."
+    Push-Location $project.Value
+    try
+    {
+        dotnet publish -f $netCoreTFM
+    }
+    finally
+    {
+        Pop-Location
+    }
 }
 
 $commonFiles = [System.Collections.Generic.HashSet[string]]::new()
 
-# Copy all assemblies from Durable Engine project into shared dependencies directory
+Write-Log "Copying assemblies from the Durable Engine project into $sharedDependenciesPath"
 Get-ChildItem -Path "$durableEnginePath/$publishPathSuffix" |
     Where-Object { $_.Extension -in '.dll','.pdb' } |
     ForEach-Object { [void]$commonFiles.Add($_.Name); Copy-Item -LiteralPath $_.FullName -Destination $sharedDependenciesPath }
 
 # Copy all *unique* assemblies from Durable SDK into output directory
+Write-Log "Copying UNIQUE assemblies from the Durable SDK project into $outputPath"
 Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
     Where-Object { $_.Extension -in '.dll','.pdb' -and -not $commonFiles.Contains($_.Name) } |
     ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
