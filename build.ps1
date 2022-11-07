@@ -21,7 +21,27 @@ $sharedDependenciesPath = "$outputPath/Dependencies/"
 $netCoreTFM = 'net6.0'
 $publishPathSuffix = "bin/$Configuration/$netCoreTFM/publish"
 
-Import-Module "$PSScriptRoot/tools/helper.psm1" -Force
+function Write-Log
+{
+    param (
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Message,
+
+        [Switch]
+        $Throw
+    )
+
+    $Message = (Get-Date -Format G)  + " -- $Message"
+
+    if ($Throw)
+    {
+        throw $Message
+    }
+
+    Write-Host $Message
+}
 
 Write-Log "Build started. Configuration '$Configuration' and output folder '$outputPath' with shared dependencies folder '$sharedDependenciesPath'..."
 
