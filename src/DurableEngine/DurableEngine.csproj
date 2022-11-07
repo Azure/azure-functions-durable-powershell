@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>DurableEngine</AssemblyName>
+    <LangVersion>Latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DurableTask.Client" Version="0.5.0-beta" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.1" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

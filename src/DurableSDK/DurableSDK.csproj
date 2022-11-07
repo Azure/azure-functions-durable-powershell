@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>DurableSDK</AssemblyName>
+    <LangVersion>Latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DurableEngine\DurableEngine.csproj" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.1" PrivateAssets="all"/>
+  </ItemGroup>
+</Project>
