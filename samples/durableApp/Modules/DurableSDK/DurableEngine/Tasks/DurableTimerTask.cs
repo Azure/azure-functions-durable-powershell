@@ -46,6 +46,8 @@ namespace DurableEngine.Tasks
 
         internal override bool HasResult()
         {
+            // To replicate the behavior of Start-Sleep, Start-DurableTimer should never
+            // have a result to the output pipe.
             return false;
         }
 

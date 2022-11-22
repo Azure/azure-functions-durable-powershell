@@ -7,6 +7,7 @@
 
 namespace DurableEngine.Tasks
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
@@ -28,6 +29,11 @@ namespace DurableEngine.Tasks
             Hashtable privateData)
             : base(noWait, privateData)
         {
+            if (!(tasks.Length > 0))
+            {
+                // TODO: refine the exception here
+                throw new ArgumentException("The input array is empty.");
+            }
             Tasks = tasks;
             RetryOptions = retryOptions;
         }
@@ -46,27 +52,44 @@ namespace DurableEngine.Tasks
             return orchestrationAction;
         }
 
-        internal override object Result {
-            get
+        internal override object Result
+        {
+            get 
             {
+                if (!HasResult())
+                {
+                    // TODO: Refine the exception thrown here.
+                    throw new Exception("This task is not complete.");
+                }
                 return allResults;
             }
         }
 
         internal override bool HasResult()
         {
-            if (!DTFxTask.IsCompleted)
+            if (!IsCompleted())
             {
                 return false;
             }
-            foreach (var task in Tasks)
+            if (allResults.Count == 0)
             {
-                if (task.HasResult())
+                // Run this O(n) procedure to populate allResults at most once for every WhenAllTask
+                foreach (var task in Tasks)
                 {
-                    allResults.Add(task.Result);
+                    if (task.HasResult())
+                    {
+                        allResults.Add(task.Result);
+                    }
+                    else
+                    {
+                        // We ensure that the output array of a WhenAllTask has the same size as
+                        // the input Task array
+                        allResults.Add(null);
+                    }
                 }
             }
-            return allResults.Count > 0;
+            // There is always a result given that the input Task array is never empty
+            return true;           
         }
     }
 }

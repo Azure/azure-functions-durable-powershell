@@ -7,6 +7,7 @@
 
 namespace DurableEngine.Tasks
 {
+    using System;
     using System.Collections;
     using System.Linq;
     using System.Management.Automation;
@@ -26,6 +27,11 @@ namespace DurableEngine.Tasks
             Hashtable privateData)
             : base(noWait, privateData)
         {
+            if (!(tasks.Length > 0))
+            {
+                // TODO: refine the exception here
+                throw new ArgumentException("The input array is empty.");
+            }
             Tasks = tasks;
             RetryOptions = retryOptions;
         }
@@ -44,7 +50,8 @@ namespace DurableEngine.Tasks
             return action;
         }
 
-        internal override object Result {
+        internal override object Result
+        {
             get
             {
                 var firstDTFxTaskToComplete = ((Task<Task>)GetDTFxTask()).Result;
@@ -58,9 +65,9 @@ namespace DurableEngine.Tasks
         {
             foreach (var task in Tasks)
             {
-                // The winning task need not have a result itself for WaitAny to have a result; in cases of DurableTimers, for example,
-                // the task itself is returned
-                if (task.DTFxTask.IsCompleted)
+                // WaitAny always has a result to write to the output pipe, namely the winning task. It does not matter
+                // if the winning task itself has a result to write to the output pipe or not
+                if (task.IsCompleted())
                 {
                     return true;
                 }

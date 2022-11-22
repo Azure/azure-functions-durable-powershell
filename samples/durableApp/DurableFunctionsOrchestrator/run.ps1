@@ -22,7 +22,13 @@ $timer1 = Start-DurableTimerE -Duration (New-Timespan -Seconds 10) -NoWait
 Write-Host "Started durable timer 1 at $($Context.CurrentUtcDateTime)"
 $timer2 = Start-DurableTimerE -Duration (New-Timespan -Seconds 5) -NoWait
 Write-Host "Started durable timer 2 $($Context.CurrentUtcDateTime)"
-$output += Wait-DurableTaskE -Task @($activity1, $activity2, $timer1, $timer2)
+$allTasks = @($activity1, $activity2, $timer1, $timer2)
+$allTaskResults = Wait-DurableTaskE -Task $allTasks
+if ($allTaskResults.Count -ne $allTasks.Count)
+{
+    throw "The WaitAll output array length is $($allTaskResults.Count) rather than $($allTasks.Count), as expected."
+}
+$output += $allTaskResults
 Write-Host "Finished awaiting timers at $($Context.CurrentUtcDateTime)"
 
 # TEST CASE 3: WaitAny for two timers
