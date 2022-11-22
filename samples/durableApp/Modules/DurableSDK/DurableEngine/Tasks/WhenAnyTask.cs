@@ -54,38 +54,16 @@ namespace DurableEngine.Tasks
         {
             get
             {
+                if (!HasResult())
+                {
+                    // TODO: Refine the exception thrown here.
+                    throw new Exception("This task is not complete.");
+                }
                 var firstDTFxTaskToComplete = ((Task<Task>)GetDTFxTask()).Result;
                 OrchestrationContext.SharedMemory.taskMap.TryGetValue(firstDTFxTaskToComplete, out DurableTask firstDurableTaskToComplete);
                 // Return the first task to complete, rather than its result
                 return firstDurableTaskToComplete;
             }
         }
-
-        internal override bool HasResult()
-        {
-            foreach (var task in Tasks)
-            {
-                // WaitAny always has a result to write to the output pipe, namely the winning task. It does not matter
-                // if the winning task itself has a result to write to the output pipe or not
-                if (task.IsCompleted())
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
-
-//         internal override object Result
-//         {
-//             get
-//             {
-//                 var task = (Task<Task>) this.dtfxTask;
-//                 Task winner = task.Result;
-//                 sdkContext.OrchestrationActionCollector.taskMap.TryGetValue(winner, out var result);
-//                 return result;
-//             }
-//         }
-//     }
-// }

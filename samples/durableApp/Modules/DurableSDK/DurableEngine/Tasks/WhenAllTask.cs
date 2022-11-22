@@ -61,35 +61,25 @@ namespace DurableEngine.Tasks
                     // TODO: Refine the exception thrown here.
                     throw new Exception("This task is not complete.");
                 }
-                return allResults;
-            }
-        }
-
-        internal override bool HasResult()
-        {
-            if (!IsCompleted())
-            {
-                return false;
-            }
-            if (allResults.Count == 0)
-            {
-                // Run this O(n) procedure to populate allResults at most once for every WhenAllTask
-                foreach (var task in Tasks)
+                if (allResults.Count == 0)
                 {
-                    if (task.HasResult())
+                    // Run this O(n) procedure to populate allResults at most once for every WhenAllTask
+                    foreach (var task in Tasks)
                     {
-                        allResults.Add(task.Result);
-                    }
-                    else
-                    {
-                        // We ensure that the output array of a WhenAllTask has the same size as
-                        // the input Task array
-                        allResults.Add(null);
+                        if (task.HasResult())
+                        {
+                            allResults.Add(task.Result);
+                        }
+                        else
+                        {
+                            // We ensure that the output array of a WhenAllTask has the same size as
+                            // the input Task array
+                            allResults.Add(null);
+                        }
                     }
                 }
+                return allResults;
             }
-            // There is always a result given that the input Task array is never empty
-            return true;           
         }
     }
 }
