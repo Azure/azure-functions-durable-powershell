@@ -8,12 +8,12 @@ param(
 
 $shimPath = "$PSScriptRoot/src/DurableSDK"
 $durableEnginePath = "$PSScriptRoot/src/DurableEngine"
-$durableAppPath = "$PSScriptRoot/samples/durableApp/Modules/DurableSDK"
+$durableAppPath = "$PSScriptRoot/test/E2E/DurableApp/Modules/DurableSDK"
 
 $outputPath = "$PSScriptRoot/src/out/"
 if ($Configuration -eq "Debug")
 {
-    # Publish directly to the sample function app for testing
+    # Publish directly to the test durable app for testing
     $outputPath = $durableAppPath
 }
 $sharedDependenciesPath = "$outputPath/Dependencies/"
