@@ -5,8 +5,12 @@
 param
 (
     [Switch]
-    $UseCoreToolsBuildFromIntegrationTests
+    $UseCoreToolsBuildFromIntegrationTests,
+    [Switch]
+    $SkipCoreToolsDownload
 )
+
+$ErrorActionPreference = 'Stop'
 
 function NewTaskHubName
 {
@@ -57,15 +61,15 @@ function NewTaskHubName
 $taskHubName = NewTaskHubName -Length 45
 
 $FUNC_RUNTIME_VERSION = '4'
-$TARGET_FRAMEWORK = 'net6.0'
 $POWERSHELL_VERSION = '7.2'
+$FUNC_CMDLET_NAME = "func"
 
 $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLowerInvariant()
 if ($IsWindows) {
-    $FUNC_EXE_NAME = "func.exe"
+    $FUNC_EXE_NAME = "$FUNC_CMDLET_NAME.exe"
     $os = "win"
 } else {
-    $FUNC_EXE_NAME = "func"
+    $FUNC_EXE_NAME = $FUNC_CMDLET_NAME
     if ($IsMacOS) {
         $os = "osx"
     } else {
@@ -73,41 +77,57 @@ if ($IsWindows) {
     }
 }
 
-$coreToolsDownloadURL = $null
-if ($UseCoreToolsBuildFromIntegrationTests.IsPresent)
+if (-not $SkipCoreToolsDownload.IsPresent)
 {
-    $coreToolsDownloadURL = "https://functionsintegclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest/Azure.Functions.Cli.$os-$arch.zip"
-    $env:CORE_TOOLS_URL = "https://functionsintegclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest"
+    Write-Host "Downloading Core Tools because SkipCoreToolsDownload switch parameter is present..."
+    $coreToolsDownloadURL = $null
+    if ($UseCoreToolsBuildFromIntegrationTests.IsPresent)
+    {
+        $coreToolsDownloadURL = "https://functionsintegclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest/Azure.Functions.Cli.$os-$arch.zip"
+        $env:CORE_TOOLS_URL = "https://functionsintegclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest"
+    }
+    else
+    {
+        $coreToolsDownloadURL = "https://functionsclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest/Azure.Functions.Cli.$os-$arch.zip"
+        if (-not $env:CORE_TOOLS_URL)
+        {
+            $env:CORE_TOOLS_URL = "https://functionsclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest"
+        }
+    }
+
+    $FUNC_CLI_DIRECTORY = Join-Path $PSScriptRoot 'Azure.Functions.Cli'
+
+    Write-Host 'Deleting Functions Core Tools if exists...'
+    Remove-Item -Force "$FUNC_CLI_DIRECTORY.zip" -ErrorAction Ignore
+    Remove-Item -Recurse -Force $FUNC_CLI_DIRECTORY -ErrorAction Ignore
+
+    $version = Invoke-RestMethod -Uri "$env:CORE_TOOLS_URL/version.txt"
+    Write-Host "Downloading Functions Core Tools (Version: $version)..."
+
+    $output = "$FUNC_CLI_DIRECTORY.zip"
+    Invoke-RestMethod -Uri $coreToolsDownloadURL -OutFile $output
+
+    Write-Host 'Extracting Functions Core Tools...'
+    Expand-Archive $output -DestinationPath $FUNC_CLI_DIRECTORY
+
+    # Prepend installed Core Tools to the PATH
+    $Env:Path = "$FUNC_CLI_DIRECTORY$([System.IO.Path]::PathSeparator)$Env:Path"
+    $funcPath = Join-Path $FUNC_CLI_DIRECTORY $FUNC_EXE_NAME
 }
 else
 {
-    $coreToolsDownloadURL = "https://functionsclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest/Azure.Functions.Cli.$os-$arch.zip"
-    if (-not $env:CORE_TOOLS_URL)
-    {
-        $env:CORE_TOOLS_URL = "https://functionsclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest"
-    }
+    $funcPath = (Get-Command $FUNC_CMDLET_NAME).Source
+    $version = & $funcPath --version
+    Write-Host "Using local Functions Core Tools (Version: $version)..."
 }
-
-$FUNC_CLI_DIRECTORY = Join-Path $PSScriptRoot 'Azure.Functions.Cli'
-
-Write-Host 'Deleting Functions Core Tools if exists...'
-Remove-Item -Force "$FUNC_CLI_DIRECTORY.zip" -ErrorAction Ignore
-Remove-Item -Recurse -Force $FUNC_CLI_DIRECTORY -ErrorAction Ignore
-
-$version = Invoke-RestMethod -Uri "$env:CORE_TOOLS_URL/version.txt"
-Write-Host "Downloading Functions Core Tools (Version: $version)..."
-
-$output = "$FUNC_CLI_DIRECTORY.zip"
-Invoke-RestMethod -Uri $coreToolsDownloadURL -OutFile $output
-
-Write-Host 'Extracting Functions Core Tools...'
-Expand-Archive $output -DestinationPath $FUNC_CLI_DIRECTORY
-
 
 # For both integration build test runs and regular test runs, we copy binaries to DurableApp/Modules
 Write-Host "Building the DurableSDK module and copying binaries to the DurableApp/Modules directory..."
 $configuration = if ($env:CONFIGURATION) { $env:CONFIGURATION } else { 'Debug' }
-& "$PSScriptRoot/../../build.ps1 -Configuration $configuration"
+
+Push-Location "../.."
+./build.ps1 -Configuration 'Debug'
+Pop-Location
 
 Write-Host "Starting Core Tools..."
 Push-Location "$PSScriptRoot\DurableApp"
@@ -115,17 +135,15 @@ Push-Location "$PSScriptRoot\DurableApp"
 $Env:TestTaskHubName = $taskHubName
 $Env:FUNCTIONS_WORKER_RUNTIME = "powershell"
 $Env:FUNCTIONS_WORKER_RUNTIME_VERSION = $POWERSHELL_VERSION
-$Env:AZURE_FUNCTIONS_ENVIRONMENT = "development"
-$Env:Path = "$Env:Path$([System.IO.Path]::PathSeparator)$FUNC_CLI_DIRECTORY"
-$funcExePath = Join-Path $FUNC_CLI_DIRECTORY $FUNC_EXE_NAME
+$Env:AZURE_FUNCTIONS_ENVIRONMENT = "Development"
 
 Write-Host "Installing extensions..."
 
-if ($IsMacOS -or $IsLinux) {
-    chmod +x $funcExePath
+if (($IsMacOS -or $IsLinux) -and (-not $SkipCoreToolsDownload)) {
+    chmod +x $funcPath
 }
 
-& $funcExePath extensions install | ForEach-Object {    
+& $funcPath extensions install | ForEach-Object {    
   if ($_ -match 'OK')    
   { Write-Host $_ -f Green }    
   elseif ($_ -match 'FAIL|ERROR')   
