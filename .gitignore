@@ -9,6 +9,9 @@ obj/
 *.pdb
 *.dll
 
+# TestResults folder
+TestResults/
+
 local.settings.json
 
 # Temporary output folder for Durable SDK binaries

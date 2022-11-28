@@ -77,6 +77,12 @@ if ($IsWindows) {
     }
 }
 
+$FUNC_CLI_DIRECTORY = Join-Path $PSScriptRoot 'Azure.Functions.Cli'
+
+Write-Host 'Deleting Functions Core Tools if exists...'
+Remove-Item -Force "$FUNC_CLI_DIRECTORY.zip" -ErrorAction Ignore
+Remove-Item -Recurse -Force $FUNC_CLI_DIRECTORY -ErrorAction Ignore
+
 if (-not $SkipCoreToolsDownload.IsPresent)
 {
     Write-Host "Downloading Core Tools because SkipCoreToolsDownload switch parameter is present..."
@@ -94,12 +100,6 @@ if (-not $SkipCoreToolsDownload.IsPresent)
             $env:CORE_TOOLS_URL = "https://functionsclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest"
         }
     }
-
-    $FUNC_CLI_DIRECTORY = Join-Path $PSScriptRoot 'Azure.Functions.Cli'
-
-    Write-Host 'Deleting Functions Core Tools if exists...'
-    Remove-Item -Force "$FUNC_CLI_DIRECTORY.zip" -ErrorAction Ignore
-    Remove-Item -Recurse -Force $FUNC_CLI_DIRECTORY -ErrorAction Ignore
 
     $version = Invoke-RestMethod -Uri "$env:CORE_TOOLS_URL/version.txt"
     Write-Host "Downloading Functions Core Tools (Version: $version)..."
@@ -120,6 +120,11 @@ else
     $version = & $funcPath --version
     Write-Host "Using local Functions Core Tools (Version: $version)..."
 }
+
+# Set an environment variable containing the path to the func executable. This will be accessed from
+# in FixtureHelper.cs for E2E testing
+$env:FUNC_PATH = $funcPath
+Write-Host "Set FUNC_PATH environment variable to $env:FUNC_PATH"
 
 # For both integration build test runs and regular test runs, we copy binaries to DurableApp/Modules
 Write-Host "Building the DurableSDK module and copying binaries to the DurableApp/Modules directory..."
