@@ -7,6 +7,7 @@
 
 namespace DurableEngine.Tasks
 {
+    using System;
     using System.Collections;
     using System.Linq;
     using System.Management.Automation;
@@ -26,6 +27,11 @@ namespace DurableEngine.Tasks
             Hashtable privateData)
             : base(noWait, privateData)
         {
+            if (!(tasks.Length > 0))
+            {
+                // TODO: refine the exception here
+                throw new ArgumentException("The input array is empty.");
+            }
             Tasks = tasks;
             RetryOptions = retryOptions;
         }
@@ -44,39 +50,20 @@ namespace DurableEngine.Tasks
             return action;
         }
 
-        internal override object Result {
+        internal override object Result
+        {
             get
             {
+                if (!HasResult())
+                {
+                    // TODO: Refine the exception thrown here.
+                    throw new Exception("This task is not complete.");
+                }
                 var firstDTFxTaskToComplete = ((Task<Task>)GetDTFxTask()).Result;
                 OrchestrationContext.SharedMemory.taskMap.TryGetValue(firstDTFxTaskToComplete, out DurableTask firstDurableTaskToComplete);
                 // Return the first task to complete, rather than its result
                 return firstDurableTaskToComplete;
             }
         }
-
-        internal override bool HasResult()
-        {
-            foreach (var task in Tasks)
-            {
-                if (task.DTFxTask.IsCompleted)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
-
-//         internal override object Result
-//         {
-//             get
-//             {
-//                 var task = (Task<Task>) this.dtfxTask;
-//                 Task winner = task.Result;
-//                 sdkContext.OrchestrationActionCollector.taskMap.TryGetValue(winner, out var result);
-//                 return result;
-//             }
-//         }
-//     }
-// }

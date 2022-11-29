@@ -7,6 +7,7 @@
 
 namespace DurableEngine.Tasks
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
@@ -18,6 +19,7 @@ namespace DurableEngine.Tasks
     {
         internal DurableTask[] Tasks { get; set; }
         private RetryOptions RetryOptions { get; }
+        private List<object> allResults = new List<object>();
 
         public WhenAllTask(
             DurableTask[] tasks,
@@ -27,6 +29,11 @@ namespace DurableEngine.Tasks
             Hashtable privateData)
             : base(noWait, privateData)
         {
+            if (!(tasks.Length > 0))
+            {
+                // TODO: refine the exception here
+                throw new ArgumentException("The input array is empty.");
+            }
             Tasks = tasks;
             RetryOptions = retryOptions;
         }
@@ -45,28 +52,34 @@ namespace DurableEngine.Tasks
             return orchestrationAction;
         }
 
-        internal override object Result {
-            get
-            {
-                List<object> allResults = new List<object>();
-                foreach (var task in Tasks)
-                {
-                    allResults.Add(task.Result);
-                }
-                return allResults; // cache
-            }
-        }
-
-        internal override bool HasResult()
+        internal override object Result
         {
-            foreach (var task in Tasks)
+            get 
             {
-                if (!task.HasResult())
+                if (!HasResult())
                 {
-                    return false;
+                    // TODO: Refine the exception thrown here.
+                    throw new Exception("This task is not complete.");
                 }
+                if (allResults.Count == 0)
+                {
+                    // Run this O(n) procedure to populate allResults at most once for every WhenAllTask
+                    foreach (var task in Tasks)
+                    {
+                        if (task.HasResult())
+                        {
+                            allResults.Add(task.Result);
+                        }
+                        else
+                        {
+                            // We ensure that the output array of a WhenAllTask has the same size as
+                            // the input Task array
+                            allResults.Add(null);
+                        }
+                    }
+                }
+                return allResults;
             }
-            return true;
         }
     }
 }

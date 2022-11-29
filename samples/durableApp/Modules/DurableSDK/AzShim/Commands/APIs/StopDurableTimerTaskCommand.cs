@@ -5,27 +5,27 @@
 
 #pragma warning disable 1591 // Missing XML comment for publicly visible type or member 'member'
 
-namespace DurableEngine.Commands
+namespace DurableSDK.Commands.APIs
 {
-    using DurableEngine;
+    using DurableEngine.Tasks;
     using System.Management.Automation;
 
     /// <summary>
-    /// Stop the Durable timeout task
+    /// Stop the Durable Timer
     /// </summary>
-    /*[Cmdlet("Stop", "DurableTimerTask")]
-    internal class StopDurableTimerCommand : PSCmdlet
+    [Cmdlet("Stop", "DurableTimerTaskE")]
+    public class StopDurableTimerCommand : PSCmdlet
     {
         /// <summary>
-        /// Gets and sets the task to be stopped.
+        /// Gets and sets the timer to be stopped.
         /// </summary>
         [Parameter(Mandatory = true)]
         [ValidateNotNullOrEmpty]
-        internal DurableTimerTask Task { get; set; }
+        public DurableTimerTask Task { get; set; }
 
         protected override void EndProcessing()
         {
             Task.Cancel();
         }
-    }*/
+    }
 }
