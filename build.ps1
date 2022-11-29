@@ -8,7 +8,7 @@ param(
 
 $shimPath = "$PSScriptRoot/src/DurableSDK"
 $durableEnginePath = "$PSScriptRoot/src/DurableEngine"
-$durableAppPath = "$PSScriptRoot/samples/durableApp/Modules/DurableSDK"
+$durableAppPath = "$PSScriptRoot/samples/durableApp/Modules/AzureFunctions.PowerShell.Durable.SDK"
 
 $outputPath = "$PSScriptRoot/src/out/"
 if ($Configuration -eq "Debug")

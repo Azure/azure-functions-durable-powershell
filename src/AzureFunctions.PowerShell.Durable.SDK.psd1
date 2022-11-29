@@ -4,10 +4,10 @@
     # RootModule = ''
     
     # Version number of this module.
-    ModuleVersion = '0.1.0'
-    
+    ModuleVersion = '0.0.1'
+
     # Supported PSEditions
-    # CompatiblePSEditions = @()
+    CompatiblePSEditions = @('Core')
     
     # ID used to uniquely identify this module
     GUID = '841fad61-94f5-4330-89be-613d54165289'
@@ -22,10 +22,10 @@
     Copyright = '(c) Microsoft Corporation. All rights reserved.'
     
     # Description of the functionality provided by this module
-    # Description = ''
+    Description = 'Alpha release of the Durable Functions SDK for PowerShell. This package is to be used exclusively with the Azure Functions PowerShell worker.'
     
     # Minimum version of the PowerShell engine required by this module
-    # PowerShellVersion = ''
+    PowerShellVersion = '7.2'
     
     # Name of the PowerShell host required by this module
     # PowerShellHostName = ''
@@ -122,7 +122,7 @@
             # ReleaseNotes = ''
     
             # Prerelease string of this module
-            # Prerelease = ''
+            Prerelease = 'alpha'
     
             # Flag to indicate whether the module requires explicit user acceptance for install/update/save
             # RequireLicenseAcceptance = $false

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>DurableSDK</AssemblyName>
+    <AssemblyName>AzureFunctions.PowerShell.Durable.SDK</AssemblyName>
     <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 
