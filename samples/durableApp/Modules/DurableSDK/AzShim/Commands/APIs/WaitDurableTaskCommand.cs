@@ -31,11 +31,11 @@ namespace DurableSDK.Commands.APIs
             DurableTask task;
             if (Any)
             {
-                task = new WhenAnyTask(Task, null, NoWait, privateData);
+                task = new WhenAnyTask(Task, NoWait, privateData);
             }
             else
             {
-                task = new WhenAllTask(Task, null, NoWait, privateData); 
+                task = new WhenAllTask(Task, NoWait, privateData); 
            }
            return task;
        }

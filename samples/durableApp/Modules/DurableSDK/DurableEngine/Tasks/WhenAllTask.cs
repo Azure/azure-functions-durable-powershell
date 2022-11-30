@@ -23,8 +23,6 @@ namespace DurableEngine.Tasks
 
         public WhenAllTask(
             DurableTask[] tasks,
-            RetryOptions retryOptions,
-            // Should this task also be able to be awaited?
             SwitchParameter noWait,
             Hashtable privateData)
             : base(noWait, privateData)
@@ -35,7 +33,6 @@ namespace DurableEngine.Tasks
                 throw new ArgumentException("The input array is empty.");
             }
             Tasks = tasks;
-            RetryOptions = retryOptions;
         }
 
         internal override Task CreateDTFxTask()

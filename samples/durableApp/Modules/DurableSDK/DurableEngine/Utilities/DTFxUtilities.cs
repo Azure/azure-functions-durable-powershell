@@ -57,9 +57,9 @@ namespace DurableEngine.Utilities
         {
             internal string InstanceId { get; set; }
 
-            internal IList<global::DurableTask.Core.History.HistoryEvent> PastEvents { get; set; }
+            internal IList<DurableTask.Core.History.HistoryEvent> PastEvents { get; set; }
 
-            internal IList<global::DurableTask.Core.History.HistoryEvent> NewEvents { get; set; }
+            internal IList<DurableTask.Core.History.HistoryEvent> NewEvents { get; set; }
 
             internal int? UpperSchemaVersion { get; set; }
         }
