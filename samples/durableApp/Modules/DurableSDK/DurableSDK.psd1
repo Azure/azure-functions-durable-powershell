@@ -73,11 +73,10 @@
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @(
        'Invoke-DurableActivityE',
-    #    'Set-BindingData',
        'Set-FunctionInvocationContext'
-    #    'Start-DurableTimer',
-    #    'Stop-DurableTimerTask',
-    #    'Wait-DurableTaskE',
+       'Start-DurableTimerE',
+       'Stop-DurableTimerTaskE',
+       'Wait-DurableTaskE'
     #    'Start-DurableExternalEventListener'
     )
     

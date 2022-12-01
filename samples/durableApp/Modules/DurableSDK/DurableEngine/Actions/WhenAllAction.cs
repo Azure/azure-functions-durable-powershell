@@ -10,7 +10,6 @@ namespace DurableEngine
     /// </summary>
     internal class WhenAllAction : OrchestrationAction
     {
-
         public readonly OrchestrationAction[] CompoundActions;
 
         internal WhenAllAction(OrchestrationAction[] compoundActions)

@@ -2,7 +2,7 @@ using namespace System.Net
 
 param($Request, $TriggerMetadata)
 
-Get-Module -ListAvailable | Write-Host
+# Get-Module -ListAvailable | Write-Host
 $FunctionName = $Request.Params.FunctionName
 $InstanceId = Start-DurableOrchestrationExternal -FunctionName $FunctionName
 Write-Host "Started orchestration with ID = '$InstanceId'"

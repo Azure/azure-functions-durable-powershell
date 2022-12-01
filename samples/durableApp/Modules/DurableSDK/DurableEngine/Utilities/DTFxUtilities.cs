@@ -1,10 +1,7 @@
 ﻿using Microsoft.DurableTask;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace DurableEngine.Utilities
 {
@@ -26,9 +23,9 @@ namespace DurableEngine.Utilities
             /// </summary>
             internal static JsonDataConverter Default { get; } = new JsonDataConverter();
 
-            readonly JsonSerializerOptions? options;
+            readonly JsonSerializerOptions options;
 
-            JsonDataConverter(JsonSerializerOptions? options = null)
+            JsonDataConverter(JsonSerializerOptions options = null)
             {
                 if (options != null)
                 {
@@ -41,13 +38,13 @@ namespace DurableEngine.Utilities
             }
 
             /// <inheritdoc/>
-            public override string? Serialize(object? value)
+            public override string Serialize(object value)
             {
                 return value != null ? System.Text.Json.JsonSerializer.Serialize(value, this.options) : null;
             }
 
             /// <inheritdoc/>
-            public override object? Deserialize(string? data, Type targetType)
+            public override object Deserialize(string data, Type targetType)
             {
                 return data != null ? System.Text.Json.JsonSerializer.Deserialize(data, targetType, this.options) : null;
             }
@@ -58,11 +55,11 @@ namespace DurableEngine.Utilities
         /// </summary>
         internal sealed class OrchestratorState
         {
-            internal string? InstanceId { get; set; }
+            internal string InstanceId { get; set; }
 
-            internal IList<global::DurableTask.Core.History.HistoryEvent>? PastEvents { get; set; }
+            internal IList<DurableTask.Core.History.HistoryEvent> PastEvents { get; set; }
 
-            internal IList<global::DurableTask.Core.History.HistoryEvent>? NewEvents { get; set; }
+            internal IList<DurableTask.Core.History.HistoryEvent> NewEvents { get; set; }
 
             internal int? UpperSchemaVersion { get; set; }
         }

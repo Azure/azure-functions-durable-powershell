@@ -11,5 +11,9 @@
   "managedDependency": {
     "enabled": true
   },
-  "extensions": { "durableTask": { "hubName": "taskhubtttt3" }}
+  "extensions": {
+    "durableTask": {
+      "hubName": "testingTaskHub1"
+    }
+  }
 }

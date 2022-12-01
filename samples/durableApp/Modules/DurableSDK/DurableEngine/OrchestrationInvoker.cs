@@ -24,6 +24,7 @@ namespace DurableEngine
 
     public class OrchestrationInvoker
     {
+        // TODO: Consider adding ContextKey to a .resx or a constants file
         public const string ContextKey = "OrchestrationContext";
         private OrchestrationContext context;
 
@@ -138,7 +139,7 @@ namespace DurableEngine
 
             // Re-construct the runtime state from the history.
             OrchestrationRuntimeState runtimeState = new(state.PastEvents);
-            foreach (global::DurableTask.Core.History.HistoryEvent newEvent in state.NewEvents)
+            foreach (HistoryEvent newEvent in state.NewEvents)
             {
                 runtimeState.AddEvent(newEvent);
             }

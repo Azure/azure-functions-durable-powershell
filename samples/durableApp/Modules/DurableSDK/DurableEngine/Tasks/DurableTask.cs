@@ -1,5 +1,4 @@
 ﻿using DurableEngine.Models;
-using Microsoft.DurableTask;
 using System;
 using System.Collections;
 using System.Management.Automation;
@@ -19,14 +18,42 @@ namespace DurableEngine.Tasks
         }
 
         /// <summary>
+        /// If present, the Task does not need to be awaited.
+        /// </summary>
+        public SwitchParameter NoWait { get; set; }
+
+        /// <summary>
         /// The orchestrator context.
         /// </summary>
         internal OrchestrationContext OrchestrationContext { get; set; }
 
         /// <summary>
-        /// If present, the Task does not need to be awaited.
+        /// The underlying DTFx Task.
         /// </summary>
-        public SwitchParameter NoWait { get; set; }
+        private Task DTFxTask;
+
+        /// <summary>
+        /// The result of this Task, if applicable.
+        /// </summary>
+        internal virtual object Result
+        {
+            get
+            {
+                // Getting Result for an incomplete Task is a synchronous operation,
+                // so we add this check to avoid blocking on an imcomplete Task.
+                if (!HasResult())
+                {
+                    // TODO: Refine the exception thrown here.
+                    throw new Exception("This task is not complete.");
+                }
+                return ((Task<object>)GetDTFxTask()).Result;
+            }
+        }
+
+        /// <summary>
+        /// Create Action object representing this Task.
+        /// </summary>
+        internal abstract OrchestrationAction CreateOrchestrationAction();
 
         /// <summary>
         /// Resolves the Task to a value depending on how it was invoked
@@ -39,44 +66,44 @@ namespace DurableEngine.Tasks
         /// <param name="writeErr">Function to write an exception to the pipeline.</param>
         public void Execute(Action<object> write, Action<ErrorRecord> writeErr)
         {
-            DurableTask task = this;
-
             if (NoWait)
             {
                 // Task doesn't need to be awaited, just feed it to pipeline
-                write(task);
+                write(this);
             }
             else
             {
-                // Flag this task as the current "task-toa-wait"
-                OrchestrationContext.SharedMemory.currTask = task;
-                OrchestrationContext.SharedMemory.Add(task.CreateOrchestrationAction());
+                var sharedMemory = OrchestrationContext.SharedMemory;
+                // Flag this task as the current "task-to-await"
+                sharedMemory.currTask = this;
+                sharedMemory.Add(CreateOrchestrationAction());
 
                 // Signal orchestration thread to await the Task.
                 // This is necessary for DTFx to determine if a result exists for the Task.
-                OrchestrationContext.SharedMemory.YieldToInvokerThread();
+                sharedMemory.YieldToInvokerThread();
 
-                var sdkTask = OrchestrationContext.SharedMemory.currTask;
-                if (sdkTask.HasResult())
+                if (IsCompleted())
                 {
-                    if (sdkTask.IsFaulted())
+                    if (IsFaulted())
                     {
                         // Feed formatted exception to pipeline
-                        var errorMessage = OrchestrationContext.SharedMemory.currTask.Exception.Message;
+                        var errorMessage = Exception.Message;
+                        // TODO: Replace this error ID with something more indicative
                         const string ErrorId = "Functions.Durable.ActivityFailure";
                         var exception = new ActivityFailureException(errorMessage);
                         var errorRecord = new ErrorRecord(exception, ErrorId, ErrorCategory.NotSpecified, null);
                         writeErr(errorRecord);
                     }
-                    else
+                    // Some tasks (like DurableTimers may not have results). In these cases, we should continue
+                    // once the task completes
+                    else if (HasResult())
                     {
                         // Feed result to pipeline
-                        var result = OrchestrationContext.SharedMemory.currTask.Result;
-                        write(result);
+                        write(Result);
                     }
                 }
                 // Reset the current task-to-await once the invocation completes
-                OrchestrationContext.SharedMemory.currTask = null;
+                sharedMemory.currTask = null;
             }
         }
 
@@ -90,32 +117,25 @@ namespace DurableEngine.Tasks
         }
 
         /// <summary>
-        /// The result of this Task, if applicable.
-        /// </summary>
-        internal virtual object Result
-        {
-            get { return ((Task<object>)DTFxTask).Result; }
-        }
-
-        /// <summary>
         /// Exception thrown by this Task, if applicable.
         /// </summary>
         internal virtual Exception Exception
         {
-            get { return DTFxTask.Exception; }
+            get { return GetDTFxTask().Exception; }
         }
 
-
         /// <summary>
-        /// Obtain  a new DTFx Task corresponding to this SDK-level Task.
+        /// Obtain a new DTFx Task corresponding to this SDK-level Task.
         /// This should only be invoked once per SDK-level Task.
         /// </summary>
         internal abstract Task CreateDTFxTask();
 
         /// <summary>
-        /// Get DTFx Task corresponding to this SDK-level task.
+        /// Gets the DTFx Task corresponding to this SDK-level task.
         /// </summary>
-        /// <returns>The corresponding DTFxTask.</returns>
+        /// <returns>
+        /// The corresponding DTFxTask.
+        /// </returns>
         public Task GetDTFxTask()
         {
             // If the Task wasn't generated before
@@ -129,14 +149,21 @@ namespace DurableEngine.Tasks
             return DTFxTask;
         }
 
-        internal Task DTFxTask;
-
         /// <summary>
-        /// Whether this Task finished executing.
+        /// Whether this Task finished executing AND has a result to write to the
+        /// output pipe. This should always be called before getting Result.
         /// </summary>
         internal virtual bool HasResult()
         {
-            return DTFxTask != null && DTFxTask.IsCompleted;
+            return GetDTFxTask().IsCompleted;
+        }
+
+        /// <summary>
+        /// Whether this Task is completed.
+        /// </summary>
+        internal virtual bool IsCompleted()
+        {
+            return GetDTFxTask().IsCompleted;
         }
 
         /// <summary>
@@ -144,13 +171,7 @@ namespace DurableEngine.Tasks
         /// </summary>
         internal virtual bool IsFaulted()
         {
-            return DTFxTask != null && DTFxTask.IsFaulted;
+            return GetDTFxTask().IsFaulted;
         }
-
-        /// <summary>
-        /// Create Action object representing this Task.
-        /// </summary>
-        internal abstract OrchestrationAction CreateOrchestrationAction();
-
     }
 }
