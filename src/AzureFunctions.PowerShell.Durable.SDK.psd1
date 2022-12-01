@@ -5,7 +5,7 @@
     
     # Version number of this module.
     ModuleVersion = '0.0.1'
-    
+
     # Supported PSEditions
     CompatiblePSEditions = @('Core')
     
@@ -76,7 +76,7 @@
        'Set-FunctionInvocationContext'
     #    'Start-DurableTimerE',
     #    'Stop-DurableTimerTaskE',
-    #    'Wait-DurableTaskE'
+       'Wait-DurableTaskE'
     #    'Start-DurableExternalEventListener'
     )
     
