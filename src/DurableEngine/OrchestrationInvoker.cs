@@ -107,7 +107,7 @@ namespace DurableEngine
                     catch { }
                 }
             };
-            
+
             // Construct and then invoke DTFx executor, which will replay for us.
             TaskOrchestrationExecutor executor = CreateTaskOrchestrationExecutor(apiInvokerFunction);
             var DTFxResult = executor.Execute();
@@ -192,7 +192,7 @@ namespace DurableEngine
             var actions = context.SharedMemory.actions;
             var extensionActions = new List<List<OrchestrationAction>>();
             extensionActions.Add(actions);
-            
+
             if (orchestratorFailed)
             {
                 throw new OrchestrationFailureException(extensionActions, context.CustomStatus, orchestratorException);

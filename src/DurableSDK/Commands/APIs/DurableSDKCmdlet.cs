@@ -11,7 +11,7 @@ namespace DurableSDK.Commands.APIs
     {
         // Create DurableTask object that backs this API.
         internal abstract DurableEngine.Tasks.DurableTask CreateDurableTask();
-        
+
         // Task object corresponding to this API
         private DurableEngine.Tasks.DurableTask durableTask;
 
