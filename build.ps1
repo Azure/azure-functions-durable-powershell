@@ -10,6 +10,7 @@ $packageName = "AzureFunctions.PowerShell.Durable.SDK"
 $shimPath = "$PSScriptRoot/src/DurableSDK"
 $durableEnginePath = "$PSScriptRoot/src/DurableEngine"
 $durableAppPath = "$PSScriptRoot/samples/durableApp/Modules/$packageName"
+$powerShellModulePath = "$PSScriptRoot/src/$packageName.psm1"
 $manifestPath = "$PSScriptRoot/src/$packageName.psd1"
 
 $outputPath = "$PSScriptRoot/src/out/"
@@ -91,5 +92,6 @@ Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
     ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
 
 # Move Durable SDK manifest into the output directory
-Write-Log "Copying manifest from the Durable SDK source code into $outputPath"
+Write-Log "Copying PowerShell module and manifest from the Durable SDK source code into $outputPath"
+Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
