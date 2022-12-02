@@ -113,6 +113,16 @@ if (-not $SkipCoreToolsDownload.IsPresent)
     # Prepend installed Core Tools to the PATH
     $Env:Path = "$FUNC_CLI_DIRECTORY$([System.IO.Path]::PathSeparator)$Env:Path"
     $funcPath = Join-Path $FUNC_CLI_DIRECTORY $FUNC_EXE_NAME
+
+    # TODO: Remove after the worker enables the external SDK
+    # Deploy a version of the PowerShell worker that enables the external SDK
+    $powerShellWorkerDirectory = ".\azure-functions-powershell-worker"
+    $enableExternalSDKBranchName = "dajusto/enable-external-df-sdk"
+    git clone "https://github.com/Azure/azure-functions-powershell-worker.git"
+    git checkout $enableExternalSDKBranchName
+    Push-Location $powerShellWorkerDirectory
+    .\build.ps1 -Deploy "$FUNC_CLI_DIRECTORY"
+    Pop-Location
 }
 else
 {

@@ -10,10 +10,7 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- pwsh: ./test/E2E/Start-E2ETest.ps1
+  env:
+    AzureWebJobsStorage: $(AzureWebJobsStorage)
+  displayName: 'Run E2E tests'

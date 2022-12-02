@@ -32,6 +32,9 @@ function Write-Log
         $Message,
 
         [Switch]
+        $Warning,
+
+        [Switch]
         $Throw
     )
 
@@ -42,7 +45,8 @@ function Write-Log
         throw $Message
     }
 
-    Write-Host $Message
+    $foregroundColor = if ($Warning.IsPresent) { 'Yellow' } else { 'Green' }
+    Write-Host -ForegroundColor $foregroundColor $Message
 }
 
 Write-Log "Build started. Configuration '$Configuration' and output folder '$outputPath' with shared dependencies folder '$sharedDependenciesPath'..."
@@ -61,7 +65,7 @@ if (Test-Path $outputPath)
 }
 # Create output folder and its inner dependencies directory
 Write-Log "Creating a new output and shared dependencies folder at $outputPath and $sharedDependenciesPath..."
-New-Item -Path $sharedDependenciesPath -ItemType Directory
+[Void](New-Item -Path $sharedDependenciesPath -ItemType Directory)
 
 # Build the Durable SDK and Durable Engine project
 foreach ($project in $projects.GetEnumerator()) {
@@ -85,7 +89,7 @@ Get-ChildItem -Path "$durableEnginePath/$publishPathSuffix" |
     ForEach-Object { [void]$commonFiles.Add($_.Name); Copy-Item -LiteralPath $_.FullName -Destination $sharedDependenciesPath }
 
 # Copy all *unique* assemblies from Durable SDK into output directory
-Write-Log "Copying UNIQUE assemblies from the Durable SDK project into $outputPath"
+Write-Log "Copying unique assemblies from the Durable SDK project into $outputPath"
 Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
     Where-Object { $_.Extension -in '.dll','.pdb' -and -not $commonFiles.Contains($_.Name) } |
     ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
