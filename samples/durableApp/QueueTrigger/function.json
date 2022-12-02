@@ -1,0 +1,16 @@
+{
+  "bindings": [
+    {
+      "name": "InstanceId",
+      "type": "queueTrigger",
+      "direction": "in",
+      "queueName": "ps-queue-items",
+      "connection": "AzureWebJobsStorage"
+    },
+    {
+      "name": "test",
+      "type": "durableClient",
+      "direction": "in"
+    }
+  ]
+}

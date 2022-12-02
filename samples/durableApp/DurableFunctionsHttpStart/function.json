@@ -12,9 +12,11 @@
       ]
     },
     {
-      "type": "http",
+      "type": "queue",
       "direction": "out",
-      "name": "Response"
+      "name": "InstanceId",
+      "queueName": "ps-queue-items",
+      "connection": "AzureWebJobsStorage"
     },
     {
       "name": "starter",
