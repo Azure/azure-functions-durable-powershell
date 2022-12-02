@@ -65,7 +65,7 @@
         # 'Get-DurableStatus',
         # 'New-DurableRetryOptions',
         'New-DurableOrchestrationCheckStatusResponseExternal',
-        # 'Send-DurableExternalEvent',
+        'Send-DurableExternalEventE',
         'Start-DurableOrchestrationExternal'
         # 'Stop-DurableOrchestration'
     )
@@ -77,7 +77,7 @@
        'Start-DurableTimerE',
        'Stop-DurableTimerTaskE',
        'Wait-DurableTaskE'
-    #    'Start-DurableExternalEventListener'
+       'Start-DurableExternalEventListenerE'
     )
     
     # Variables to export from this module
