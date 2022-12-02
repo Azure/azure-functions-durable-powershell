@@ -18,7 +18,7 @@ namespace DurableEngine.Tasks
     public class DurableTimerTask : DurableTask
     {
         internal TimeSpan Duration { get; }
-        private DateTime FireAt { get; set; }
+        private DateTime FireAt { get; }
         private CreateDurableTimerAction Action { get; set; }
         private readonly CancellationTokenSource _cancelationTokenSource = new CancellationTokenSource();
 
