@@ -19,52 +19,55 @@ function GetDurableClientFromModulePrivateData {
     }
 }
 
-# function Get-DurableStatus {
-#     [CmdletBinding()]
-#     param(
-#         [Parameter(
-#             Mandatory = $true,
-#             Position = 0,
-#             ValueFromPipelineByPropertyName = $true)]
-#         [ValidateNotNullOrEmpty()]
-#         [string] $InstanceId,
+function Get-DurableStatusExternal {
+    [CmdletBinding()]
+    param(
+        [Parameter(
+            Mandatory = $true,
+            Position = 0,
+            ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $InstanceId,
 
-#         [Parameter(
-#             ValueFromPipelineByPropertyName = $true)]
-#         [object] $DurableClient,
+        [Parameter(
+            ValueFromPipelineByPropertyName = $true)]
+        [object] $DurableClient,
 
-#         [switch] $ShowHistory,
+        [switch] $ShowHistory,
 
-#         [switch] $ShowHistoryOutput,
+        [switch] $ShowHistoryOutput,
 
-#         [switch] $ShowInput
-#     )
+        [switch] $ShowInput
+    )
 
-#     $ErrorActionPreference = 'Stop'
+    # TODO: Remove this line before publishing
+    Write-Host "EXTERNAL CHECK STATUS"
 
-#     if ($null -eq $DurableClient) {
-#         $DurableClient = GetDurableClientFromModulePrivateData
-#     }
+    $ErrorActionPreference = 'Stop'
 
-#     $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId"
+    if ($null -eq $DurableClient) {
+        $DurableClient = GetDurableClientFromModulePrivateData
+    }
 
-#     $query = @()
-#     if ($ShowHistory.IsPresent) {
-#         $query += "showHistory=true"
-#     }
-#     if ($ShowHistoryOutput.IsPresent) {
-#         $query += "showHistoryOutput=true"
-#     }
-#     if ($ShowInput.IsPresent) {
-#         $query += "showInput=true"
-#     }
+    $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId"
 
-#     if ($query.Count -gt 0) {
-#         $requestUrl += "?" + [string]::Join("&", $query)
-#     }
+    $query = @()
+    if ($ShowHistory.IsPresent) {
+        $query += "showHistory=true"
+    }
+    if ($ShowHistoryOutput.IsPresent) {
+        $query += "showHistoryOutput=true"
+    }
+    if ($ShowInput.IsPresent) {
+        $query += "showInput=true"
+    }
 
-#     Invoke-RestMethod -Uri $requestUrl
-# }
+    if ($query.Count -gt 0) {
+        $requestUrl += "?" + [string]::Join("&", $query)
+    }
+
+    Invoke-RestMethod -Uri $requestUrl
+}
 
 <#
 .SYNOPSIS
