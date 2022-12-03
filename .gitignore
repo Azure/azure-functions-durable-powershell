@@ -13,7 +13,7 @@ obj/
 TestResults/
 /**/Azure.Functions.Cli*
 /**/azure-functions-powershell-worker/
-/**/durableApp/Modules/**/AzureFunctions.PowerShell.Durable.SDK.psd1
+/**/durableApp/Modules/**/AzureFunctions.PowerShell.Durable.SDK*
 
 local.settings.json
 

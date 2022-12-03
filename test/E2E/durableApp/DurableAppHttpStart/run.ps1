@@ -3,8 +3,8 @@ using namespace System.Net
 param($Request, $TriggerMetadata)
 $ErrorActionPreference = 'Stop'
 
-$OrchestratorName = $Request.Params.OrchestratorName
-$InstanceId = Start-DurableOrchestrationExternal -FunctionName $OrchestratorName -InputObject 'Hello'
+$FunctionName = $Request.Params.FunctionName
+$InstanceId = Start-DurableOrchestrationExternal -FunctionName $FunctionName
 Write-Host "Started orchestration with ID = '$InstanceId'"
 
 $Response = New-DurableOrchestrationCheckStatusResponseExternal -Request $Request -InstanceId $InstanceId

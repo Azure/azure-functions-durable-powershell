@@ -13,7 +13,7 @@
   },
   "extensions": {
     "durableTask": {
-      "hubName": "%TestTaskHubName%"
+      "hubName": "TestTaskHub1"
     }
   }
 }
