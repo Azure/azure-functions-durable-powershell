@@ -85,7 +85,7 @@ Remove-Item -Recurse -Force $FUNC_CLI_DIRECTORY -ErrorAction Ignore
 
 if (-not $SkipCoreToolsDownload.IsPresent)
 {
-    Write-Host "Downloading Core Tools because SkipCoreToolsDownload switch parameter is present..."
+    Write-Host "Downloading Core Tools because SkipCoreToolsDownload switch parameter is not present..."
     $coreToolsDownloadURL = $null
     if ($UseCoreToolsBuildFromIntegrationTests.IsPresent)
     {
@@ -121,7 +121,7 @@ if (-not $SkipCoreToolsDownload.IsPresent)
     git clone "https://github.com/Azure/azure-functions-powershell-worker.git"
     git checkout $enableExternalSDKBranchName
     Push-Location $powerShellWorkerDirectory
-    .\build.ps1 -Deploy "$FUNC_CLI_DIRECTORY"
+    .\build.ps1 -Bootstrap -Deploy "$FUNC_CLI_DIRECTORY"
     Pop-Location
 }
 else
