@@ -2,24 +2,23 @@
   "bindings": [
     {
       "authLevel": "function",
-      "name": "Request",
       "type": "httpTrigger",
       "direction": "in",
-      "route": "orchestrators/{FunctionName}",
+      "name": "Request",
       "methods": [
-        "post",
-        "get"
+        "get",
+        "post"
       ]
+    },
+    {
+      "type": "durableClient",
+      "name": "starter",
+      "direction": "in"
     },
     {
       "type": "http",
       "direction": "out",
       "name": "Response"
-    },
-    {
-      "name": "starter",
-      "type": "durableClient",
-      "direction": "in"
     }
   ]
 }

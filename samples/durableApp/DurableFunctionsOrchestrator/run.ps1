@@ -44,20 +44,20 @@ $output = @()
 # Write-Host 'Stopped durable timer'
 
 # TEST CASE 4: Basic external event
-# Write-Host "TEST 4: Basic external event"
-# $approvalEvent1 = Start-DurableExternalEventListenerE -EventName "ApprovalEvent1"
-# if ($approvalEvent1)
-# {
-#     Write-Host "Approved event 1 successfully."
-#     $output += $approvalEvent1
-# }
-# else
-# {
-#     throw "Approval event 1 failed"    
-# }
+Write-Host "TEST 4: Basic external event"
+$approvalEvent1 = Start-DurableExternalEventListenerE -EventName "ApprovalEvent1"
+if ($approvalEvent1)
+{
+    Write-Host "Approved event 1 successfully."
+    $output += $approvalEvent1
+}
+else
+{
+    throw "Approval event 1 failed"    
+}
 
 # TEST CASE 5: External event without waiting
-Write-Host "TEST 4: Basic external event"
+Write-Host "TEST 5: External event without waiting"
 $approvalEvent2 = Start-DurableExternalEventListenerE -EventName "ApprovalEvent2" -NoWait
 $timer3 = Start-DurableTimerE -Duration (New-Timespan -Seconds 60) -NoWait
 $winner2 = Wait-DurableTaskE -Task @($approvalEvent2, $timer3) -Any
