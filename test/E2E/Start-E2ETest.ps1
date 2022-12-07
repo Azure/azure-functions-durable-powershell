@@ -119,8 +119,8 @@ if (-not $SkipCoreToolsDownload.IsPresent)
     $powerShellWorkerDirectory = ".\azure-functions-powershell-worker"
     $enableExternalSDKBranchName = "dajusto/enable-external-df-sdk"
     git clone "https://github.com/Azure/azure-functions-powershell-worker.git"
-    git checkout $enableExternalSDKBranchName
     Push-Location $powerShellWorkerDirectory
+    git checkout $enableExternalSDKBranchName
     .\build.ps1 -Bootstrap -Deploy "$FUNC_CLI_DIRECTORY"
     Pop-Location
 }
@@ -140,11 +140,9 @@ Write-Host "Set FUNC_PATH environment variable to $env:FUNC_PATH"
 Write-Host "Building the DurableSDK module and copying binaries to the DurableApp/Modules directory..."
 $configuration = if ($env:CONFIGURATION) { $env:CONFIGURATION } else { 'Debug' }
 
-Push-Location ("../.." | Resolve-Path)
-Write-Log "Switched to $(Get-Location) to build the external SDK"
+Push-Location "$PSScriptRoot/../.."
 ./build.ps1 -Configuration 'Debug'
 Pop-Location
-Write-Log "Switched to $(Get-Location)"
 
 Write-Host "Starting Core Tools..."
 Push-Location "$PSScriptRoot\DurableApp"
