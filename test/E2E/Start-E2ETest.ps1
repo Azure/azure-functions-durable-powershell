@@ -116,12 +116,12 @@ if (-not $SkipCoreToolsDownload.IsPresent)
 
     # TODO: Remove after the worker enables the external SDK
     # Deploy a version of the PowerShell worker that enables the external SDK
-    $powerShellWorkerDirectory = ".\azure-functions-powershell-worker"
+    $powerShellWorkerDirectory = "$PSScriptRoot/azure-functions-powershell-worker"
     $enableExternalSDKBranchName = "dajusto/enable-external-df-sdk"
     git clone "https://github.com/Azure/azure-functions-powershell-worker.git"
     Push-Location $powerShellWorkerDirectory
     git checkout $enableExternalSDKBranchName
-    .\build.ps1 -Bootstrap -Deploy "$FUNC_CLI_DIRECTORY"
+    & $powerShellWorkerDirectory/build.ps1 -Bootstrap -Deploy "$FUNC_CLI_DIRECTORY"
     Pop-Location
 }
 else
@@ -141,7 +141,7 @@ Write-Host "Building the DurableSDK module and copying binaries to the DurableAp
 $configuration = if ($env:CONFIGURATION) { $env:CONFIGURATION } else { 'Debug' }
 
 Push-Location "$PSScriptRoot/../.."
-./build.ps1 -Configuration 'Debug'
+& ./build.ps1 -Configuration 'Debug'
 Pop-Location
 
 Write-Host "Starting Core Tools..."

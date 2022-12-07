@@ -74,7 +74,7 @@ foreach ($project in $projects.GetEnumerator()) {
     Push-Location $project.Value
     try
     {
-        dotnet publish -f $netCoreTFM
+        dotnet publish -f $netCoreTFM -c $Configuration
     }
     finally
     {
