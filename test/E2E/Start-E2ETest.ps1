@@ -117,8 +117,10 @@ if (-not $SkipCoreToolsDownload.IsPresent)
     # TODO: Remove after the worker enables the external SDK
     # Deploy a version of the PowerShell worker that enables the external SDK
     $powerShellWorkerDirectory = "$PSScriptRoot/azure-functions-powershell-worker"
+    Write-Host 'Deleting the PowerShell worker if exists...'
+    Remove-Item -Force "$powerShellWorkerDirectory.zip" -ErrorAction Ignore
     $enableExternalSDKBranchName = "dajusto/enable-external-df-sdk"
-    git clone "https://github.com/Azure/azure-functions-powershell-worker.git"
+    git clone "https://github.com/Azure/azure-functions-powershell-worker.git" $powerShellWorkerDirectory
     Push-Location $powerShellWorkerDirectory
     git checkout $enableExternalSDKBranchName
     & $powerShellWorkerDirectory/build.ps1 -Bootstrap -Deploy "$FUNC_CLI_DIRECTORY"
