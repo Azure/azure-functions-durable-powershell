@@ -8,7 +8,7 @@
 
 namespace DurableSDK.Commands.APIs
 {
-    using DurableEngine.Models;
+    using DurableEngine;
     using DurableEngine.Tasks;
     using System.Collections;
     using System.Management.Automation;
