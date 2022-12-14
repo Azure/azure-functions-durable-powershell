@@ -53,7 +53,7 @@ if ($approvalEvent1)
 }
 else
 {
-    throw "Approval event 1 failed"    
+    throw "Approval event 1 failed"
 }
 
 # TEST CASE 5: External event without waiting
