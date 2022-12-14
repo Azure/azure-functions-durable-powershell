@@ -3,10 +3,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-using System;
-using System.Collections.Generic;
-using DurableEngine.Models;
-
 namespace DurableEngine
 {
     /// <summary>
@@ -27,46 +23,47 @@ namespace DurableEngine
         /// <summary>
         /// Retry options.
         /// </summary>
-        public readonly Dictionary<string, object> RetryOptions;
+        public readonly RetryOptions RetryOptions;
+        //public readonly Dictionary<string, object> RetryOptions;
 
         internal CallActivityWithRetryAction(string functionName, object input, RetryOptions retryOptions)
             : base(ActionType.CallActivityWithRetry)
         {
             FunctionName = functionName;
             Input = input;
-            RetryOptions = ToDictionary(retryOptions);
+            RetryOptions = retryOptions;//ToDictionary(retryOptions);
         }
 
-        private static Dictionary<string, object> ToDictionary(RetryOptions retryOptions)
-        {
-            var result = new Dictionary<string, object>()
-                            {
-                                { "firstRetryIntervalInMilliseconds", ToIntMilliseconds(retryOptions.FirstRetryInterval) },
-                                { "maxNumberOfAttempts", retryOptions.MaxNumberOfAttempts }
-                            };
+        // private static Dictionary<string, object> ToDictionary(RetryOptions retryOptions)
+        // {
+        //     var result = new Dictionary<string, object>()
+        //                     {
+        //                         { "firstRetryIntervalInMilliseconds", ToIntMilliseconds(retryOptions.FirstRetryInterval) },
+        //                         { "maxNumberOfAttempts", retryOptions.MaxNumberOfAttempts }
+        //                     };
 
-            AddOptionalValue(result, "backoffCoefficient", retryOptions.BackoffCoefficient, x => x);
-            AddOptionalValue(result, "maxRetryIntervalInMilliseconds", retryOptions.MaxRetryInterval, ToIntMilliseconds);
-            AddOptionalValue(result, "retryTimeoutInMilliseconds", retryOptions.RetryTimeout, ToIntMilliseconds);
+        //     AddOptionalValue(result, "backoffCoefficient", retryOptions.BackoffCoefficient, x => x);
+        //     AddOptionalValue(result, "maxRetryIntervalInMilliseconds", retryOptions.MaxRetryInterval, ToIntMilliseconds);
+        //     AddOptionalValue(result, "retryTimeoutInMilliseconds", retryOptions.RetryTimeout, ToIntMilliseconds);
 
-            return result;
-        }
+        //     return result;
+        // }
 
-        private static void AddOptionalValue<T>(
-            Dictionary<string, object> dictionary,
-            string name,
-            T? nullable,
-            Func<T, object> transformValue) where T : struct
-        {
-            if (nullable.HasValue)
-            {
-                dictionary.Add(name, transformValue(nullable.Value));
-            }
-        }
+        // private static void AddOptionalValue<T>(
+        //     Dictionary<string, object> dictionary,
+        //     string name,
+        //     T? nullable,
+        //     Func<T, object> transformValue) where T : struct
+        // {
+        //     if (nullable.HasValue)
+        //     {
+        //         dictionary.Add(name, transformValue(nullable.Value));
+        //     }
+        // }
 
-        private static object ToIntMilliseconds(TimeSpan timespan)
-        {
-            return (int)timespan.TotalMilliseconds;
-        }
+        // private static object ToIntMilliseconds(TimeSpan timespan)
+        // {
+        //     return (int)timespan.TotalMilliseconds;
+        // }
     }
 }
