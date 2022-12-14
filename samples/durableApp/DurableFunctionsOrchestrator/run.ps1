@@ -69,7 +69,7 @@ if ($approvalEvent2 -eq $winner2)
 }
 else
 {
-    throw "Approval event 2 failed"    
+    throw "Approval event 2 failed"
 }
 
 $output
