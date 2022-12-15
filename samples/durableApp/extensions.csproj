@@ -5,6 +5,7 @@
 	<DefaultItemExcludes>**</DefaultItemExcludes>
   </PropertyGroup>
   <ItemGroup>
+    <!-- The below package is a local build used for testing purposes. -->
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="100.7.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator" Version="4.0.1" />
   </ItemGroup>
