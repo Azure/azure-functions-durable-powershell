@@ -17,7 +17,6 @@ namespace DurableEngine.Tasks
     public class WhenAnyTask : DurableTask
     {
         internal DurableTask[] Tasks { get; set; }
-        private RetryOptions RetryOptions { get; }
 
         public WhenAnyTask(
             DurableTask[] tasks,

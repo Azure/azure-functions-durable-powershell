@@ -301,29 +301,3 @@ function GetRaiseEventUrlE(
 
     return $RequestUrl
 }
-
-# function New-DurableRetryOptions(
-#     [Parameter(Mandatory = $true)]
-#     [timespan]
-#     $FirstRetryInterval,
-
-#     [Parameter(Mandatory = $true)]
-#     [int]
-#     $MaxNumberOfAttempts,
-    
-#     [double]
-#     $BackoffCoefficient,
-    
-#     [timespan]
-#     $MaxRetryInterval,
-    
-#     [timespan]
-#     $RetryTimeout) {
-
-#     [Microsoft.DurableTask.RetryOptions]::new(
-#         $FirstRetryInterval,
-#         $MaxNumberOfAttempts,
-#         $PSBoundParameters.ContainsKey('BackoffCoefficient') ? $BackoffCoefficient : $null,
-#         $MaxRetryInterval,
-#         $RetryTimeout)
-# }
