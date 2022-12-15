@@ -301,33 +301,3 @@ function New-DurableOrchestrationCheckStatusResponseExternal {
 
 #     return $RequestUrl
 # }
-
-function New-DurableRetryOptionsExternal(
-    [Parameter(Mandatory = $true)]
-    [timespan]
-    $FirstRetryInterval,
-
-    [Parameter(Mandatory = $true)]
-    [int]
-    $MaxNumberOfAttempts,
-    
-    [double]
-    $BackoffCoefficient = 1,
-    
-    [timespan]
-    $MaxRetryInterval,
-    
-    [timespan]
-    $RetryTimeout) {
-    
-    # The order of the MaxNumberOfAttempts and FirstRetryInterval parameters is switched to
-    # maintain backwards compatibility with existing Durable PowerShell Functions that use
-    # the worker implementation.
-    [void][System.Reflection.Assembly]::LoadFrom("$PSScriptRoot/Dependencies/DurableEngine.dll")
-    [DurableEngine.RetryOptions]::new(
-        $MaxNumberOfAttempts,
-        $FirstRetryInterval,
-        $BackoffCoefficient,
-        $PSBoundParameters.ContainsKey('MaxRetryInterval') ? $MaxRetryInterval : $null,
-        $PSBoundParameters.ContainsKey('RetryTimeout') ? $RetryTimeout : $null)
-}
