@@ -48,7 +48,7 @@ namespace DurableEngine.Tasks
             }
             else
             {
-                // Flag this task as the current "task-to-swait"
+                // Flag this task as the current "task-to-await"
                 OrchestrationContext.SharedMemory.currTask = task;
                 OrchestrationContext.SharedMemory.Add(task.CreateOrchestrationAction());
 
