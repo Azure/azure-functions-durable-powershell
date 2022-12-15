@@ -37,7 +37,9 @@ namespace DurableEngine
             // the CallActivityWithRetryAction. This dictionary should be initialized when this class is
             // initialized because we must only pass on non-null, sensible parameter values to DTFx: the
             // parameter values of the underlying RetryPolicy class are all non-nullable, with unsuitable
-            // defaults for the optional MaxRetryInterval and RetryTimeOut parameters. 
+            // defaults for the optional MaxRetryInterval and RetryTimeOut parameters. Furthermore,
+            // of RetryOptions cannot be modified after construction, so it is safe to do this eager
+            // serialization in the constructor.
             RetryOptionsDictionary = new Dictionary<string, object>()
                             {
                                 { "firstRetryIntervalInMilliseconds", ToIntMilliseconds(firstRetryInterval) },
