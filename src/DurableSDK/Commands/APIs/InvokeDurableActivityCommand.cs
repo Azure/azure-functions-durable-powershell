@@ -49,7 +49,7 @@ namespace DurableSDK.Commands.APIs
         internal override DurableTask CreateDurableTask()
         {
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
-            ActivityInvocationTask task = new ActivityInvocationTask(FunctionName, Input, null, NoWait, privateData);
+            ActivityInvocationTask task = new ActivityInvocationTask(FunctionName, Input, RetryOptions, NoWait, privateData);
             return task;
         }
     }
