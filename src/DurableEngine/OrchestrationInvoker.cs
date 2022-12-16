@@ -22,6 +22,9 @@ namespace DurableEngine
     using DurableTask.Core;
     using DurableTask.Core.Command;
 
+    using Microsoft.DurableTask.Worker;
+    using Microsoft.DurableTask.Worker.Shims;
+
     public class OrchestrationInvoker
     {
         public const string ContextKey = "OrchestrationContext";
@@ -143,18 +146,9 @@ namespace DurableEngine
                 runtimeState.AddEvent(newEvent);
             }
 
-            // Construct worker context.
-            // Since we're only utilizing the DTFx executor to manage replay for us,
-            // we construct it minimally. This means we pass in a NullLogger and an emptyService provider.
-            var dataConverter = JsonDataConverter.Default;
-            var logger = NullLoggerFactory.Instance.CreateLogger("");
-            var emptyServiceProvider = new ServiceCollection().BuildServiceProvider();
-            WorkerContext workerContext = new(dataConverter, logger, emptyServiceProvider);
-
             // construct orchestration shim, a DTFx concept.
-            TaskName orchestratorName = new TaskName(runtimeState.Name, runtimeState.Version);
-            FuncTaskOrchestrator<int, object> functionTaskOrchestrator = new(apiInvokerFunction);
-            TaskOrchestrationShim orchestratorShim = new(workerContext, orchestratorName, functionTaskOrchestrator);
+            TaskName orchestratorName = new TaskName(runtimeState.Name);
+            var orchestratorShim = new DurableTaskShimFactory().CreateOrchestration(orchestratorName, apiInvokerFunction);
 
             // construct executor
             TaskOrchestrationExecutor executor = new(runtimeState, orchestratorShim, BehaviorOnContinueAsNew.Carryover);
