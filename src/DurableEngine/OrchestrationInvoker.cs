@@ -12,8 +12,6 @@ namespace DurableEngine
     using System.Management.Automation;
 
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Logging.Abstractions;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.DurableTask;
     using DurableEngine.Utilities;
     using DurableEngine.Models;
@@ -22,7 +20,6 @@ namespace DurableEngine
     using DurableTask.Core;
     using DurableTask.Core.Command;
 
-    using Microsoft.DurableTask.Worker;
     using Microsoft.DurableTask.Worker.Shims;
 
     public class OrchestrationInvoker
@@ -33,6 +30,7 @@ namespace DurableEngine
         private bool orchestratorFailed = false;
         private object orchestratorOutput = null;
         private Exception orchestratorException = null;
+        private readonly DurableTaskShimFactory shimFactory = new DurableTaskShimFactory();
 
 
         public OrchestrationInvoker(Hashtable privateData)
@@ -148,7 +146,7 @@ namespace DurableEngine
 
             // construct orchestration shim, a DTFx concept.
             TaskName orchestratorName = new TaskName(runtimeState.Name);
-            var orchestratorShim = new DurableTaskShimFactory().CreateOrchestration(orchestratorName, apiInvokerFunction);
+            var orchestratorShim = shimFactory.CreateOrchestration(orchestratorName, apiInvokerFunction);
 
             // construct executor
             TaskOrchestrationExecutor executor = new(runtimeState, orchestratorShim, BehaviorOnContinueAsNew.Carryover);
