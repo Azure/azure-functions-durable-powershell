@@ -12,8 +12,6 @@ namespace DurableEngine
     using System.Management.Automation;
 
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Logging.Abstractions;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.DurableTask;
     using DurableEngine.Utilities;
     using DurableEngine.Models;
@@ -21,6 +19,8 @@ namespace DurableEngine
     using static DurableEngine.Utilities.DTFxUtilities;
     using DurableTask.Core;
     using DurableTask.Core.Command;
+
+    using Microsoft.DurableTask.Worker.Shims;
 
     public class OrchestrationInvoker
     {
@@ -30,6 +30,7 @@ namespace DurableEngine
         private bool orchestratorFailed = false;
         private object orchestratorOutput = null;
         private Exception orchestratorException = null;
+        private readonly DurableTaskShimFactory shimFactory = new DurableTaskShimFactory();
 
 
         public OrchestrationInvoker(Hashtable privateData)
@@ -143,18 +144,9 @@ namespace DurableEngine
                 runtimeState.AddEvent(newEvent);
             }
 
-            // Construct worker context.
-            // Since we're only utilizing the DTFx executor to manage replay for us,
-            // we construct it minimally. This means we pass in a NullLogger and an emptyService provider.
-            var dataConverter = JsonDataConverter.Default;
-            var logger = NullLoggerFactory.Instance.CreateLogger("");
-            var emptyServiceProvider = new ServiceCollection().BuildServiceProvider();
-            WorkerContext workerContext = new(dataConverter, logger, emptyServiceProvider);
-
             // construct orchestration shim, a DTFx concept.
-            TaskName orchestratorName = new TaskName(runtimeState.Name, runtimeState.Version);
-            FuncTaskOrchestrator<int, object> functionTaskOrchestrator = new(apiInvokerFunction);
-            TaskOrchestrationShim orchestratorShim = new(workerContext, orchestratorName, functionTaskOrchestrator);
+            TaskName orchestratorName = new TaskName(runtimeState.Name);
+            var orchestratorShim = shimFactory.CreateOrchestration(orchestratorName, apiInvokerFunction);
 
             // construct executor
             TaskOrchestrationExecutor executor = new(runtimeState, orchestratorShim, BehaviorOnContinueAsNew.Carryover);
