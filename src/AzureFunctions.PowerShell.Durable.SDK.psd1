@@ -65,7 +65,7 @@
         'Get-DurableStatusExternal',
         # 'New-DurableRetryOptions',
         'New-DurableOrchestrationCheckStatusResponseExternal',
-        # 'Send-DurableExternalEvent',
+        'Send-DurableExternalEventE',
         'Start-DurableOrchestrationExternal'
         # 'Stop-DurableOrchestration'
     )
@@ -73,11 +73,12 @@
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @(
        'Invoke-DurableActivityE',
+       'New-DurableRetryOptionsE',
        'Set-FunctionInvocationContext'
        'Start-DurableTimerE',
        'Stop-DurableTimerTaskE',
        'Wait-DurableTaskE'
-    #    'Start-DurableExternalEventListener'
+       'Start-DurableExternalEventListenerE'
     )
     
     # Variables to export from this module

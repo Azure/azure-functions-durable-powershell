@@ -10,10 +10,11 @@ namespace DurableEngine.Tasks
 {
     using Newtonsoft.Json;
     using System.Threading.Tasks;
-    using System;
     using System.Collections;
     using System.Management.Automation;
+    using DurableEngine;
     using DurableEngine.Models;
+    using Microsoft.DurableTask;
 
     public class ActivityInvocationTask : DurableTask
     {
@@ -37,12 +38,11 @@ namespace DurableEngine.Tasks
 
         internal override Task<object> CreateDTFxTask()
         {
-            if (RetryOptions != null)
-            {
-                throw new NotImplementedException();
-            }
             var DTFxContext = OrchestrationContext.DTFxContext;
-            return DTFxContext.CallActivityAsync<object>(FunctionName, Input);
+            var taskOptions = RetryOptions == null
+                ? null :
+                TaskOptions.FromRetryPolicy(RetryOptions);
+            return DTFxContext.CallActivityAsync<object>(FunctionName, Input, taskOptions);
         }
 
         internal override OrchestrationAction CreateOrchestrationAction()

@@ -189,7 +189,7 @@ function New-DurableOrchestrationCheckStatusResponseExternal {
             ValueFromPipelineByPropertyName=$true)]
         [object] $DurableClient
     )
-    # MICHAELPENG TODO: Remove this before publishing
+    # TODO: Remove this before publishing
     Write-Host "EXTERNAL CHECK STATUS"
     
     if ($null -eq $DurableClient) {
@@ -224,109 +224,83 @@ function New-DurableOrchestrationCheckStatusResponseExternal {
     }
 }
 
-# <#
-# .SYNOPSIS
-#     Send an external event to an orchestration instance.
-# .DESCRIPTION
-#     Send an external event with the given event name, and event data to an orchestration instance with the given instance ID.
-# .EXAMPLE
-#     PS > Send-DurableExternalEvent -InstanceId "example-instance-id" -EventName "ExampleExternalEvent" -EventData "data for the external event"
-#     Return the instance id of the new orchestration.
-# .PARAMETER InstanceId
-#     The ID of the orchestration instance that will handle the external event.
-# .PARAMETER EventName
-#     The name of the external event.
-# .PARAMETER EventData
-#     The JSON-serializable data associated with the external event.
-# .PARAMETER TaskHubName
-#     The TaskHubName of the orchestration instance that will handle the external event.
-# .PARAMETER ConnectionName
-#     The name of the connection string associated with TaskHubName
-# #>
-# function Send-DurableExternalEvent {
-#     [CmdletBinding()]
-#     param(
-#         [Parameter(
-#             Mandatory=$true,
-#             Position=0,
-#             ValueFromPipelineByPropertyName=$true)]
-#         [ValidateNotNullOrEmpty()]
-#         [string] $InstanceId,
+<#
+.SYNOPSIS
+    Send an external event to an orchestration instance.
+.DESCRIPTION
+    Send an external event with the given event name, and event data to an orchestration instance with the given instance ID.
+.EXAMPLE
+    PS > Send-DurableExternalEvent -InstanceId "example-instance-id" -EventName "ExampleExternalEvent" -EventData "data for the external event"
+    Return the instance id of the new orchestration.
+.PARAMETER InstanceId
+    The ID of the orchestration instance that will handle the external event.
+.PARAMETER EventName
+    The name of the external event.
+.PARAMETER EventData
+    The JSON-serializable data associated with the external event.
+.PARAMETER TaskHubName
+    The TaskHubName of the orchestration instance that will handle the external event.
+.PARAMETER ConnectionName
+    The name of the connection string associated with TaskHubName
+#>
+function Send-DurableExternalEventE {
+    [CmdletBinding()]
+    param(
+        [Parameter(
+            Mandatory=$true,
+            Position=0,
+            ValueFromPipelineByPropertyName=$true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $InstanceId,
 
-#         [Parameter(
-#             Mandatory=$true,
-#             Position=1,
-#             ValueFromPipelineByPropertyName=$true)]
-#         [string] $EventName,
+        [Parameter(
+            Mandatory=$true,
+            Position=1,
+            ValueFromPipelineByPropertyName=$true)]
+        [string] $EventName,
 
-#         [Parameter(
-#             Position=2,
-#             ValueFromPipelineByPropertyName=$true)]
-#         [object] $EventData,
+        [Parameter(
+            Position=2,
+            ValueFromPipelineByPropertyName=$true)]
+        [object] $EventData,
 
-# 		[Parameter(
-#             ValueFromPipelineByPropertyName=$true)]
-#         [string] $TaskHubName,
+		[Parameter(
+            ValueFromPipelineByPropertyName=$true)]
+        [string] $TaskHubName,
 
-#         [Parameter(
-#             ValueFromPipelineByPropertyName=$true)]
-#         [string] $ConnectionName
-#     )
+        [Parameter(
+            ValueFromPipelineByPropertyName=$true)]
+        [string] $ConnectionName
+    )
     
-#     $DurableClient = GetDurableClientFromModulePrivateData
+    $DurableClient = GetDurableClientFromModulePrivateData
 
-#     $RequestUrl = GetRaiseEventUrl -DurableClient $DurableClient -InstanceId $InstanceId -EventName $EventName -TaskHubName $TaskHubName -ConnectionName $ConnectionName
+    $RequestUrl = GetRaiseEventUrlE -DurableClient $DurableClient -InstanceId $InstanceId -EventName $EventName -TaskHubName $TaskHubName -ConnectionName $ConnectionName
 
-#     $Body = $EventData | ConvertTo-Json -Compress
+    $Body = $EventData | ConvertTo-Json -Compress
               
-#     $null = Invoke-RestMethod -Uri $RequestUrl -Method 'POST' -ContentType 'application/json' -Body $Body
-# }
+    $null = Invoke-RestMethod -Uri $RequestUrl -Method 'POST' -ContentType 'application/json' -Body $Body
+}
 
-# function GetRaiseEventUrl(
-#     $DurableClient,
-#     [string] $InstanceId,
-#     [string] $EventName,
-#     [string] $TaskHubName,
-#     [string] $ConnectionName) {
+function GetRaiseEventUrlE(
+    $DurableClient,
+    [string] $InstanceId,
+    [string] $EventName,
+    [string] $TaskHubName,
+    [string] $ConnectionName) {
 
-#     $RequestUrl = $DurableClient.BaseUrl + "/instances/$InstanceId/raiseEvent/$EventName"
+    $RequestUrl = $DurableClient.BaseUrl + "/instances/$InstanceId/raiseEvent/$EventName"
     
-#     $query = @()
-#     if ($null -eq $TaskHubName) {
-#         $query += "taskHub=$TaskHubName"
-#     }
-#     if ($null -eq $ConnectionName) {
-#         $query += "connection=$ConnectionName"
-#     }
-#     if ($query.Count -gt 0) {
-#         $RequestUrl += "?" + [string]::Join("&", $query)
-#     }
+    $query = @()
+    if ($null -eq $TaskHubName) {
+        $query += "taskHub=$TaskHubName"
+    }
+    if ($null -eq $ConnectionName) {
+        $query += "connection=$ConnectionName"
+    }
+    if ($query.Count -gt 0) {
+        $RequestUrl += "?" + [string]::Join("&", $query)
+    }
 
-#     return $RequestUrl
-# }
-
-# function New-DurableRetryOptions(
-#     [Parameter(Mandatory = $true)]
-#     [timespan]
-#     $FirstRetryInterval,
-
-#     [Parameter(Mandatory = $true)]
-#     [int]
-#     $MaxNumberOfAttempts,
-    
-#     [double]
-#     $BackoffCoefficient,
-    
-#     [timespan]
-#     $MaxRetryInterval,
-    
-#     [timespan]
-#     $RetryTimeout) {
-
-#     [Microsoft.DurableTask.RetryOptions]::new(
-#         $FirstRetryInterval,
-#         $MaxNumberOfAttempts,
-#         $PSBoundParameters.ContainsKey('BackoffCoefficient') ? $BackoffCoefficient : $null,
-#         $MaxRetryInterval,
-#         $RetryTimeout)
-# }
+    return $RequestUrl
+}

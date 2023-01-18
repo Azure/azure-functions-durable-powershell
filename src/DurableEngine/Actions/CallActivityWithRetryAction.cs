@@ -3,12 +3,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-using System;
-using System.Collections.Generic;
-using DurableEngine.Models;
-
 namespace DurableEngine
 {
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// An orchestration action that represents calling an activity function with retry.
     /// </summary>
@@ -34,39 +33,7 @@ namespace DurableEngine
         {
             FunctionName = functionName;
             Input = input;
-            RetryOptions = ToDictionary(retryOptions);
-        }
-
-        private static Dictionary<string, object> ToDictionary(RetryOptions retryOptions)
-        {
-            var result = new Dictionary<string, object>()
-                            {
-                                { "firstRetryIntervalInMilliseconds", ToIntMilliseconds(retryOptions.FirstRetryInterval) },
-                                { "maxNumberOfAttempts", retryOptions.MaxNumberOfAttempts }
-                            };
-
-            AddOptionalValue(result, "backoffCoefficient", retryOptions.BackoffCoefficient, x => x);
-            AddOptionalValue(result, "maxRetryIntervalInMilliseconds", retryOptions.MaxRetryInterval, ToIntMilliseconds);
-            AddOptionalValue(result, "retryTimeoutInMilliseconds", retryOptions.RetryTimeout, ToIntMilliseconds);
-
-            return result;
-        }
-
-        private static void AddOptionalValue<T>(
-            Dictionary<string, object> dictionary,
-            string name,
-            T? nullable,
-            Func<T, object> transformValue) where T : struct
-        {
-            if (nullable.HasValue)
-            {
-                dictionary.Add(name, transformValue(nullable.Value));
-            }
-        }
-
-        private static object ToIntMilliseconds(TimeSpan timespan)
-        {
-            return (int)timespan.TotalMilliseconds;
-        }
+            RetryOptions = retryOptions.RetryOptionsDictionary;
+        }  
     }
 }

@@ -1,5 +1,4 @@
 using DurableEngine.Models;
-using Microsoft.DurableTask;
 using System;
 using System.Collections;
 using System.Management.Automation;
@@ -48,7 +47,7 @@ namespace DurableEngine.Tasks
             }
             else
             {
-                // Flag this task as the current "task-toa-wait"
+                // Flag this task as the current "task-to-await"
                 OrchestrationContext.SharedMemory.currTask = task;
                 OrchestrationContext.SharedMemory.Add(task.CreateOrchestrationAction());
 
