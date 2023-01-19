@@ -138,8 +138,8 @@ else
 $env:FUNC_PATH = $funcPath
 Write-Host "Set FUNC_PATH environment variable to $env:FUNC_PATH"
 
-# For both integration build test runs and regular test runs, we copy binaries to DurableApp/Modules
-Write-Host "Building the DurableSDK module and copying binaries to the DurableApp/Modules directory..."
+# For both integration build test runs and regular test runs, we copy binaries to durableApp/Modules
+Write-Host "Building the DurableSDK module and copying binaries to the durableApp/Modules directory..."
 $configuration = if ($env:CONFIGURATION) { $env:CONFIGURATION } else { 'Debug' }
 
 Push-Location "$PSScriptRoot/../.."
@@ -147,7 +147,7 @@ Push-Location "$PSScriptRoot/../.."
 Pop-Location
 
 Write-Host "Starting Core Tools..."
-Push-Location "$PSScriptRoot\DurableApp"
+Push-Location "$PSScriptRoot\durableApp"
 
 $Env:TestTaskHubName = $taskHubName
 $Env:FUNCTIONS_WORKER_RUNTIME = "powershell"
