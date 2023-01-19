@@ -6,11 +6,28 @@
 trigger:
 - main
 
+strategy:
+  matrix:
+    linux:
+      imageName: 'MMSUbuntu20.04TLS'
+    windows:
+      imageName: 'MMS2019TLS'
+
 pool:
-  vmImage: ubuntu-latest
+    name: '1ES-Hosted-AzFunc'
+    demands:
+      - ImageOverride -equals $(imageName)
 
 steps:
 - pwsh: ./test/E2E/Start-E2ETest.ps1
   env:
     AzureWebJobsStorage: $(AzureWebJobsStorage)
   displayName: 'Run E2E tests'
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '**/*.trx'
+    failTaskOnFailedTests: true
+  condition: succeededOrFailed()
+  displayName: 'Publish tests results'

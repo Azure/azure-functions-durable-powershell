@@ -15,8 +15,6 @@ TestResults/
 /**/azure-functions-powershell-worker/
 /**/durableApp/Modules/**/AzureFunctions.PowerShell.Durable.SDK*
 
-local.settings.json
-
 # Temporary output folder for Durable SDK binaries
 **/src/out
 

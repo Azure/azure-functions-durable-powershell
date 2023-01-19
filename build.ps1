@@ -50,7 +50,7 @@ function Write-Log
     Write-Host -ForegroundColor $foregroundColor $Message
 }
 
-Write-Log "Build started. Configuration '$Configuration' and output folder '$outputPath' with shared dependencies folder '$sharedDependenciesPath'..."
+Write-Log "Build started...`nConfiguration: '$Configuration'`nOutput folder '$outputPath'`nShared dependencies folder: '$sharedDependenciesPath'"
 
 # Map from project names to the folder containing the corresponding .csproj
 $projects = @{
