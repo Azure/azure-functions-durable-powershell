@@ -155,12 +155,16 @@ finally {
 Write-Host "Starting Core Tools..."
 Push-Location "$PSScriptRoot\durableApp"
 try {
-    Write-Host "Installing extensions..."
-
     if (($IsMacOS -or $IsLinux) -and (-not $SkipCoreToolsDownload)) {
         chmod +x $funcPath
     }
 
+    Write-Host "Initializing function app project..."
+    & $funcPath init . --powershell
+
+    if ($LASTEXITCODE -ne 0) { throw "Installing extensions failed." }
+
+    Write-Host "Installing extensions..."
     & $funcPath extensions install | ForEach-Object {    
     if ($_ -match 'OK')    
     { Write-Host $_ -f Green }    

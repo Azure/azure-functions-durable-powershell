@@ -17,7 +17,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
             funcProcess.StartInfo.RedirectStandardError = true;
             funcProcess.StartInfo.RedirectStandardOutput = true;
             funcProcess.StartInfo.CreateNoWindow = true;
-            funcProcess.StartInfo.WorkingDirectory = Path.Combine(rootDir, String.Format(@"test{0}E2E{0}DurableApp", Path.DirectorySeparatorChar));
+            funcProcess.StartInfo.WorkingDirectory = Path.Combine(rootDir, String.Format(@"test{0}E2E{0}durableApp", Path.DirectorySeparatorChar));
             funcProcess.StartInfo.FileName = Environment.GetEnvironmentVariable(Constants.FUNC_PATH);
             funcProcess.StartInfo.ArgumentList.Add("start");
 
