@@ -16,6 +16,7 @@ TestResults/
 /**/durableApp/Modules/**/AzureFunctions.PowerShell.Durable.SDK*
 
 local.settings.json
+/**/.gitignore
 
 # Temporary output folder for Durable SDK binaries
 **/src/out

@@ -10,7 +10,7 @@ param
     $SkipCoreToolsDownload
 )
 
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'STOP'
 
 function NewTaskHubName
 {
@@ -58,11 +58,26 @@ function NewTaskHubName
     $sb.ToString()
 }
 
-$taskHubName = NewTaskHubName -Length 45
-
 $FUNC_RUNTIME_VERSION = '4'
 $POWERSHELL_VERSION = '7.2'
 $FUNC_CMDLET_NAME = "func"
+
+# Set the appropriate environment variables
+$taskHubName = NewTaskHubName -Length 45
+
+# In non-ADO environments, host.json values are not populated with environment variables. Instead,
+# We override the host.json taskHubName with an app setting/environment variable: see
+# https://learn.microsoft.com/en-us/azure/azure-functions/functions-app-settings for reference.
+$Env:AzureFunctionsJobHost__extensions__durableTask__hubName = $taskHubName
+
+$Env:FUNCTIONS_WORKER_RUNTIME = "powershell"
+$Env:FUNCTIONS_WORKER_RUNTIME_VERSION = $POWERSHELL_VERSION
+$Env:AZURE_FUNCTIONS_ENVIRONMENT = "Development"
+
+# TODO: Remove this once the external SDK is no longer behind a feature flag
+# Enable the feature flag for the external durable SDK
+$env:ExternalDurablePowerShellSDK = $true
+Write-Host "Set ExternalDurablePowerShellSDK environment variable to $env:ExternalDurablePowerShellSDK"
 
 $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLowerInvariant()
 if ($IsWindows) {
@@ -113,24 +128,11 @@ if (-not $SkipCoreToolsDownload.IsPresent)
     # Prepend installed Core Tools to the PATH
     $Env:Path = "$FUNC_CLI_DIRECTORY$([System.IO.Path]::PathSeparator)$Env:Path"
     $funcPath = Join-Path $FUNC_CLI_DIRECTORY $FUNC_EXE_NAME
-
-    # TODO: Remove after the worker enables the external SDK
-    # Deploy a version of the PowerShell worker that enables the external SDK
-    $powerShellWorkerDirectory = "$PSScriptRoot/azure-functions-powershell-worker"
-    Write-Host 'Deleting the PowerShell worker if it exists...'
-    Remove-Item -Force "$powerShellWorkerDirectory" -ErrorAction Ignore
-    $enableExternalSDKBranchName = "dev"
-    git clone "https://github.com/Azure/azure-functions-powershell-worker.git" $powerShellWorkerDirectory
-    Push-Location $powerShellWorkerDirectory
-    git checkout $enableExternalSDKBranchName
-    & $powerShellWorkerDirectory/build.ps1 -Bootstrap -Deploy "$FUNC_CLI_DIRECTORY"
-    Pop-Location
-}
-else
-{
+} else {
+    # TODO: Fix this for Core Tools installations through npm
     $funcPath = (Get-Command $FUNC_CMDLET_NAME).Source
     $version = & $funcPath --version
-    Write-Host "Using local Functions Core Tools (Version: $version)..."
+    Write-Host "Using local Functions Core Tools (Version: $version) from $funcPath..."
 }
 
 # Set an environment variable containing the path to the func executable. This will be accessed from
@@ -143,38 +145,36 @@ Write-Host "Building the DurableSDK module and copying binaries to the durableAp
 $configuration = if ($env:CONFIGURATION) { $env:CONFIGURATION } else { 'Debug' }
 
 Push-Location "$PSScriptRoot/../.."
-& ./build.ps1 -Configuration 'Debug'
-Pop-Location
+try {
+    & ./build.ps1 -Configuration 'Debug'
+}
+finally {
+    Pop-Location
+}
 
 Write-Host "Starting Core Tools..."
 Push-Location "$PSScriptRoot\durableApp"
+try {
+    Write-Host "Installing extensions..."
 
-$Env:TestTaskHubName = $taskHubName
-$Env:FUNCTIONS_WORKER_RUNTIME = "powershell"
-$Env:FUNCTIONS_WORKER_RUNTIME_VERSION = $POWERSHELL_VERSION
-$Env:AZURE_FUNCTIONS_ENVIRONMENT = "Development"
-# TODO: Remove this once the external SDK is no longer behind a feature flag
-# Enable the feature flag for the external durable SDK
-$env:ExternalDurablePowerShellSDK = $true
-Write-Host "Set ExternalDurablePowerShellSDK environment variable to $env:ExternalDurablePowerShellSDK"
+    if (($IsMacOS -or $IsLinux) -and (-not $SkipCoreToolsDownload)) {
+        chmod +x $funcPath
+    }
 
-Write-Host "Installing extensions..."
+    & $funcPath extensions install | ForEach-Object {    
+    if ($_ -match 'OK')    
+    { Write-Host $_ -f Green }    
+    elseif ($_ -match 'FAIL|ERROR')   
+    { Write-Host $_ -f Red }
+    else    
+    { Write-Host $_ }    
+    }
 
-if (($IsMacOS -or $IsLinux) -and (-not $SkipCoreToolsDownload)) {
-    chmod +x $funcPath
+    if ($LASTEXITCODE -ne 0) { throw "Installing extensions failed." }
 }
-
-& $funcPath extensions install | ForEach-Object {    
-  if ($_ -match 'OK')    
-  { Write-Host $_ -f Green }    
-  elseif ($_ -match 'FAIL|ERROR')   
-  { Write-Host $_ -f Red }
-  else    
-  { Write-Host $_ }    
+finally {
+    Pop-Location
 }
-
-if ($LASTEXITCODE -ne 0) { throw "Installing extensions failed." }
-Pop-Location
 
 Write-Host "Running E2E integration tests..." -ForegroundColor Green
 Write-Host "-----------------------------------------------------------------------------`n" -ForegroundColor Green

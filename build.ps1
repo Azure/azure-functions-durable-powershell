@@ -99,3 +99,4 @@ Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
 Write-Log "Copying PowerShell module and manifest from the Durable SDK source code into $outputPath"
 Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
+Write-Log "Build succeeded!"
