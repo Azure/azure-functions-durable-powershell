@@ -66,7 +66,7 @@ if (Test-Path $outputPath)
 }
 # Create output folder and its inner dependencies directory
 Write-Log "Creating a new output and shared dependencies folder at $outputPath and $sharedDependenciesPath..."
-[Void](New-Item -Path $sharedDependenciesPath -ItemType Directory)
+[void](New-Item -Path $sharedDependenciesPath -ItemType Directory)
 
 # Build the Durable SDK and Durable Engine project
 foreach ($project in $projects.GetEnumerator()) {

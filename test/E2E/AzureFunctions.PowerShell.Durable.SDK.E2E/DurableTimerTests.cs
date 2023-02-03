@@ -4,6 +4,7 @@
 using AzureFunctions.PowerShell.Durable.SDK.Tests.E2E;
 using Newtonsoft.Json;
 using System.Net;
+using Xunit;
 
 namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 {

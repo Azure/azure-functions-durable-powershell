@@ -5,6 +5,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
 {
     using System;
     using System.Diagnostics;
+    using Xunit;
     using Xunit.Abstractions;
     using Xunit.Sdk;
     
