@@ -9,14 +9,14 @@ param(
 $packageName = "AzureFunctions.PowerShell.Durable.SDK"
 $shimPath = "$PSScriptRoot/src/DurableSDK"
 $durableEnginePath = "$PSScriptRoot/src/DurableEngine"
-$durableAppPath = "$PSScriptRoot/samples/durableApp/Modules/$packageName"
+$durableAppPath = "$PSScriptRoot/test/E2E/durableApp/Modules/$packageName"
 $powerShellModulePath = "$PSScriptRoot/src/$packageName.psm1"
 $manifestPath = "$PSScriptRoot/src/$packageName.psd1"
 
 $outputPath = "$PSScriptRoot/src/out/"
 if ($Configuration -eq "Debug")
 {
-    # Publish directly to the sample function app for testing
+    # Publish directly to the test durable app for testing
     $outputPath = $durableAppPath
 }
 $sharedDependenciesPath = "$outputPath/Dependencies/"
@@ -33,6 +33,9 @@ function Write-Log
         $Message,
 
         [Switch]
+        $Warning,
+
+        [Switch]
         $Throw
     )
 
@@ -43,10 +46,11 @@ function Write-Log
         throw $Message
     }
 
-    Write-Host $Message
+    $foregroundColor = if ($Warning.IsPresent) { 'Yellow' } else { 'Green' }
+    Write-Host -ForegroundColor $foregroundColor $Message
 }
 
-Write-Log "Build started. Configuration '$Configuration' and output folder '$outputPath' with shared dependencies folder '$sharedDependenciesPath'..."
+Write-Log "Build started...`nConfiguration: '$Configuration'`nOutput folder '$outputPath'`nShared dependencies folder: '$sharedDependenciesPath'"
 
 # Map from project names to the folder containing the corresponding .csproj
 $projects = @{
@@ -62,7 +66,7 @@ if (Test-Path $outputPath)
 }
 # Create output folder and its inner dependencies directory
 Write-Log "Creating a new output and shared dependencies folder at $outputPath and $sharedDependenciesPath..."
-New-Item -Path $sharedDependenciesPath -ItemType Directory
+[void](New-Item -Path $sharedDependenciesPath -ItemType Directory)
 
 # Build the Durable SDK and Durable Engine project
 foreach ($project in $projects.GetEnumerator()) {
@@ -70,7 +74,7 @@ foreach ($project in $projects.GetEnumerator()) {
     Push-Location $project.Value
     try
     {
-        dotnet publish -f $netCoreTFM
+        dotnet publish -f $netCoreTFM -c $Configuration
     }
     finally
     {
@@ -86,7 +90,7 @@ Get-ChildItem -Path "$durableEnginePath/$publishPathSuffix" |
     ForEach-Object { [void]$commonFiles.Add($_.Name); Copy-Item -LiteralPath $_.FullName -Destination $sharedDependenciesPath }
 
 # Copy all *unique* assemblies from Durable SDK into output directory
-Write-Log "Copying UNIQUE assemblies from the Durable SDK project into $outputPath"
+Write-Log "Copying unique assemblies from the Durable SDK project into $outputPath"
 Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
     Where-Object { $_.Extension -in '.dll','.pdb' -and -not $commonFiles.Contains($_.Name) } |
     ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
@@ -95,3 +99,4 @@ Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
 Write-Log "Copying PowerShell module and manifest from the Durable SDK source code into $outputPath"
 Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
+Write-Log "Build succeeded!"

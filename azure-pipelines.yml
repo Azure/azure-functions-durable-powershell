@@ -6,14 +6,28 @@
 trigger:
 - main
 
+strategy:
+  matrix:
+    linux:
+      imageName: 'MMSUbuntu20.04TLS'
+    windows:
+      imageName: 'MMS2019TLS'
+
 pool:
-  vmImage: ubuntu-latest
+    name: '1ES-Hosted-AzFunc'
+    demands:
+      - ImageOverride -equals $(imageName)
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- pwsh: ./test/E2E/Start-E2ETest.ps1 -UseCoreToolsBuildFromIntegrationTests
+  env:
+    AzureWebJobsStorage: $(AzureWebJobsStorage)
+  displayName: 'Run E2E tests'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '**/*.trx'
+    failTaskOnFailedTests: true
+  condition: succeededOrFailed()
+  displayName: 'Publish tests results'

@@ -10,10 +10,5 @@
   },
   "managedDependency": {
     "enabled": true
-  },
-  "extensions": {
-    "durableTask": {
-      "hubName": "testingTaskHub1"
-    }
   }
 }
