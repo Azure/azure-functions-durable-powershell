@@ -2,24 +2,14 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using AzureFunctions.PowerShell.Durable.SDK.Tests.E2E;
-using Newtonsoft.Json;
-using System.Net;
 using Xunit;
 
 namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 {
     [Collection(Constants.DurableAppCollectionName)]
-    public class DurableTimerTests
+    public class DurableTimerTests : DurableTests
     {
-        private readonly DurableAppFixture _fixture;
-
-        // Set the shared context for E2E tests
-        public DurableTimerTests(DurableAppFixture fixture)
-        {
-            _fixture = fixture;
-        }
-
-        private TimeSpan _orchestrationCompletionTimeout = TimeSpan.FromSeconds(120);
+        public DurableTimerTests(DurableAppFixture fixture) : base(fixture) {}
 
         /*
             Verifies that the Durable execution model correctly replays the same collection of CurrentUtcDateTimes.
@@ -55,76 +45,81 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         public async Task OrchestratorReplaysCurrentUtcDateTime()
         {
             var initialResponse = await Utilities.GetHttpStartResponse("CurrentUtcDateTimeOrchestrator", queryString: string.Empty);
-
-            var initialResponseBody = await initialResponse.Content.ReadAsStringAsync();
-            dynamic initialResponseBodyObject = JsonConvert.DeserializeObject(initialResponseBody);
-            var statusQueryGetUri = (string)initialResponseBodyObject.statusQueryGetUri;
-
-            var startTime = DateTime.UtcNow;
-
-            using (var httpClient = new HttpClient())
-            {
-                while (true)
+            await ValidateOutput(
+                initialResponse,
+                (dynamic statusResponseBody) =>
                 {
-                    var statusResponse = await httpClient.GetAsync(statusQueryGetUri);
-                    switch (statusResponse.StatusCode)
+                    var output = statusResponseBody.output.ToString();
+                    string[] lines = output.Split('\n');
+
+                    // Expect the format to be as in Case 1
+                    var delineatorLines = new int[] { 0, 3, 9 };
+                    var timestamp1Lines = new int[] { 1, 2, 4, 5, 10, 11 };
+                    var timestamp2Lines = new int[] { 6, 7, 8, 12, 13, 14 };
+                    int timestamp3Line = 15;
+
+                    // Updates the expected format to be Case 2 if it is not Case 1
+                    if (lines[timestamp3Line] == "---")
                     {
-                        case HttpStatusCode.Accepted:
-                        {
-                            if (DateTime.UtcNow > startTime + _orchestrationCompletionTimeout)
-                            {
-                                Assert.True(false, $"The orchestration has not completed after {_orchestrationCompletionTimeout}");
-                            }
+                        delineatorLines = new int[] { 0, 3, 9, 15 };
+                        timestamp1Lines = new int[] { 1, 2, 4, 5, 10, 11, 16, 17 };
+                        timestamp2Lines = new int[] { 6, 7, 8, 12, 13, 14, 18, 19, 20 };
+                        timestamp3Line = 21;
 
-                            await Task.Delay(TimeSpan.FromSeconds(2));
-                            break;
-                        }
-                        case HttpStatusCode.OK:
-                        {
-                            var statusResponseBody = await Utilities.GetResponseBodyAsync(statusResponse);
-                            Assert.Equal("Completed", (string)statusResponseBody.runtimeStatus);
-                            string log = statusResponseBody.output.ToString();
-                            string[] lines = log.Split('\n');
-
-                            // Expect the format to be as in Case 1
-                            var delineatorLines = new int[] { 0, 3, 9 };
-                            var timestamp1Lines = new int[] { 1, 2, 4, 5, 10, 11 };
-                            var timestamp2Lines = new int[] { 6, 7, 8, 12, 13, 14 };
-                            int timestamp3Line = 15;
-
-                            // Updates the expected format to be Case 2 if it is not Case 1
-                            if (lines[timestamp3Line] == "---")
-                            {
-                                delineatorLines = new int[] { 0, 3, 9, 15 };
-                                timestamp1Lines = new int[] { 1, 2, 4, 5, 10, 11, 16, 17 };
-                                timestamp2Lines = new int[] { 6, 7, 8, 12, 13, 14, 18, 19, 20 };
-                                timestamp3Line = 21;
-
-                                Assert.True(delineatorLines.Length == 4);
-                                Assert.True(timestamp1Lines.Length == 8);
-                                Assert.True(timestamp2Lines.Length == 9);
-                            }
-
-                            Assert.Equal("---", lines[delineatorLines[0]]);
-                            VerifyArrayItemsAreEqual(array: lines, indices: delineatorLines);
-                            VerifyArrayItemsAreEqual(array: lines, indices: timestamp1Lines);
-                            VerifyArrayItemsAreEqual(array: lines, indices: timestamp2Lines);
-                            // Verifies that the Timestamp3 line is not a delineator, Timestamp2, or Timestamp1 line
-                            Assert.NotEqual(lines[timestamp3Line], lines[delineatorLines[0]]);
-                            Assert.NotEqual(lines[timestamp3Line], lines[timestamp1Lines[0]]);
-                            Assert.NotEqual(lines[timestamp3Line], lines[timestamp2Lines[0]]);
-                            return;
-                        }
-                        default:
-                        {
-                            Assert.True(false, $"Unexpected orchestration status code: {statusResponse.StatusCode}");
-                            break;
-                        }
+                        Assert.True(delineatorLines.Length == 4);
+                        Assert.True(timestamp1Lines.Length == 8);
+                        Assert.True(timestamp2Lines.Length == 9);
                     }
-                }
-            }
 
+                    Assert.Equal("---", lines[delineatorLines[0]]);
+                    VerifyArrayItemsAreEqual(array: lines, indices: delineatorLines);
+                    VerifyArrayItemsAreEqual(array: lines, indices: timestamp1Lines);
+                    VerifyArrayItemsAreEqual(array: lines, indices: timestamp2Lines);
+                    // Verifies that the Timestamp3 line is not a delineator, Timestamp2, or Timestamp1 line
+                    Assert.NotEqual(lines[timestamp3Line], lines[delineatorLines[0]]);
+                    Assert.NotEqual(lines[timestamp3Line], lines[timestamp1Lines[0]]);
+                    Assert.NotEqual(lines[timestamp3Line], lines[timestamp2Lines[0]]);
+                    return;
+                });
         }
+
+        /*
+            Verifies that the Start-DurableTimer cmdlet restarts the orchestrator and updates the CurrentUtcDateTime
+            after the timer is fired. The orchestrator writes CurrentUtcDateTime values to a temp file. File contents
+            are expected to take the following form:
+            
+            Line
+            0     ---
+            1     <Timestamp1>
+            2     ---
+            3     <Timestamp1>
+            4     <Timestamp2>
+        */
+        [Fact]
+        private async Task DurableTimerStopsOrchestratorAndUpdatesCurrentUtcDateTime()
+        {
+            var initialResponse = await Utilities.GetHttpStartResponse("DurableTimerOrchestrator", queryString: string.Empty);
+            await ValidateOutput(
+                initialResponse,
+                (dynamic statusResponseBody) =>
+                {
+                    var output = statusResponseBody.output.ToString();
+                    string[] lines = output.Split('\n');
+
+                    // Expect the format to be as in Case 1
+                    var delineatorLines = new int[] { 0, 2 };
+                    var timestamp1Lines = new int[] { 1, 3 };
+                    int timestamp2Line = 4;
+
+                    Assert.Equal("---", lines[delineatorLines[0]]);
+                    VerifyArrayItemsAreEqual(array: lines, indices: delineatorLines);
+                    VerifyArrayItemsAreEqual(array: lines, indices: timestamp1Lines);
+                    // Verifies that the Timestamp2 line is not a delineator or Timestamp1 line
+                    Assert.NotEqual(lines[timestamp2Line], lines[delineatorLines[0]]);
+                    Assert.NotEqual(lines[timestamp2Line], lines[timestamp1Lines[0]]);
+                });
+        }
+
         private void VerifyArrayItemsAreEqual(string[] array, int[] indices)
         {
             if (indices.Length > 0)
