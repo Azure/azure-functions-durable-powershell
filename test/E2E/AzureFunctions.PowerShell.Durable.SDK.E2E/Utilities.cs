@@ -9,15 +9,15 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
 
     public static class Utilities
     {
-        public static async Task<bool> InvokeOrchestration(
-            string orchestrationName,
+        public static async Task<bool> GetHttpStartResponse(
+            string orchestratorName,
             string queryString,
             HttpStatusCode expectedStatusCode,
             string expectedMessage,
             int expectedCode = 0,
             string clientRoute = "orchestrators")
         {
-            var response = await GetHttpStartResponse(orchestrationName, queryString, clientRoute);
+            var response = await GetHttpStartResponse(orchestratorName, queryString, clientRoute);
             if (expectedStatusCode != response.StatusCode && expectedCode != (int)response.StatusCode)
             {
                 return false;
