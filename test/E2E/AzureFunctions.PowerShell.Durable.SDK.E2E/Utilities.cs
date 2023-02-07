@@ -14,9 +14,10 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
             string queryString,
             HttpStatusCode expectedStatusCode,
             string expectedMessage,
-            int expectedCode = 0)
+            int expectedCode = 0,
+            string clientRoute = "orchestrators")
         {
-            var response = await GetHttpStartResponse(orchestrationName, queryString);
+            var response = await GetHttpStartResponse(orchestrationName, queryString, clientRoute);
             if (expectedStatusCode != response.StatusCode && expectedCode != (int)response.StatusCode)
             {
                 return false;

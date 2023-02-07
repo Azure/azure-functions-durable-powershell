@@ -57,9 +57,9 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         public async Task DurableClientTerminatesOrchestration()
         {
             var initialResponse = await Utilities.GetHttpStartResponse(
-                clientRoute: "terminatingClientOrchestrators",
-                "DurablePatternsOrchestrator",
-                queryString: string.Empty);
+                orchestrationName: "DurablePatternsOrchestrator",
+                queryString: string.Empty,
+                clientRoute: "terminatingClientOrchestrators");
             await ValidateDurableWorkflowResults(
                 initialResponse,
                 (dynamic statusResponseBody) =>
