@@ -9,7 +9,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
 
     public static class Utilities
     {
-        public static async Task<bool> GetHttpStartResponse(
+        public static async Task<bool> InvokeOrchestration(
             string orchestrationName,
             string queryString,
             HttpStatusCode expectedStatusCode,
