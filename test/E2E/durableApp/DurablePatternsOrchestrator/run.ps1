@@ -16,7 +16,7 @@ $output += Invoke-DurableActivityE -FunctionName "Hello" -Input "Tokyo"
 $tasks = @()
 $tasks += Invoke-DurableActivityE -FunctionName "Hello" -Input "Seattle" -NoWait
 $tasks += Invoke-DurableActivityE -FunctionName "Hello" -Input "London" -NoWait
-$output += Wait-DurableTask -Task $tasks
+$output += Wait-DurableTaskE -Task $tasks
 
 # Retries
 $retryOptions = New-DurableRetryOptionsE -FirstRetryInterval (New-Timespan -Seconds 2) -MaxNumberOfAttempts 5
