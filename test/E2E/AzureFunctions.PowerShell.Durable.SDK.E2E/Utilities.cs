@@ -30,9 +30,12 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
             return true;
         }
 
-        public static async Task<HttpResponseMessage> GetHttpStartResponse(string orchestratorName, string queryString)
+        public static async Task<HttpResponseMessage> GetHttpStartResponse(
+            string orchestratorName,
+            string queryString,
+            string clientRoute = "orchestrators")
         {
-            string uri = $"api/orchestrators/{orchestratorName}{queryString}";
+            string uri = $"api/{clientRoute}/{orchestratorName}{queryString}";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
 

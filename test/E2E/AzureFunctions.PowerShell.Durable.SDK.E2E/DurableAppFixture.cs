@@ -19,11 +19,11 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
         {
             _diagnosticMessageSink = diagnosticMessageSink;
             // Kill any existing func processes
-            //WriteDiagnosticMessage("Shutting down any running Functions hosts.");
+            WriteDiagnosticMessage("Shutting down any running Functions hosts.");
             FixtureHelpers.KillExistingFuncProcesses();
 
             // Start func processes
-            //WriteDiagnosticMessage("Starting Functions hosts.");
+            WriteDiagnosticMessage("Starting Functions hosts.");
             _funcProcess = FixtureHelpers.GetFuncProcess();
 
             FixtureHelpers.StartProcessWithLogging(_funcProcess);

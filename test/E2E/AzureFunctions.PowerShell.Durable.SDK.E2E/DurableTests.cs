@@ -22,9 +22,10 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 
         // Poll the statusQueryGetUri returned in the initial HttpResponseMessage until the workflow
         // is complete and validate the final response body contents
-        protected internal async Task ValidateOutput(
+        protected internal async Task ValidateDurableWorkflowResults(
             HttpResponseMessage initialResponse,
-            Action<dynamic> validateResponseBody)
+            Action<dynamic>? validateIntermediateResponse,
+            Action<dynamic>? validateResponseBody)
         {
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
@@ -39,6 +40,8 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 while (true)
                 {
                     var statusResponse = await httpClient.GetAsync(statusQueryGetUri);
+                    var statusResponseBody = await Utilities.GetResponseBodyAsync(statusResponse);
+
                     switch (statusResponse.StatusCode)
                     {
                         case HttpStatusCode.Accepted:
@@ -48,15 +51,15 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                                 Assert.True(false, $"The orchestration has not completed after {_orchestrationCompletionTimeout}");
                             }
 
+                            validateIntermediateResponse?.Invoke(statusResponseBody);
                             await Task.Delay(TimeSpan.FromSeconds(2));
                             break;
                         }
 
                         case HttpStatusCode.OK:
                         {
-                            var statusResponseBody = await Utilities.GetResponseBodyAsync(statusResponse);
                             Assert.Equal("Completed", (string)statusResponseBody.runtimeStatus);
-                            validateResponseBody(statusResponseBody);
+                            validateResponseBody?.Invoke(statusResponseBody);
                             return;
                         }
 
