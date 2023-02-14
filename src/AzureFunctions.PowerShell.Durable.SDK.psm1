@@ -3,6 +3,8 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+using namespace System.Net
+
 # Set aliases for cmdlets to export
 # Set-Alias -Name Wait-ActivityFunction -Value Wait-DurableTask
 # Set-Alias -Name Invoke-ActivityFunction -Value Invoke-DurableActivity
@@ -159,7 +161,7 @@ function Stop-DurableOrchestrationE {
 
     $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId/terminate?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
 
-    Invoke-RestMethod -Uri $requestUrl
+    Invoke-RestMethod -Uri $requestUrl -Method 'POST'
 }
 
 function IsValidUrl([uri]$Url) {

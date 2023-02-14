@@ -56,7 +56,7 @@ namespace DurableEngine
             // DF API.
             // Similarly, the user code thread / PS orchestrator will block its own thread until this function is done `await`'ing
             // the requested APIs.
-            Func<TaskOrchestrationContext, int, Task<object>> apiInvokerFunction = async (TaskOrchestrationContext DTFxContext, int _) =>
+            Func<TaskOrchestrationContext, object, Task<object>> apiInvokerFunction = async (TaskOrchestrationContext DTFxContext, object _) =>
             {
                 context.DTFxContext = DTFxContext;
 
@@ -126,7 +126,7 @@ namespace DurableEngine
         /// </summary>
         /// <param name="apiInvokerFunction">A C# Function that calls DF APIs.</param>
         /// <returns>An orchestrator executor implementing DF replay.</returns>
-        private TaskOrchestrationExecutor CreateTaskOrchestrationExecutor(Func<TaskOrchestrationContext, int, Task<object>> apiInvokerFunction)
+        private TaskOrchestrationExecutor CreateTaskOrchestrationExecutor(Func<TaskOrchestrationContext, object, Task<object>> apiInvokerFunction)
         {
             // Construct the OrchestratorState object. The key here is to correctly distinguish new events from past ones.
             OrchestratorState state = new OrchestratorState();
