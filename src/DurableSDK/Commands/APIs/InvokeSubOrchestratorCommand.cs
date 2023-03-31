@@ -17,27 +17,27 @@ namespace DurableSDK.Commands.APIs
     public class InvokeSubOrchestratorCommand : DurableSDKCmdlet
     {
         /// <summary>
-        /// Name of the Activity to invoke.
+        /// Name of the SubOrchestrator to invoke.
         /// </summary>
         [Parameter(Mandatory = true)]
         public string FunctionName { get; set; }
 
         /// <summary>
-        /// Name of the Activity to invoke.
+        /// InstanceId of the SubOrchestrator to invoke.
         /// </summary>
         [Parameter]
         [ValidateNotNull]
         public string InstanceId { get; set; }
 
         /// <summary>
-        /// The input for the Activity.
+        /// The input for the SubOrchestrator.
         /// </summary>
         [Parameter]
         [ValidateNotNull]
         public object Input { get; set; }
 
         /// <summary>
-        /// Retry configuration for the Activity.
+        /// Retry configuration for the SubOrchestrator.
         /// </summary>
         [Parameter]
         [ValidateNotNull]

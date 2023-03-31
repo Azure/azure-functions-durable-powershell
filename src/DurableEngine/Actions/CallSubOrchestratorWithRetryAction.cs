@@ -19,7 +19,7 @@ namespace DurableEngine.Actions
         public readonly string InstanceId;
 
         /// <summary>
-        /// The input to the activity function.
+        /// The input to the sub-orchestrator.
         /// </summary>
         public readonly object Input;
 
