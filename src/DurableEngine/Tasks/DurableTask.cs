@@ -1,7 +1,12 @@
 using DurableEngine.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DurableEngine.Tasks
@@ -69,8 +74,19 @@ namespace DurableEngine.Tasks
                     }
                     else
                     {
-                        // Feed result to pipeline
                         var result = OrchestrationContext.SharedMemory.currTask.Result;
+
+                        // TODO: improve this de-serialization logic. Might need C#-isolated support
+                        // We need to re-serialize to the raw string and then de-serialize via Newtonsoft to get a proper type
+                        if  (result is List<object> list) {
+                            result = list.Select(e => e is JsonElement res ? JsonConvert.DeserializeObject(res.GetRawText()) : e);
+                        }
+                        if (result is JsonElement res)
+                        {
+                            result = JsonConvert.DeserializeObject(res.GetRawText());
+                        }
+
+                        // Feed result to pipeline
                         write(result);
                     }
                 }

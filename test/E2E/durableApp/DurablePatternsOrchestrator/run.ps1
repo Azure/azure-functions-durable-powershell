@@ -26,5 +26,7 @@ $output += Invoke-DurableActivityE -FunctionName "FlakyFunction" -Input $inputDa
 Set-DurableCustomStatusE -CustomStatus 'Custom status: finished'
 
 Write-Host "DurablePatternsOrchestrator: finished."
+Write-Host $output
+Write-Host "DurablePatternsOrchestrator: finished."
 
 return $output
