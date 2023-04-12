@@ -95,6 +95,11 @@ Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
     Where-Object { $_.Extension -in '.dll','.pdb' -and -not $commonFiles.Contains($_.Name) } |
     ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
 
+Write-Log "Copying unique ps1xml from the Durable SDK project into $outputPath"
+Get-ChildItem -Path "$shimPath" |
+    Where-Object { $_.Extension -in '.ps1xml' -and -not $commonFiles.Contains($_.Name) } |
+    ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
+
 # Move Durable SDK manifest into the output directory
 Write-Log "Copying PowerShell module and manifest from the Durable SDK source code into $outputPath"
 Copy-Item -Path $powerShellModulePath -Destination $outputPath

@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System;
 using System.Management.Automation;
 
 namespace DurableSDK.Commands.APIs
@@ -17,7 +18,7 @@ namespace DurableSDK.Commands.APIs
 
         protected override void EndProcessing()
         {
-            // Create Task corresponding to this API and execute it.
+            // Create Task corresponding to this API and execute it
             durableTask = CreateDurableTask();
             durableTask.Execute(WriteObject, WriteError);
         }

@@ -22,6 +22,19 @@ namespace DurableEngine.Tasks
             OrchestrationContext = (OrchestrationContext)privateData[OrchestrationInvoker.ContextKey];
         }
 
+        private OrchestrationAction orchestrationAction;
+
+        internal OrchestrationAction OrchestrationAction {
+            get 
+            {
+                if (this.orchestrationAction == null)
+                {
+                    this.orchestrationAction = this.CreateOrchestrationAction();
+                }
+                return this.orchestrationAction;
+            }
+        }
+
         /// <summary>
         /// The orchestrator context.
         /// </summary>
@@ -54,7 +67,14 @@ namespace DurableEngine.Tasks
             {
                 // Flag this task as the current "task-to-await"
                 OrchestrationContext.SharedMemory.currTask = task;
-                OrchestrationContext.SharedMemory.Add(task.CreateOrchestrationAction());
+
+                // DF APIs only generate an action once, otherwise we'll get duplicate executions
+                if (task.orchestrationAction == null)
+                {
+                    var action = task.OrchestrationAction; // generate and cache action
+                    OrchestrationContext.SharedMemory.Add(action);
+                }
+
 
                 // Signal orchestration thread to await the Task.
                 // This is necessary for DTFx to determine if a result exists for the Task.
@@ -110,7 +130,6 @@ namespace DurableEngine.Tasks
         {
             get { return DTFxTask.Exception; }
         }
-
 
         /// <summary>
         /// Obtain  a new DTFx Task corresponding to this SDK-level Task.

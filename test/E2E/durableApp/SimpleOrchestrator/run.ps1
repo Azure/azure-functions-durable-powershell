@@ -4,6 +4,13 @@ param($Context)
 
 $ErrorActionPreference = 'Stop'
 
-$output = Invoke-DurableActivityE -FunctionName "Hello" -Input "Tokyo"
+$myTask = Invoke-DurableActivityE -FunctionName "Hello" -Input "Tokyo" -NoWait
 
-return $output
+$tasks = @($myTask)
+Wait-DurableTaskE -Task $tasks -Any
+#$result = Get-DurableTaskResult -Task $myTask
+
+#Write-Host "++++++++++++++++++"
+#Write-Host $myTask
+
+return 5
