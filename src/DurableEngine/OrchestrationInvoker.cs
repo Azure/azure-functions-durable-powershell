@@ -22,7 +22,6 @@ namespace DurableEngine
 
     using Microsoft.DurableTask.Worker.Shims;
     using Microsoft.DurableTask.Worker;
-    using Newtonsoft.Json;
 
     public class OrchestrationInvoker
     {
