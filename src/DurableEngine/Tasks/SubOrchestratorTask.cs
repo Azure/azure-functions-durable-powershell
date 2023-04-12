@@ -37,9 +37,7 @@ namespace DurableEngine.Tasks
         internal override Task<object> CreateDTFxTask()
         {
             var DTFxContext = OrchestrationContext.DTFxContext;
-            var taskOptions = RetryOptions == null
-                ? null :
-                TaskOptions.FromRetryPolicy(RetryOptions);
+            var taskOptions = new SubOrchestrationOptions(RetryOptions, InstanceId);
             return DTFxContext.CallSubOrchestratorAsync<object>(FunctionName, Input, taskOptions);
         }
 
