@@ -4,6 +4,8 @@ param($Context)
 
 $ErrorActionPreference = 'Stop'
 
-$output = Invoke-DurableSubOrchestratorE -FunctionName "SimpleOrchestrator"
+$output = @()
+$output += Invoke-DurableSubOrchestratorE -FunctionName "SimpleOrchestrator"
+$output += Invoke-DurableActivityE -FunctionName "Hello" -Input "Seattle"
 
 return $output
