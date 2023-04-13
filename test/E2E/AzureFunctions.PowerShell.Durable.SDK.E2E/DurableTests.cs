@@ -8,6 +8,8 @@ using Xunit;
 
 namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 {
+    // Parent class for all Durable E2E test files. No tests should be written here, otherwise,
+    // XUnit will not be able to find matching fixture data.
     public class DurableTests
     {
         private readonly DurableAppFixture _fixture;
@@ -20,8 +22,13 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             _fixture = fixture;
         }
 
-        // Poll the statusQueryGetUri returned in the initial HttpResponseMessage until the workflow
-        // is complete and validate the final response body contents
+        // Durable workflows follow an asynchronous pattern, where an initial response is given
+        // to the client, and a statusQueryGetUri is polled until the orchestration terminates. This
+        // method allows delagates to be passed in that will validate the appropriate response is
+        // given in each of the below three states:
+        //  1. The orchestration has been initialized.
+        //  2. The orchestration is running.
+        //  3. The orchestration has terminated.
         protected internal async Task ValidateDurableWorkflowResults(
             HttpResponseMessage initialResponse,
             Action<dynamic>? validateInitialResponse,
@@ -69,56 +76,6 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     }
                 }
             }
-        }
-
-        [Fact]
-        public async Task LegacyDurableCommandNamesStillWork()
-        {
-            var initialResponse = await Utilities.GetHttpStartResponse("LegacyNamesOrchestrator");
-            Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
-
-            await ValidateDurableWorkflowResults(
-                initialResponse,
-                null,
-                (dynamic intermediateStatusResponseBody) =>
-                {
-                    var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
-                    Assert.True(
-                        runtimeStatus == "Running" || runtimeStatus == "Pending",
-                        $"Unexpected runtime status: {runtimeStatus}");
-                },
-                (dynamic finalStatusResponseBody) =>
-                {
-                    Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
-                    Assert.Equal("Hello Tokyo", finalStatusResponseBody.output[0].ToString());
-                });
-        }
-
-        [Fact]
-        public async Task OrchestratationContextHasAllExpectedProperties()
-        {
-            var initialResponse = await Utilities.GetHttpStartResponse(
-                "DurableOrchestratorAccessContextProps",
-                clientRoute: "contextOrchestrators");
-            Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
-
-            await ValidateDurableWorkflowResults(
-                initialResponse,
-                null,
-                (dynamic intermediateStatusResponseBody) =>
-                {
-                    var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
-                    Assert.True(
-                        runtimeStatus == "Running" || runtimeStatus == "Pending",
-                        $"Unexpected runtime status: {runtimeStatus}");
-                },
-                (dynamic finalStatusResponseBody) =>
-                {
-                    Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
-                    Assert.Equal("True", finalStatusResponseBody.output[0].ToString());
-                    Assert.Equal("Hello myInstanceId", finalStatusResponseBody.output[1].ToString());
-                    Assert.Equal("False", finalStatusResponseBody.output[2].ToString());
-                });
         }
     }
 }

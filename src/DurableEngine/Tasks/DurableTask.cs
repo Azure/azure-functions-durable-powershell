@@ -1,12 +1,7 @@
 using DurableEngine.Models;
-using Newtonsoft.Json;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Management.Automation;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DurableEngine.Tasks
@@ -138,7 +133,7 @@ namespace DurableEngine.Tasks
         internal Task DTFxTask;
 
         /// <summary>
-        /// Whether this Task finished executing.
+        /// Whether this Task finished executing AND has a result to write to the output pipe.
         /// </summary>
         internal virtual bool HasResult()
         {
