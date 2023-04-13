@@ -66,18 +66,20 @@
         'New-DurableOrchestrationCheckStatusResponseExternal',
         'Send-DurableExternalEventE',
         'Start-DurableOrchestrationExternal'
-        # 'Stop-DurableOrchestration'
+        'Stop-DurableOrchestrationE'
     )
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @(
        'Invoke-DurableActivityE',
+       'Invoke-DurableSubOrchestratorE',
        'New-DurableRetryOptionsE',
-       'Set-FunctionInvocationContext'
+       'Set-DurableCustomStatusE',
+       'Set-FunctionInvocationContext',
+       'Start-DurableExternalEventListenerE'
        'Start-DurableTimerE',
        'Stop-DurableTimerTaskE',
        'Wait-DurableTaskE'
-       'Start-DurableExternalEventListenerE'
     )
     
     # Variables to export from this module
@@ -85,7 +87,7 @@
     
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
     AliasesToExport = @(
-        # 'Invoke-ActivityFunction',
+        'Invoke-ActivityFunction',
         'New-OrchestrationCheckStatusResponse',
         'Start-NewOrchestration',
         'Wait-ActivityFunction'

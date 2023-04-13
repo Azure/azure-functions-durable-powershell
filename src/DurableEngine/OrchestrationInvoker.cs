@@ -21,6 +21,7 @@ namespace DurableEngine
     using DurableTask.Core.Command;
 
     using Microsoft.DurableTask.Worker.Shims;
+    using Microsoft.DurableTask.Worker;
 
     public class OrchestrationInvoker
     {
@@ -30,12 +31,14 @@ namespace DurableEngine
         private bool orchestratorFailed = false;
         private object orchestratorOutput = null;
         private Exception orchestratorException = null;
-        private readonly DurableTaskShimFactory shimFactory = new DurableTaskShimFactory();
+        private readonly DurableTaskShimFactory shimFactory;
 
 
         public OrchestrationInvoker(Hashtable privateData)
         {
             context = (OrchestrationContext)privateData[ContextKey];
+            DurableTaskWorkerOptions workerOptions = new DurableTaskWorkerOptions { DataConverter = new JsonDataConverter() };
+            this.shimFactory = new DurableTaskShimFactory(options: workerOptions);
         }
 
         public Func<PowerShell, object> CreateInvokerFunction()
@@ -56,7 +59,7 @@ namespace DurableEngine
             // DF API.
             // Similarly, the user code thread / PS orchestrator will block its own thread until this function is done `await`'ing
             // the requested APIs.
-            Func<TaskOrchestrationContext, int, Task<object>> apiInvokerFunction = async (TaskOrchestrationContext DTFxContext, int _) =>
+            Func<TaskOrchestrationContext, object, Task<object>> apiInvokerFunction = async (TaskOrchestrationContext DTFxContext, object _) =>
             {
                 context.DTFxContext = DTFxContext;
 
@@ -126,7 +129,7 @@ namespace DurableEngine
         /// </summary>
         /// <param name="apiInvokerFunction">A C# Function that calls DF APIs.</param>
         /// <returns>An orchestrator executor implementing DF replay.</returns>
-        private TaskOrchestrationExecutor CreateTaskOrchestrationExecutor(Func<TaskOrchestrationContext, int, Task<object>> apiInvokerFunction)
+        private TaskOrchestrationExecutor CreateTaskOrchestrationExecutor(Func<TaskOrchestrationContext, object, Task<object>> apiInvokerFunction)
         {
             // Construct the OrchestratorState object. The key here is to correctly distinguish new events from past ones.
             OrchestratorState state = new OrchestratorState();

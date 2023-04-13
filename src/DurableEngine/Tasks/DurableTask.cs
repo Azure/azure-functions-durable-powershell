@@ -1,7 +1,12 @@
 using DurableEngine.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DurableEngine.Tasks
@@ -69,8 +74,10 @@ namespace DurableEngine.Tasks
                     }
                     else
                     {
-                        // Feed result to pipeline
+                        // TODO: add extension to guarantee termination or else fail fast
                         var result = OrchestrationContext.SharedMemory.currTask.Result;
+
+                        // Feed result to pipeline
                         write(result);
                     }
                 }
