@@ -3,7 +3,13 @@
 param(
     [ValidateSet('Debug', 'Release')]
     [string]
-    $Configuration = 'Debug'
+    $Configuration = 'Debug',
+    
+    [switch]
+    $AddSBOM,
+
+    [string]
+    $SBOMUtilSASUrl
 )
 
 $packageName = "AzureFunctions.PowerShell.Durable.SDK"
@@ -23,6 +29,36 @@ $sharedDependenciesPath = "$outputPath/Dependencies/"
 
 $netCoreTFM = 'net6.0'
 $publishPathSuffix = "bin/$Configuration/$netCoreTFM/publish"
+
+function Install-SBOMUtil
+{
+    if ([string]::IsNullOrEmpty($SBOMUtilSASUrl))
+    {
+        throw "The `$SBOMUtilSASUrl parameter cannot be null or empty when specifying the `$AddSBOM switch"
+    }
+
+    $MANIFESTOOLNAME = "ManifestTool"
+    Write-Log "Installing $MANIFESTOOLNAME..."
+
+    $MANIFESTOOL_DIRECTORY = Join-Path $PSScriptRoot $MANIFESTOOLNAME
+    Remove-Item -Recurse -Force $MANIFESTOOL_DIRECTORY -ErrorAction Ignore
+
+    Invoke-RestMethod -Uri $SBOMUtilSASUrl -OutFile "$MANIFESTOOL_DIRECTORY.zip"
+    Expand-Archive "$MANIFESTOOL_DIRECTORY.zip" -DestinationPath $MANIFESTOOL_DIRECTORY
+
+    $dllName = "Microsoft.ManifestTool.dll"
+    $manifestToolPath = "$MANIFESTOOL_DIRECTORY/$dllName"
+
+    if (-not (Test-Path $manifestToolPath))
+    {
+        throw "$MANIFESTOOL_DIRECTORY does not contain '$dllName'"
+    }
+
+    Write-Log 'Done.'
+
+    return $manifestToolPath
+}
+
 
 function Write-Log
 {
@@ -100,3 +136,25 @@ Write-Log "Copying PowerShell module and manifest from the Durable SDK source co
 Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
 Write-Log "Build succeeded!"
+
+if ($AddSBOM)
+{
+    # Install manifest tool
+    $manifestTool = Install-SBOMUtil
+    Write-Log "manifestTool: $manifestTool "
+
+    # Generate manifest
+    $buildPath = $outputPath
+    $telemetryFilePath = Join-Path $PSScriptRoot ((New-Guid).Guid + ".json")
+    $packageName = "AzureFunctions.PowerShell.Durable.SDK.nuspec"
+
+    # Delete the manifest folder if it exists
+    $manifestFolderPath = Join-Path $buildPath "_manifest"
+    if (Test-Path $manifestFolderPath)
+    {
+        Remove-Item $manifestFolderPath -Recurse -Force -ErrorAction Ignore
+    }
+
+    Write-Log "Running: dotnet $manifestTool generate -BuildDropPath $buildPath -BuildComponentPath $buildPath -Verbosity Information -t $telemetryFilePath"
+    & { dotnet $manifestTool generate -BuildDropPath $buildPath -BuildComponentPath $buildPath -Verbosity Information -t $telemetryFilePath -PackageName $packageName }
+}
