@@ -48,9 +48,10 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             await ValidateDurableWorkflowResults(
                 initialResponse,
                 null,
-                (dynamic statusResponseBody) =>
+                null,
+                (dynamic finalStatusResponseBody) =>
                 {
-                    var output = statusResponseBody.output.ToString();
+                    var output = finalStatusResponseBody.output.ToString();
                     string[] lines = output.Split('\n');
 
                     // Expect the format to be as in Case 1
@@ -103,9 +104,10 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             await ValidateDurableWorkflowResults(
                 initialResponse,
                 null,
-                (dynamic statusResponseBody) =>
+                null,
+                (dynamic finalStatusResponseBody) =>
                 {
-                    var output = statusResponseBody.output.ToString();
+                    var output = finalStatusResponseBody.output.ToString();
                     string[] lines = output.Split('\n');
 
                     // Expect the format to be as in Case 1

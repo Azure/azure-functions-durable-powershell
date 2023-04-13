@@ -24,14 +24,15 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         // is complete and validate the final response body contents
         protected internal async Task ValidateDurableWorkflowResults(
             HttpResponseMessage initialResponse,
+            Action<dynamic>? validateInitialResponse,
             Action<dynamic>? validateIntermediateResponse,
-            Action<dynamic>? validateResponseBody)
+            Action<dynamic>? validateFinalResponse)
         {
-            Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
+            var initialResponseBodyString = await initialResponse.Content.ReadAsStringAsync();
+            dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString);
+            var statusQueryGetUri = (string)initialResponseBody.statusQueryGetUri;
 
-            var initialResponseBody = await initialResponse.Content.ReadAsStringAsync();
-            dynamic initialResponseBodyObject = JsonConvert.DeserializeObject(initialResponseBody);
-            var statusQueryGetUri = (string)initialResponseBodyObject.statusQueryGetUri;
+            validateInitialResponse?.Invoke(initialResponseBody);
 
             var startTime = DateTime.UtcNow;
 
@@ -58,7 +59,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 
                         case HttpStatusCode.OK:
                         {
-                            validateResponseBody?.Invoke(statusResponseBody);
+                            validateFinalResponse?.Invoke(statusResponseBody);
                             return;
                         }
 
@@ -69,5 +70,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 }
             }
         }
+
+        
     }
 }
