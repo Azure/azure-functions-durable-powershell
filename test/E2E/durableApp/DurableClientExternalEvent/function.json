@@ -5,10 +5,10 @@
       "name": "Request",
       "type": "httpTrigger",
       "direction": "in",
-      "route": "terminatingClientOrchestrators/{FunctionName}",
+      "route": "externalEventOrchestrators/{FunctionName}",
       "methods": [
         "post",
-        "get"        
+        "get"
       ]
     },
     {
@@ -23,3 +23,4 @@
     }    
   ]
 }
+  

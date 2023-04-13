@@ -3,6 +3,8 @@ using namespace System.Net
 param($Request, $TriggerMetadata)
 $ErrorActionPreference = 'Stop'
 
+Write-Host "DurableClient started"
+
 $FunctionName = $Request.Params.FunctionName
 $InstanceId = Start-DurableOrchestrationExternal -FunctionName $FunctionName
 Write-Host "Started orchestration with ID = '$InstanceId'"
@@ -16,4 +18,4 @@ if ($Status.RuntimeStatus -notin 'Pending', 'Running', 'Failed', 'Completed') {
     throw "Unexpected orchestration $InstanceId runtime status: $($Status.RuntimeStatus)"
 }
 
-Write-Host "DurableAppHttpStartCompleted"
+Write-Host "DurableClient completed"
