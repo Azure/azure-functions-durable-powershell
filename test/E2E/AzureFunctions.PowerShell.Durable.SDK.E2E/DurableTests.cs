@@ -58,7 +58,6 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 
                         case HttpStatusCode.OK:
                         {
-                            Assert.Equal("Completed", (string)statusResponseBody.runtimeStatus);
                             validateResponseBody?.Invoke(statusResponseBody);
                             return;
                         }

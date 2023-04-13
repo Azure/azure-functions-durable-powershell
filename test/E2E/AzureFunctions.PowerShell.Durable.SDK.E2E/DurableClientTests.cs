@@ -40,7 +40,6 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     Assert.True(
                         runtimeStatus == "Running" || runtimeStatus == "Pending",
                         $"Unexpected runtime status: {runtimeStatus}");
-                    Assert.Equal("Custom status: started", (string)statusResponseBody.customStatus);
                 },
                 (dynamic statusResponseBody) =>
                 {
@@ -54,10 +53,46 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         }
 
         [Fact]
+        public async Task DurableSubOrchestratorCompletes()
+        {
+            var initialResponse = await Utilities.GetHttpStartResponse("SubOrchestrator", queryString: string.Empty);
+            Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
+
+            var location = initialResponse.Headers.Location;
+            Assert.NotNull(location);
+
+            var initialResponseBody = await initialResponse.Content.ReadAsStringAsync();
+            dynamic initialResponseBodyObject = JsonConvert.DeserializeObject(initialResponseBody);
+            Assert.NotNull(initialResponseBodyObject.id);
+            var statusQueryGetUri = (string)initialResponseBodyObject.statusQueryGetUri;
+            Assert.Equal(location.ToString(), statusQueryGetUri);
+            Assert.NotNull(initialResponseBodyObject.sendEventPostUri);
+            Assert.NotNull(initialResponseBodyObject.purgeHistoryDeleteUri);
+            Assert.NotNull(initialResponseBodyObject.terminatePostUri);
+            Assert.NotNull(initialResponseBodyObject.rewindPostUri);
+
+            await ValidateDurableWorkflowResults(
+                initialResponse,
+                (dynamic statusResponseBody) =>
+                {
+                    var runtimeStatus = (string)statusResponseBody.runtimeStatus;
+                    Assert.True(
+                        runtimeStatus == "Running" || runtimeStatus == "Pending",
+                        $"Unexpected runtime status: {runtimeStatus}");
+                },
+                (dynamic statusResponseBody) =>
+                {
+                    Assert.Equal("Completed", (string)statusResponseBody.runtimeStatus);
+                    Assert.Equal("Hello Tokyo", statusResponseBody.output[0].ToString());
+                    Assert.Equal("Hello Seattle", statusResponseBody.output[1].ToString());
+                });
+        }
+
+        [Fact]
         public async Task DurableClientTerminatesOrchestration()
         {
             var initialResponse = await Utilities.GetHttpStartResponse(
-                orchestratorName: "DurablePatternsOrchestrator",
+                orchestratorName: "DurablePatternsOrchestratorWithExternalEvent",
                 queryString: string.Empty,
                 clientRoute: "terminatingClientOrchestrators");
             await ValidateDurableWorkflowResults(

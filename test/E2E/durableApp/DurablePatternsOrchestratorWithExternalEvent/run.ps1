@@ -23,10 +23,10 @@ $retryOptions = New-DurableRetryOptionsE -FirstRetryInterval (New-Timespan -Seco
 $inputData = @{ Name = 'Toronto'; StartTime = $Context.CurrentUtcDateTime }
 $output += Invoke-DurableActivityE -FunctionName "FlakyFunction" -Input $inputData -RetryOptions $retryOptions
 
+Start-DurableExternalEventListenerE -EventName "Unblock"
+
 Set-DurableCustomStatusE -CustomStatus 'Custom status: finished'
 
-Write-Host "DurablePatternsOrchestrator: finished."
-Write-Host $output
 Write-Host "DurablePatternsOrchestrator: finished."
 
 return $output

@@ -32,7 +32,7 @@ namespace DurableEngine.Tasks
             Hashtable privateData) : base(noWait, privateData)
         {
             FunctionName = functionName;
-            Input = JsonConvert.SerializeObject(functionInput);
+            Input = functionInput;
             RetryOptions = retryOptions;
         }
 
