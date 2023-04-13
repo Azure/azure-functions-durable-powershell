@@ -32,7 +32,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString);
             var statusQueryGetUri = (string)initialResponseBody.statusQueryGetUri;
 
-            validateInitialResponse?.Invoke(initialResponseBody);
+            await validateInitialResponse?.Invoke(initialResponseBody);
 
             var startTime = DateTime.UtcNow;
 
@@ -52,14 +52,14 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                                 Assert.True(false, $"The orchestration has not completed after {_orchestrationCompletionTimeout}");
                             }
 
-                            validateIntermediateResponse?.Invoke(statusResponseBody);
+                            await validateIntermediateResponse?.Invoke(statusResponseBody);
                             await Task.Delay(TimeSpan.FromSeconds(2));
                             break;
                         }
 
                         case HttpStatusCode.OK:
                         {
-                            validateFinalResponse?.Invoke(statusResponseBody);
+                            await validateFinalResponse?.Invoke(statusResponseBody);
                             return;
                         }
 

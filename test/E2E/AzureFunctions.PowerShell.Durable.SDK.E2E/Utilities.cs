@@ -4,6 +4,7 @@
 namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
 {
     using Newtonsoft.Json;
+    using System.Diagnostics;
     using System.Net;
     using System.Net.Http.Headers;
 
@@ -51,6 +52,31 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
         {
             var responseBody = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject(responseBody);
+        }
+
+        public static async Task RetryAsync(
+            Func<Task<bool>> condition,
+            int timeout = 60 * 1000,
+            int pollingInterval = 2 * 1000,
+            bool throwWhenDebugging = false,
+            Func<string> userMessageCallback = null)
+        {
+            DateTime start = DateTime.Now;
+            while (!await condition())
+            {
+                await Task.Delay(pollingInterval);
+
+                bool shouldThrow = !Debugger.IsAttached || (Debugger.IsAttached && throwWhenDebugging);
+                if (shouldThrow && (DateTime.Now - start).TotalMilliseconds > timeout)
+                {
+                    string error = "Condition not reached within timeout.";
+                    if (userMessageCallback != null)
+                    {
+                        error += " " + userMessageCallback();
+                    }
+                    throw new ApplicationException(error);
+                }
+            }
         }
     }
 }
