@@ -33,7 +33,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
 
         public static async Task<HttpResponseMessage> GetHttpStartResponse(
             string orchestratorName,
-            string queryString,
+            string queryString = "",
             string clientRoute = "orchestrators")
         {
             string uri = $"api/{clientRoute}/{orchestratorName}{queryString}";

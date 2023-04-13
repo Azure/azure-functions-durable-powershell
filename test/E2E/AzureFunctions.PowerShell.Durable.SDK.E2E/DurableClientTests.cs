@@ -15,7 +15,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         [Fact]
         public async Task DurableClientFollowsAsyncPattern()
         {
-            var initialResponse = await Utilities.GetHttpStartResponse("DurablePatternsOrchestrator", queryString: string.Empty);
+            var initialResponse = await Utilities.GetHttpStartResponse("DurablePatternsOrchestrator");
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
             var location = initialResponse.Headers.Location;
@@ -54,7 +54,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         [Fact]
         public async Task DurableSubOrchestratorCompletes()
         {
-            var initialResponse = await Utilities.GetHttpStartResponse("SubOrchestrator", queryString: string.Empty);
+            var initialResponse = await Utilities.GetHttpStartResponse("SubOrchestrator");
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
             var location = initialResponse.Headers.Location;
@@ -92,7 +92,6 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         {
             var initialResponse = await Utilities.GetHttpStartResponse(
                 orchestratorName: "DurablePatternsOrchestratorWithExternalEvent",
-                queryString: string.Empty,
                 clientRoute: "terminatingOrchestrators");
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 

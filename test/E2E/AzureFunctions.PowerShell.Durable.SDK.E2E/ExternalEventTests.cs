@@ -17,7 +17,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         [Fact]
         public async Task ExternalEventReturnsData()
         {
-            var initialResponse = await Utilities.GetHttpStartResponse("BasicExternalEventOrchestrator", queryString: string.Empty);
+            var initialResponse = await Utilities.GetHttpStartResponse("BasicExternalEventOrchestrator");
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
             var initialResponseBodyString = await initialResponse.Content.ReadAsStringAsync();
@@ -56,7 +56,6 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         {
             var initialResponse = await Utilities.GetHttpStartResponse(
                 "ComplexExternalEventOrchestrator",
-                queryString: string.Empty,
                 clientRoute: "externalEventOrchestrators");
 
             await ValidateDurableWorkflowResults(

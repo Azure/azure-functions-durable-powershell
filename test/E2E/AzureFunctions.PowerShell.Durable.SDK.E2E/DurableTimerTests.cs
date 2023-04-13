@@ -44,7 +44,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         [Fact]
         public async Task OrchestratorReplaysCurrentUtcDateTime()
         {
-            var initialResponse = await Utilities.GetHttpStartResponse("CurrentUtcDateTimeOrchestrator", queryString: string.Empty);
+            var initialResponse = await Utilities.GetHttpStartResponse("CurrentUtcDateTimeOrchestrator");
             await ValidateDurableWorkflowResults(
                 initialResponse,
                 null,
@@ -100,7 +100,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         [Fact]
         private async Task DurableTimerStopsOrchestratorAndUpdatesCurrentUtcDateTime()
         {
-            var initialResponse = await Utilities.GetHttpStartResponse("DurableTimerOrchestrator", queryString: string.Empty);
+            var initialResponse = await Utilities.GetHttpStartResponse("DurableTimerOrchestrator");
             await ValidateDurableWorkflowResults(
                 initialResponse,
                 null,
