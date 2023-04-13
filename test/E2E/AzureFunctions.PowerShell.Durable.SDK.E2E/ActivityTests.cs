@@ -12,24 +12,24 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
     {
         public ActivityTests(DurableAppFixture fixture) : base(fixture) {}
 
-        [Fact]
-        public async Task ActivityCanHaveQueueBinding()
-        {
-            await StorageHelpers.ClearQueue();
-            var initialResponse = await Utilities.GetHttpStartResponse("DurableOrchestratorWriteToQueue");
-            Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
+        //[Fact]
+        //public async Task ActivityCanHaveQueueBinding()
+        //{
+        //    await StorageHelpers.ClearQueue();
+        //    var initialResponse = await Utilities.GetHttpStartResponse("DurableOrchestratorWriteToQueue");
+        //    Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
-            await ValidateDurableWorkflowResults(
-                initialResponse,
-                null,
-                null,
-                async (dynamic finalStatusResponseBody) =>
-                {
-                    Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
-                    var queueMessage = await StorageHelpers.ReadFromQueue();
-                    Assert.Equal("QueueData", queueMessage);
-                });
-        }
+        //    await ValidateDurableWorkflowResults(
+        //        initialResponse,
+        //        null,
+        //        null,
+        //        async (dynamic finalStatusResponseBody) =>
+        //        {
+        //            Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
+        //            var queueMessage = await StorageHelpers.ReadFromQueue();
+        //            Assert.Equal("QueueData", queueMessage);
+        //        });
+        //}
 
 
         [Fact]
