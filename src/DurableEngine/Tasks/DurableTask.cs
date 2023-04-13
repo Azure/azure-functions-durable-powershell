@@ -77,16 +77,6 @@ namespace DurableEngine.Tasks
                         // TODO: add extension to guarantee termination or else fail fast
                         var result = OrchestrationContext.SharedMemory.currTask.Result;
 
-                        // TODO: improve this de-serialization logic. Might need C#-isolated support
-                        // We need to re-serialize to the raw string and then de-serialize via Newtonsoft to get a proper type
-                        if  (result is List<object> list) {
-                            result = list.Select(e => e is JsonElement res ? JsonConvert.DeserializeObject(res.GetRawText()) : e);
-                        }
-                        if (result is JsonElement res)
-                        {
-                            result = JsonConvert.DeserializeObject(res.GetRawText());
-                        }
-
                         // Feed result to pipeline
                         write(result);
                     }
