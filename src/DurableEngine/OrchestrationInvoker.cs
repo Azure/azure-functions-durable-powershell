@@ -21,6 +21,7 @@ namespace DurableEngine
     using DurableTask.Core.Command;
 
     using Microsoft.DurableTask.Worker.Shims;
+    using Microsoft.DurableTask.Worker;
 
     public class OrchestrationInvoker
     {
@@ -30,12 +31,14 @@ namespace DurableEngine
         private bool orchestratorFailed = false;
         private object orchestratorOutput = null;
         private Exception orchestratorException = null;
-        private readonly DurableTaskShimFactory shimFactory = new DurableTaskShimFactory();
+        private readonly DurableTaskShimFactory shimFactory;
 
 
         public OrchestrationInvoker(Hashtable privateData)
         {
             context = (OrchestrationContext)privateData[ContextKey];
+            DurableTaskWorkerOptions workerOptions = new DurableTaskWorkerOptions { DataConverter = new JsonDataConverter() };
+            this.shimFactory = new DurableTaskShimFactory(options: workerOptions);
         }
 
         public Func<PowerShell, object> CreateInvokerFunction()
