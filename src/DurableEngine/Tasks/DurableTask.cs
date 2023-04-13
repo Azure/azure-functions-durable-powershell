@@ -74,6 +74,7 @@ namespace DurableEngine.Tasks
                     }
                     else
                     {
+                        // TODO: add extension to guarantee termination or else fail fast
                         var result = OrchestrationContext.SharedMemory.currTask.Result;
 
                         // TODO: improve this de-serialization logic. Might need C#-isolated support
