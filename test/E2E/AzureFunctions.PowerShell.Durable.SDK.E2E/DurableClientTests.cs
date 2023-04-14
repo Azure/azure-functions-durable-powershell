@@ -23,7 +23,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 
             await ValidateDurableWorkflowResults(
                 initialResponse,
-                (dynamic initialResponseBody) =>
+                validateInitialResponse: (dynamic initialResponseBody) =>
                 {
                     Assert.NotNull(initialResponseBody.id);
                     var statusQueryGetUri = (string)initialResponseBody.statusQueryGetUri;
@@ -33,14 +33,14 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     Assert.NotNull(initialResponseBody.terminatePostUri);
                     Assert.NotNull(initialResponseBody.rewindPostUri);
                 },
-                (dynamic intermediateStatusResponseBody) =>
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
                 {
                     var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
                     Assert.True(
                         runtimeStatus == "Running" || runtimeStatus == "Pending",
                         $"Unexpected runtime status: {runtimeStatus}");
                 },
-                (dynamic finalStatusResponseBody) =>
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
                     Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
                     Assert.Equal("Hello Tokyo", finalStatusResponseBody.output[0].ToString());
@@ -62,7 +62,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 
             await ValidateDurableWorkflowResults(
                 initialResponse,
-                (dynamic initialStatusResponseBody) =>
+                validateInitialResponse: (dynamic initialStatusResponseBody) =>
                 {
                     Assert.NotNull(initialStatusResponseBody.id);
                     var statusQueryGetUri = (string)initialStatusResponseBody.statusQueryGetUri;
@@ -72,14 +72,14 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     Assert.NotNull(initialStatusResponseBody.terminatePostUri);
                     Assert.NotNull(initialStatusResponseBody.rewindPostUri);
                 },
-                (dynamic intermediateStatusResponseBody) =>
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
                 {
                     var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
                     Assert.True(
                         runtimeStatus == "Running" || runtimeStatus == "Pending",
                         $"Unexpected runtime status: {runtimeStatus}");
                 },
-                (dynamic finalStatusResponseBody) =>
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
                     Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
                     Assert.Equal("Hello Tokyo", finalStatusResponseBody.output[0].ToString());
@@ -97,15 +97,14 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 
             await ValidateDurableWorkflowResults(
                 initialResponse,
-                null,
-                (dynamic intermediateStatusResponseBody) =>
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
                 {
                     var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
                     Assert.True(
                         runtimeStatus == "Running" || runtimeStatus == "Pending",
                         $"Unexpected runtime status: {runtimeStatus}");
                 },
-                (dynamic finalStatusResponseBody) =>
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
                     Assert.Equal("Terminated", (string)finalStatusResponseBody.runtimeStatus);
                     Assert.Equal("Terminated intentionally", (string)finalStatusResponseBody.output);

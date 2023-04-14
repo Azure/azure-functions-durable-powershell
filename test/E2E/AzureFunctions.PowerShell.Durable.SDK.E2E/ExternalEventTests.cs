@@ -20,31 +20,29 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             var initialResponse = await Utilities.GetHttpStartResponse("BasicExternalEventOrchestrator");
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
-            var initialResponseBodyString = await initialResponse.Content.ReadAsStringAsync();
-            dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString);
-            var raiseEventUri = (string)initialResponseBody.sendEventPostUri;
-
-            raiseEventUri = raiseEventUri.Replace("{eventName}", "TESTEVENTNAME");
-
-            using (var httpClient = new HttpClient())
-            {
-                // Send external event payload
-                var json = JsonConvert.SerializeObject("helloWorld!");
-                var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-                await httpClient.PostAsync(raiseEventUri, httpContent);
-            }
-
             await ValidateDurableWorkflowResults(
                 initialResponse,
-                null,
-                (dynamic intermediateStatusResponseBody) =>
+                sendExternalEvents: async (HttpClient httpClient) =>
+                {
+                    var initialResponseBodyString = await initialResponse.Content.ReadAsStringAsync();
+                    dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString);
+                    var raiseEventUri = (string)initialResponseBody.sendEventPostUri;
+
+                    raiseEventUri = raiseEventUri.Replace("{eventName}", "TESTEVENTNAME");
+
+                    // Send external event payload
+                    var json = JsonConvert.SerializeObject("helloWorld!");
+                    var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+                    await httpClient.PostAsync(raiseEventUri, httpContent);
+                },
+                validateInitialResponse: (dynamic intermediateStatusResponseBody) =>
                 {
                     var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
                     Assert.True(
                         runtimeStatus == "Running" || runtimeStatus == "Pending",
                         $"Unexpected runtime status: {runtimeStatus}");
                 },
-                (dynamic finalStatusResponseBody) =>
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
                     Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
                     Assert.Equal("helloWorld!", finalStatusResponseBody.output.ToString());
@@ -60,9 +58,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 
             await ValidateDurableWorkflowResults(
                 initialResponse,
-                null,
-                null,
-                (dynamic finalStatusResponseBody) =>
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
                     Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
                     Assert.Equal("FirstTimeout", finalStatusResponseBody.output[0].ToString());

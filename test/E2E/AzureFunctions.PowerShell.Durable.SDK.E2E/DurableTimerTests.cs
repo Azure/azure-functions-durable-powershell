@@ -47,9 +47,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             var initialResponse = await Utilities.GetHttpStartResponse("CurrentUtcDateTimeOrchestrator");
             await ValidateDurableWorkflowResults(
                 initialResponse,
-                null,
-                null,
-                (dynamic finalStatusResponseBody) =>
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
                     var output = finalStatusResponseBody.output.ToString();
                     string[] lines = output.Split('\n');
@@ -103,9 +101,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             var initialResponse = await Utilities.GetHttpStartResponse("DurableTimerOrchestrator");
             await ValidateDurableWorkflowResults(
                 initialResponse,
-                null,
-                null,
-                (dynamic finalStatusResponseBody) =>
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
                     var output = finalStatusResponseBody.output.ToString();
                     string[] lines = output.Split('\n');

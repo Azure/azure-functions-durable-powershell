@@ -14,7 +14,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
     {
         private readonly DurableAppFixture _fixture;
         
-        private readonly TimeSpan _orchestrationCompletionTimeout = TimeSpan.FromSeconds(120);
+        protected readonly TimeSpan _orchestrationCompletionTimeout = TimeSpan.FromSeconds(120);
 
         // Set the shared context for E2E tests
         public DurableTests(DurableAppFixture fixture)
@@ -29,11 +29,14 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         //  1. The orchestration has been initialized.
         //  2. The orchestration is running.
         //  3. The orchestration has terminated.
+        // Validation delegates are expected to be synchronous. This method also allows for external
+        // events to be sent after the workflow begins execution.
         protected internal async Task ValidateDurableWorkflowResults(
             HttpResponseMessage initialResponse,
-            Action<dynamic>? validateInitialResponse,
-            Action<dynamic>? validateIntermediateResponse,
-            Action<dynamic>? validateFinalResponse)
+            Func<HttpClient, Task>? sendExternalEvents = null,
+            Action<dynamic>? validateInitialResponse = null,
+            Action<dynamic>? validateIntermediateResponse = null,
+            Action<dynamic>? validateFinalResponse = null)
         {
             var initialResponseBodyString = await initialResponse.Content.ReadAsStringAsync();
             dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString);
@@ -49,6 +52,10 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 {
                     var statusResponse = await httpClient.GetAsync(statusQueryGetUri);
                     var statusResponseBody = await Utilities.GetResponseBodyAsync(statusResponse);
+                    if (sendExternalEvents != null)
+                    {
+                        await sendExternalEvents.Invoke(httpClient);
+                    }
 
                     switch (statusResponse.StatusCode)
                     {
