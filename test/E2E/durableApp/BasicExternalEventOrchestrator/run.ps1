@@ -2,9 +2,9 @@ param($Context)
 
 $output = @()
 
-Invoke-DurableActivityE -FunctionName "DurableActivity" -Input "Tokyo"
-Invoke-DurableActivityE -FunctionName "DurableActivity" -Input "Seattle"
+Invoke-DurableActivityE -FunctionName "Hello" -Input "Tokyo"
+Invoke-DurableActivityE -FunctionName "Hello" -Input "Seattle"
 $output += Start-DurableExternalEventListenerE -EventName "TESTEVENTNAME" 
-Invoke-DurableActivityE -FunctionName "DurableActivity" -Input "London"
+Invoke-DurableActivityE -FunctionName "Hello" -Input "London"
 
 $output

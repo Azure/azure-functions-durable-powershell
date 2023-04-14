@@ -6,7 +6,7 @@ using Azure.Storage.Queues.Models;
 
 namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
 {
-    class StorageHelpers
+    public class StorageHelpers
     {
         public static QueueClient _queueClient = new QueueClient(Constants.Queue.StorageConnectionStringSetting, Constants.Queue.QueueName);
 
@@ -22,7 +22,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
         {
             QueueMessage retrievedMessage = await _queueClient.ReceiveMessageAsync();
             await _queueClient.DeleteMessageAsync(retrievedMessage.MessageId, retrievedMessage.PopReceipt);
-            return retrievedMessage.Body.ToString();
+            return Convert.ToBase64String(retrievedMessage.Body);
         }
     }
 }

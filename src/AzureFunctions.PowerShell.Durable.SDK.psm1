@@ -104,7 +104,11 @@ function Start-DurableOrchestrationExternal {
 
 		[Parameter(
             ValueFromPipelineByPropertyName=$true)]
-        [object] $DurableClient
+        [object] $DurableClient,
+
+        [Parameter(
+            ValueFromPipelineByPropertyName=$true)]
+        [string] $InstanceId
     )
     # MICHAELPENG TODO: Remove this line before publishing
     Write-Host "EXTERNAL START ORCHESTRATION"
