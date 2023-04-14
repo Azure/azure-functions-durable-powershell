@@ -119,7 +119,9 @@ function Start-DurableOrchestrationExternal {
         $DurableClient = GetDurableClientFromModulePrivateData
     }
 
-    $InstanceId = (New-Guid).Guid
+    if (-not $InstanceId) {
+        $InstanceId = (New-Guid).Guid
+    }
 
     $Uri =
         if ($DurableClient.rpcBaseUrl) {
