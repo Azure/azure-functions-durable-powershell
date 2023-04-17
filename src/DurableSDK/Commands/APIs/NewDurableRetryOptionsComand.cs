@@ -15,7 +15,7 @@ namespace DurableSDK.Commands.APIs
     /// <summary>
     /// Creates retry plicies that can be passed as parameters to various Durable cmdlets
     /// </summary>
-    [Cmdlet("New", "DurableRetryOptions")]
+    [Cmdlet("New", "DurableRetryOptionsE")]
     public class NewDurableRetryOptions : PSCmdlet
     {
         /// <summary>

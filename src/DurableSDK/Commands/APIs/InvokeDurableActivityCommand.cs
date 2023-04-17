@@ -16,7 +16,7 @@ namespace DurableSDK.Commands.APIs
     /// <summary>
     /// Invoke a durable activity.
     /// </summary>
-    [Cmdlet("Invoke", "DurableActivityE")]
+    [Cmdlet("Invoke", "DurableActivity")]
     public class InvokeDurableActivityCommand : DurableSDKCmdlet
     {
         /// <summary>
