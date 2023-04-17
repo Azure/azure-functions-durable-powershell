@@ -21,21 +21,6 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             var initialResponse = await Utilities.GetHttpStartResponse("BasicExternalEventOrchestrator");
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
-            // validate initial status
-            using (var httpClient = new HttpClient())
-            {
-                var initialResponseBodyString = await initialResponse.Content.ReadAsStringAsync();
-                dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString);
-                var statusQueryGetUri = (string)initialResponseBody.statusQueryGetUri;
-
-                var statusResponse = await httpClient.GetAsync(statusQueryGetUri);
-                var intermediateStatusResponseBody = await Utilities.GetResponseBodyAsync(statusResponse);
-                var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
-                Assert.True(
-                    runtimeStatus == "Running" || runtimeStatus == "Pending",
-                    $"Unexpected runtime status: {runtimeStatus}");
-            }
-
             await ValidateDurableWorkflowResults(
                 initialResponse,
                 sendExternalEvents: async (HttpClient httpClient) =>
@@ -50,6 +35,13 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     var json = JsonConvert.SerializeObject("helloWorld!");
                     var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
                     await httpClient.PostAsync(raiseEventUri, httpContent);
+                },
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
+                {
+                    var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
+                    Assert.True(
+                        runtimeStatus == "Running" || runtimeStatus == "Pending",
+                        $"Unexpected runtime status: {runtimeStatus}");
                 },
                 validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
