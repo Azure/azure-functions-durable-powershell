@@ -276,7 +276,7 @@ function Send-DurableExternalEvent {
     
     $DurableClient = GetDurableClientFromModulePrivateData
 
-    $RequestUrl = GetRaiseEventUrlE -DurableClient $DurableClient -InstanceId $InstanceId -EventName $EventName -TaskHubName $TaskHubName -ConnectionName $ConnectionName
+    $RequestUrl = GetRaiseEventUrl -DurableClient $DurableClient -InstanceId $InstanceId -EventName $EventName -TaskHubName $TaskHubName -ConnectionName $ConnectionName
 
     $Body = $EventData | ConvertTo-Json -Compress
               
