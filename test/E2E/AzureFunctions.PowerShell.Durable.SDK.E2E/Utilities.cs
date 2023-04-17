@@ -4,19 +4,21 @@
 namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
 {
     using Newtonsoft.Json;
+    using System.Diagnostics;
     using System.Net;
     using System.Net.Http.Headers;
 
     public static class Utilities
     {
         public static async Task<bool> GetHttpStartResponse(
-            string orchestrationName,
+            string orchestratorName,
             string queryString,
             HttpStatusCode expectedStatusCode,
             string expectedMessage,
-            int expectedCode = 0)
+            int expectedCode = 0,
+            string clientRoute = "orchestrators")
         {
-            var response = await GetHttpStartResponse(orchestrationName, queryString);
+            var response = await GetHttpStartResponse(orchestratorName, queryString, clientRoute);
             if (expectedStatusCode != response.StatusCode && expectedCode != (int)response.StatusCode)
             {
                 return false;
@@ -30,9 +32,12 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
             return true;
         }
 
-        public static async Task<HttpResponseMessage> GetHttpStartResponse(string orchestratorName, string queryString)
+        public static async Task<HttpResponseMessage> GetHttpStartResponse(
+            string orchestratorName,
+            string queryString = "",
+            string clientRoute = "orchestrators")
         {
-            string uri = $"api/orchestrators/{orchestratorName}{queryString}";
+            string uri = $"api/{clientRoute}/{orchestratorName}{queryString}";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
 

@@ -36,7 +36,10 @@ function Write-Log
         $Warning,
 
         [Switch]
-        $Throw
+        $Throw,
+
+        [System.String]
+        $Color
     )
 
     $Message = (Get-Date -Format G)  + " -- $Message"
@@ -46,11 +49,12 @@ function Write-Log
         throw $Message
     }
 
-    $foregroundColor = if ($Warning.IsPresent) { 'Yellow' } else { 'Green' }
+    $foregroundColor = if ($Warning.IsPresent) { 'Yellow' } elseif ($Color) { $Color } else { 'Green' }
     Write-Host -ForegroundColor $foregroundColor $Message
 }
 
-Write-Log "Build started...`nConfiguration: '$Configuration'`nOutput folder '$outputPath'`nShared dependencies folder: '$sharedDependenciesPath'"
+Write-Log "Build started..."
+Write-Log "Configuration: '$Configuration'`nOutput folder '$outputPath'`nShared dependencies folder: '$sharedDependenciesPath'" "Gray"
 
 # Map from project names to the folder containing the corresponding .csproj
 $projects = @{
@@ -59,13 +63,13 @@ $projects = @{
 }
 
 # Remove previous build if it exists
-Write-Log "Removing previous build from $outputPath if it exists..."
+Write-Log "Removing previous build from $outputPath if it exists..." "Cyan"
 if (Test-Path $outputPath)
 {
-    Remove-Item -Path $outputPath -Recurse
+    Remove-Item -Path $outputPath -Recurse -Force -ErrorAction Ignore
 }
 # Create output folder and its inner dependencies directory
-Write-Log "Creating a new output and shared dependencies folder at $outputPath and $sharedDependenciesPath..."
+Write-Log "Creating a new output and shared dependencies folder at $outputPath and $sharedDependenciesPath..." "Cyan"
 [void](New-Item -Path $sharedDependenciesPath -ItemType Directory)
 
 # Build the Durable SDK and Durable Engine project
@@ -84,19 +88,19 @@ foreach ($project in $projects.GetEnumerator()) {
 
 $commonFiles = [System.Collections.Generic.HashSet[string]]::new()
 
-Write-Log "Copying assemblies from the Durable Engine project into $sharedDependenciesPath"
+Write-Log "Copying assemblies from the Durable Engine project into $sharedDependenciesPath" "Gray"
 Get-ChildItem -Path "$durableEnginePath/$publishPathSuffix" |
     Where-Object { $_.Extension -in '.dll','.pdb' } |
     ForEach-Object { [void]$commonFiles.Add($_.Name); Copy-Item -LiteralPath $_.FullName -Destination $sharedDependenciesPath }
 
 # Copy all *unique* assemblies from Durable SDK into output directory
-Write-Log "Copying unique assemblies from the Durable SDK project into $outputPath"
+Write-Log "Copying unique assemblies from the Durable SDK project into $outputPath" "Gray"
 Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
     Where-Object { $_.Extension -in '.dll','.pdb' -and -not $commonFiles.Contains($_.Name) } |
     ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
 
 # Move Durable SDK manifest into the output directory
-Write-Log "Copying PowerShell module and manifest from the Durable SDK source code into $outputPath"
+Write-Log "Copying PowerShell module and manifest from the Durable SDK source code into $outputPath" "Gray"
 Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
 Write-Log "Build succeeded!"

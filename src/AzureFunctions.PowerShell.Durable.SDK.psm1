@@ -3,11 +3,14 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+using namespace System.Net
+
 # Set aliases for cmdlets to export
-# Set-Alias -Name Wait-ActivityFunction -Value Wait-DurableTask
-# Set-Alias -Name Invoke-ActivityFunction -Value Invoke-DurableActivity
-Set-Alias -Name New-OrchestrationCheckStatusResponse -Value New-DurableOrchestrationCheckStatusResponseExternal
-Set-Alias -Name Start-NewOrchestration -Value Start-DurableOrchestrationExternal
+# TODO: Remove the external suffixes
+Set-Alias -Name Wait-ActivityFunctionE -Value Wait-DurableTaskE
+Set-Alias -Name Invoke-ActivityFunctionE -Value Invoke-DurableActivityE
+Set-Alias -Name New-OrchestrationCheckStatusResponseE -Value New-DurableOrchestrationCheckStatusResponseExternal
+Set-Alias -Name Start-NewOrchestrationE -Value Start-DurableOrchestrationExternal
 
 function GetDurableClientFromModulePrivateData {
     $PrivateData = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData
@@ -101,7 +104,11 @@ function Start-DurableOrchestrationExternal {
 
 		[Parameter(
             ValueFromPipelineByPropertyName=$true)]
-        [object] $DurableClient
+        [object] $DurableClient,
+
+        [Parameter(
+            ValueFromPipelineByPropertyName=$true)]
+        [string] $InstanceId
     )
     # MICHAELPENG TODO: Remove this line before publishing
     Write-Host "EXTERNAL START ORCHESTRATION"
@@ -112,7 +119,9 @@ function Start-DurableOrchestrationExternal {
         $DurableClient = GetDurableClientFromModulePrivateData
     }
 
-    $InstanceId = (New-Guid).Guid
+    if (-not $InstanceId) {
+        $InstanceId = (New-Guid).Guid
+    }
 
     $Uri =
         if ($DurableClient.rpcBaseUrl) {
@@ -131,34 +140,36 @@ function Start-DurableOrchestrationExternal {
     return $instanceId
 }
 
-# function Stop-DurableOrchestration {
-#     [CmdletBinding()]
-#     param(
-#         [Parameter(
-#             Mandatory = $true,
-#             Position = 0,
-#             ValueFromPipelineByPropertyName = $true)]
-#         [ValidateNotNullOrEmpty()]
-#         [string] $InstanceId,
+function Stop-DurableOrchestrationE {
+    [CmdletBinding()]
+    param(
+        [Parameter(
+            Mandatory = $true,
+            Position = 0,
+            ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $InstanceId,
 
-#         [Parameter(
-#             Mandatory = $true,
-#             Position = 1,
-#             ValueFromPipelineByPropertyName = $true)]
-#         [ValidateNotNullOrEmpty()]
-#         [string] $Reason
-#     )
+        [Parameter(
+            Mandatory = $true,
+            Position = 1,
+            ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Reason
+    )
+    # MICHAELPENG TODO: Remove this line before publishing
+    Write-Host "EXTERNAL STOP ORCHESTRATION"
 
-#     $ErrorActionPreference = 'Stop'
+    $ErrorActionPreference = 'Stop'
 
-#     if ($null -eq $DurableClient) {
-#         $DurableClient = GetDurableClientFromModulePrivateData
-#     }
+    if ($null -eq $DurableClient) {
+        $DurableClient = GetDurableClientFromModulePrivateData
+    }
 
-#     $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId/terminate?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
+    $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId/terminate?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
 
-#     Invoke-RestMethod -Uri $requestUrl
-# }
+    Invoke-RestMethod -Uri $requestUrl -Method 'POST'
+}
 
 function IsValidUrl([uri]$Url) {
     $Url.IsAbsoluteUri -and ($Url.Scheme -in 'http', 'https')

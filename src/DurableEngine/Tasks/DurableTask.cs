@@ -69,8 +69,10 @@ namespace DurableEngine.Tasks
                     }
                     else
                     {
-                        // Feed result to pipeline
+                        // TODO: add extension to guarantee termination or else fail fast
                         var result = OrchestrationContext.SharedMemory.currTask.Result;
+
+                        // Feed result to pipeline
                         write(result);
                     }
                 }
@@ -131,7 +133,7 @@ namespace DurableEngine.Tasks
         internal Task DTFxTask;
 
         /// <summary>
-        /// Whether this Task finished executing.
+        /// Whether this Task finished executing AND has a result to write to the output pipe.
         /// </summary>
         internal virtual bool HasResult()
         {

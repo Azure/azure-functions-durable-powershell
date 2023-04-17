@@ -94,7 +94,7 @@ if ($IsWindows) {
 
 $FUNC_CLI_DIRECTORY = Join-Path $PSScriptRoot 'Azure.Functions.Cli'
 
-Write-Host 'Deleting Functions Core Tools if exists...'
+Write-Host "Deleting $FUNC_CLI_DIRECTORY if it exists..."
 Remove-Item -Force "$FUNC_CLI_DIRECTORY.zip" -ErrorAction Ignore
 Remove-Item -Recurse -Force $FUNC_CLI_DIRECTORY -ErrorAction Ignore
 
@@ -129,8 +129,16 @@ if (-not $SkipCoreToolsDownload.IsPresent)
     $Env:Path = "$FUNC_CLI_DIRECTORY$([System.IO.Path]::PathSeparator)$Env:Path"
     $funcPath = Join-Path $FUNC_CLI_DIRECTORY $FUNC_EXE_NAME
 } else {
-    # TODO: Fix this for Core Tools installations through npm
     $funcPath = (Get-Command $FUNC_CMDLET_NAME).Source
+    $funcDir = [System.IO.Path]::GetDirectoryName($funcPath)
+    if ($funcDir.Contains("nodejs"))
+    {
+        $funcPath = Join-Path $funcDir "node_modules" "azure-functions-core-tools" "bin" "$FUNC_CMDLET_NAME.exe"
+    }
+    if (-not(Test-Path $funcPath))
+    {
+        throw "Invalid path for the Core Tools executable: $funcPath"
+    }
     $version = & $funcPath --version
     Write-Host "Using local Functions Core Tools (Version: $version) from $funcPath..."
 }
