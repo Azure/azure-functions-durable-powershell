@@ -3,6 +3,7 @@
 
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
+using System.Text;
 
 namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
 {
@@ -22,7 +23,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
         {
             QueueMessage retrievedMessage = await _queueClient.ReceiveMessageAsync();
             await _queueClient.DeleteMessageAsync(retrievedMessage.MessageId, retrievedMessage.PopReceipt);
-            return retrievedMessage.Body.ToString();
+            return Encoding.ASCII.GetString(retrievedMessage.Body);
         }
     }
 }
