@@ -8,8 +8,8 @@ Write-Host "ExternalEventOrchestrator started."
 
 $output = @()
 
-$firstDuration = New-TimeSpan -Seconds 5
-$secondDuration = New-TimeSpan -Seconds 60
+$firstDuration = New-TimeSpan -Seconds $Context.Input.FirstDuration
+$secondDuration = New-TimeSpan -Seconds $Context.Input.SecondDuration
 
 $firstTimeout = Start-DurableTimer -Duration $firstDuration -NoWait
 $firstExternalEvent = Start-DurableExternalEventListener -EventName "FirstExternalEvent" -NoWait
@@ -25,7 +25,6 @@ else {
 
 $secondTimeout = Start-DurableTimer -Duration $secondDuration -NoWait
 $secondExternalEvent = Start-DurableExternalEventListener -EventName "SecondExternalEvent" -NoWait
-[void](Send-DurableExternalEvent -InstanceId $Context.InstanceId -EventName "SecondExternalEvent")
 $secondCompleted = Wait-DurableTask -Task @($secondTimeout, $secondExternalEvent) -Any
 
 if ($secondCompleted -eq $secondTimeout) {
