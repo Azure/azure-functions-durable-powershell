@@ -23,7 +23,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
         {
             QueueMessage retrievedMessage = await _queueClient.ReceiveMessageAsync();
             await _queueClient.DeleteMessageAsync(retrievedMessage.MessageId, retrievedMessage.PopReceipt);
-            return Encoding.ASCII.GetString(retrievedMessage.Body);
+            return Convert.FromBase64String(retrievedMessage.Body.ToString()).ToString() ?? "";
         }
     }
 }
