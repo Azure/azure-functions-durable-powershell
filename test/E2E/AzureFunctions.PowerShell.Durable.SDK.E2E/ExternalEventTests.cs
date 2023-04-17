@@ -4,6 +4,7 @@
 using AzureFunctions.PowerShell.Durable.SDK.Tests.E2E;
 using Newtonsoft.Json;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using Xunit;
 
@@ -35,7 +36,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
                     await httpClient.PostAsync(raiseEventUri, httpContent);
                 },
-                validateInitialResponse: (dynamic intermediateStatusResponseBody) =>
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
                 {
                     var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
                     Assert.True(
