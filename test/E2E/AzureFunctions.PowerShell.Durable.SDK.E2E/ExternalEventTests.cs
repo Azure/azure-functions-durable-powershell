@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace AzureFunctions.PowerShell.Durable.SDK.E2E
@@ -51,11 +52,9 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         }
 
         [Fact]
-        private async Task ExternalEventClientSendsExternalEvents()
+        private async Task SendDurableExternalEventsRaisesEvent()
         {
-            var initialResponse = await Utilities.GetHttpStartResponse(
-                "ComplexExternalEventOrchestrator",
-                clientRoute: "externalEventOrchestrators");
+            var initialResponse = await Utilities.GetHttpStartResponse("SendDurableExternalEventOrchestrator");
 
             await ValidateDurableWorkflowResults(
                 initialResponse,
