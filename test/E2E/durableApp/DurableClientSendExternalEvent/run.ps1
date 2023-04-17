@@ -5,7 +5,7 @@ Write-Host "DurableClientSendExternalEvent started"
 
 $OrchestratorInputs = @{ FirstDuration = 5; SecondDuration = 60 }
 
-$InstanceId = Start-DurableOrchestration -FunctionName "ComplexExternalEventOrchestrator" -InputObject $OrchestratorInputs
+$InstanceId = Start-DurableOrchestration -FunctionName "SendDurableExternalEventOrchestrator" -InputObject $OrchestratorInputs
 Write-Host "Started orchestration with ID = '$InstanceId'"
 
 $Response = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $InstanceId
