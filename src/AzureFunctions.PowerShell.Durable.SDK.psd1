@@ -62,24 +62,24 @@
     
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
-        'Get-DurableStatusExternal',
-        'New-DurableOrchestrationCheckStatusResponseExternal',
-        'Send-DurableExternalEventE',
-        'Start-DurableOrchestrationExternal'
-        'Stop-DurableOrchestrationE'
+        'Get-DurableStatus',
+        'New-DurableOrchestrationCheckStatusResponse',
+        'Send-DurableExternalEvent',
+        'Start-DurableOrchestration'
+        'Stop-DurableOrchestration'
     )
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @(
-       'Invoke-DurableActivityE',
-       'Invoke-DurableSubOrchestratorE',
-       'New-DurableRetryOptionsE',
-       'Set-DurableCustomStatusE',
+       'Invoke-DurableActivity',
+       'Invoke-DurableSubOrchestrator',
+       'New-DurableRetryOptions',
+       'Set-DurableCustomStatus',
        'Set-FunctionInvocationContext',
-       'Start-DurableExternalEventListenerE'
-       'Start-DurableTimerE',
-       'Stop-DurableTimerTaskE',
-       'Wait-DurableTaskE'
+       'Start-DurableExternalEventListener'
+       'Start-DurableTimer',
+       'Stop-DurableTimerTask',
+       'Wait-DurableTask'
     )
     
     # Variables to export from this module
@@ -87,10 +87,10 @@
     
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
     AliasesToExport = @(
-        'Invoke-ActivityFunctionE',
-        'New-OrchestrationCheckStatusResponseE',
-        'Start-NewOrchestrationE',
-        'Wait-ActivityFunctionE'
+        'Invoke-ActivityFunction',
+        'New-OrchestrationCheckStatusResponse',
+        'Start-NewOrchestration',
+        'Wait-ActivityFunction'
     )
     
     # DSC resources to export from this module

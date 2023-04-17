@@ -15,7 +15,7 @@ namespace DurableSDK.Commands.APIs
     /// <summary>
     /// Start the Durable External Event Listener
     /// </summary>
-    [Cmdlet("Start", "DurableExternalEventListenerE")]
+    [Cmdlet("Start", "DurableExternalEventListener")]
     public class StartDurableExternalEventListenerCommand : DurableSDKCmdlet
     {
         /// <summary>

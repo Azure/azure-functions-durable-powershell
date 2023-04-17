@@ -6,11 +6,10 @@
 using namespace System.Net
 
 # Set aliases for cmdlets to export
-# TODO: Remove the external suffixes
-Set-Alias -Name Wait-ActivityFunctionE -Value Wait-DurableTaskE
-Set-Alias -Name Invoke-ActivityFunctionE -Value Invoke-DurableActivityE
-Set-Alias -Name New-OrchestrationCheckStatusResponseE -Value New-DurableOrchestrationCheckStatusResponseExternal
-Set-Alias -Name Start-NewOrchestrationE -Value Start-DurableOrchestrationExternal
+Set-Alias -Name Wait-ActivityFunction -Value Wait-DurableTask
+Set-Alias -Name Invoke-ActivityFunction -Value Invoke-DurableActivity
+Set-Alias -Name New-OrchestrationCheckStatusResponse -Value New-DurableOrchestrationCheckStatusResponse
+Set-Alias -Name Start-NewOrchestration -Value Start-DurableOrchestration
 
 function GetDurableClientFromModulePrivateData {
     $PrivateData = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData
@@ -22,7 +21,7 @@ function GetDurableClientFromModulePrivateData {
     }
 }
 
-function Get-DurableStatusExternal {
+function Get-DurableStatus {
     [CmdletBinding()]
     param(
         [Parameter(
@@ -42,9 +41,6 @@ function Get-DurableStatusExternal {
 
         [switch] $ShowInput
     )
-
-    # TODO: Remove this line before publishing
-    Write-Host "EXTERNAL CHECK STATUS"
 
     $ErrorActionPreference = 'Stop'
 
@@ -87,7 +83,7 @@ function Get-DurableStatusExternal {
 .PARAMETER DurableClient
     The orchestration client object.
 #>
-function Start-DurableOrchestrationExternal {
+function Start-DurableOrchestration {
     [CmdletBinding()]
     param(
         [Parameter(
@@ -110,8 +106,6 @@ function Start-DurableOrchestrationExternal {
             ValueFromPipelineByPropertyName=$true)]
         [string] $InstanceId
     )
-    # MICHAELPENG TODO: Remove this line before publishing
-    Write-Host "EXTERNAL START ORCHESTRATION"
 
     $ErrorActionPreference = 'Stop'
 
@@ -140,7 +134,7 @@ function Start-DurableOrchestrationExternal {
     return $instanceId
 }
 
-function Stop-DurableOrchestrationE {
+function Stop-DurableOrchestration {
     [CmdletBinding()]
     param(
         [Parameter(
@@ -157,8 +151,6 @@ function Stop-DurableOrchestrationE {
         [ValidateNotNullOrEmpty()]
         [string] $Reason
     )
-    # MICHAELPENG TODO: Remove this line before publishing
-    Write-Host "EXTERNAL STOP ORCHESTRATION"
 
     $ErrorActionPreference = 'Stop'
 
@@ -183,7 +175,7 @@ function GetUrlOrigin([uri]$Url) {
     $fixedOriginUrl.ToString()
 }
 
-function New-DurableOrchestrationCheckStatusResponseExternal {
+function New-DurableOrchestrationCheckStatusResponse {
     [CmdletBinding()]
     param(
         [Parameter(
@@ -200,9 +192,7 @@ function New-DurableOrchestrationCheckStatusResponseExternal {
             ValueFromPipelineByPropertyName=$true)]
         [object] $DurableClient
     )
-    # TODO: Remove this before publishing
-    Write-Host "EXTERNAL CHECK STATUS"
-    
+
     if ($null -eq $DurableClient) {
         $DurableClient = GetDurableClientFromModulePrivateData
     }
@@ -254,7 +244,7 @@ function New-DurableOrchestrationCheckStatusResponseExternal {
 .PARAMETER ConnectionName
     The name of the connection string associated with TaskHubName
 #>
-function Send-DurableExternalEventE {
+function Send-DurableExternalEvent {
     [CmdletBinding()]
     param(
         [Parameter(
@@ -293,7 +283,7 @@ function Send-DurableExternalEventE {
     $null = Invoke-RestMethod -Uri $RequestUrl -Method 'POST' -ContentType 'application/json' -Body $Body
 }
 
-function GetRaiseEventUrlE(
+function GetRaiseEventUrl(
     $DurableClient,
     [string] $InstanceId,
     [string] $EventName,

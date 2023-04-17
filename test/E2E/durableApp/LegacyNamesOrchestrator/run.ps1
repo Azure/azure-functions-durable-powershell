@@ -6,7 +6,7 @@ $ErrorActionPreference = 'Stop'
 
 Write-Host "DurableOrchestratorLegacyNames: started."
 
-Invoke-ActivityFunctionE -FunctionName "Hello" -Input "Tokyo"
+Invoke-ActivityFunction -FunctionName "Hello" -Input "Tokyo"
 
 Write-Host "DurableOrchestratorLegacyNames: finished."
 

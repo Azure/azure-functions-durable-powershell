@@ -2,7 +2,7 @@ param($Context)
 
 $output = @()
 
-$task = Invoke-DurableActivityE -FunctionName 'Hello' -Input "world" -NoWait
-$firstTask = Wait-DurableTaskE -Task @($task) -Any
+$task = Invoke-DurableActivity -FunctionName 'Hello' -Input "world" -NoWait
+$firstTask = Wait-DurableTask -Task @($task) -Any
 $output += Get-DurableTaskResult -Task @($firstTask)
 $output

@@ -6,13 +6,13 @@ $ErrorActionPreference = 'Stop'
 Write-Host "DurableClient started"
 
 $FunctionName = $Request.Params.FunctionName
-$InstanceId = Start-DurableOrchestrationExternal -FunctionName $FunctionName
+$InstanceId = Start-DurableOrchestration -FunctionName $FunctionName
 Write-Host "Started orchestration with ID = '$InstanceId'"
 
-$Response = New-DurableOrchestrationCheckStatusResponseExternal -Request $Request -InstanceId $InstanceId
+$Response = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $InstanceId
 Push-OutputBinding -Name Response -Value $Response
 
-$Status = Get-DurableStatusExternal -InstanceId $InstanceId
+$Status = Get-DurableStatus -InstanceId $InstanceId
 Write-Host "Orchestration $InstanceId status: $($Status | ConvertTo-Json)"
 if ($Status.RuntimeStatus -notin 'Pending', 'Running', 'Failed', 'Completed') {
     throw "Unexpected orchestration $InstanceId runtime status: $($Status.RuntimeStatus)"

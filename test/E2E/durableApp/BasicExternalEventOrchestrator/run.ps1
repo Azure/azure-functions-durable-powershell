@@ -2,6 +2,6 @@ param($Context)
 
 $output = @()
 
-$output += Start-DurableExternalEventListenerE -EventName "TESTEVENTNAME" 
+$output += Start-DurableExternalEventListener -EventName "TESTEVENTNAME" 
 
 $output

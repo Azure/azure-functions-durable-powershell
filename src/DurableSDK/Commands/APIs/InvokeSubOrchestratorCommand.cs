@@ -13,7 +13,7 @@ namespace DurableSDK.Commands.APIs
     /// <summary>
     /// Invoke a durable sub-orchestrator.
     /// </summary>
-    [Cmdlet("Invoke", "DurableSubOrchestratorE")]
+    [Cmdlet("Invoke", "DurableSubOrchestrator")]
     public class InvokeSubOrchestratorCommand : DurableSDKCmdlet
     {
         /// <summary>
