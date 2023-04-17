@@ -35,12 +35,17 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
                     await httpClient.PostAsync(raiseEventUri, httpContent);
                 },
-                validateInitialResponse: (dynamic intermediateStatusResponseBody) =>
+                validateInitialResponse: (dynamic initialStatusResponseBody) =>
                 {
-                    var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
-                    Assert.True(
-                        runtimeStatus == "Running" || runtimeStatus == "Pending",
-                        $"Unexpected runtime status: {runtimeStatus} \\ {intermediateStatusResponseBody}");
+                    using (var httpClient = new HttpClient())
+                    {
+                        var statusResponse = await httpClient.GetAsync(statusQueryGetUri);
+                        var intermediateStatusResponseBody = await Utilities.GetResponseBodyAsync(statusResponse);
+                        var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
+                        Assert.True(
+                            runtimeStatus == "Running" || runtimeStatus == "Pending",
+                            $"Unexpected runtime status: {runtimeStatus} \\ {intermediateStatusResponseBody}");
+                    }
                 },
                 validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
