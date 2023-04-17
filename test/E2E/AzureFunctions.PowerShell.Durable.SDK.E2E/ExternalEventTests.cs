@@ -40,7 +40,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
                     Assert.True(
                         runtimeStatus == "Running" || runtimeStatus == "Pending",
-                        $"Unexpected runtime status: {runtimeStatus}");
+                        $"Unexpected runtime status: {runtimeStatus} \\ {intermediateStatusResponseBody}");
                 },
                 validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
