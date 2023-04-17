@@ -25,7 +25,7 @@ else {
 
 $secondTimeout = Start-DurableTimer -Duration $secondDuration -NoWait
 $secondExternalEvent = Start-DurableExternalEventListener -EventName "SecondExternalEvent" -NoWait
-[null](Send-DurableExternalEvent -InstanceId $InstanceId -EventName "SecondExternalEvent")
+[void](Send-DurableExternalEvent -InstanceId $InstanceId -EventName "SecondExternalEvent")
 $secondCompleted = Wait-DurableTask -Task @($secondTimeout, $secondExternalEvent) -Any
 
 if ($secondCompleted -eq $secondTimeout) {
