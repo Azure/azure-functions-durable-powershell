@@ -17,8 +17,8 @@ namespace DurableEngine.Tasks
     // All DurableTimerTasks must be complete or canceled for the orchestration to complete
     public class DurableTimerTask : DurableTask
     {
-        internal TimeSpan Duration { get; }
-        private DateTime FireAt { get; }
+        public TimeSpan Duration { get; internal set; }
+        public DateTime FireAt { get; private set; }
         private CreateDurableTimerAction Action { get; set; }
         private readonly CancellationTokenSource _cancelationTokenSource = new CancellationTokenSource();
 

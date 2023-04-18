@@ -55,7 +55,7 @@
     # TypesToProcess = @()
     
     # Format files (.ps1xml) to be loaded when importing this module
-    # FormatsToProcess = @()
+    FormatsToProcess = @(".\task.format.ps1xml")
     
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
     NestedModules = @('.\AzureFunctions.PowerShell.Durable.SDK.dll', '.\AzureFunctions.PowerShell.Durable.SDK.psm1')

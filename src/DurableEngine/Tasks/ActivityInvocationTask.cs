@@ -18,11 +18,11 @@ namespace DurableEngine.Tasks
 
     public class ActivityInvocationTask : DurableTask
     {
-        internal string FunctionName { get; }
+        public string FunctionName { get; internal set;}
 
-        internal object Input { get; }
+        public object Input { get; internal set; }
 
-        private RetryOptions RetryOptions { get; }
+        public RetryOptions RetryOptions { get; internal set;}
 
         public ActivityInvocationTask(
             string functionName,
