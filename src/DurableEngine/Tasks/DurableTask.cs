@@ -18,18 +18,15 @@ namespace DurableEngine.Tasks
             OrchestrationContext = (OrchestrationContext)privateData[OrchestrationInvoker.ContextKey];
         }
 
-        private OrchestrationAction orchestrationAction;
+        private OrchestrationAction action;
 
-        internal OrchestrationAction OrchestrationAction
+        internal OrchestrationAction GetOrCreateAction()
         {
-            get
+            if (this.action == null)
             {
-                if (this.orchestrationAction == null)
-                {
-                    this.orchestrationAction = this.CreateOrchestrationAction();
-                }
-                return this.orchestrationAction;
+                this.action = this.CreateOrchestrationAction();
             }
+            return this.action;
         }
 
         /// <summary>
@@ -66,10 +63,10 @@ namespace DurableEngine.Tasks
                 OrchestrationContext.SharedMemory.currTask = task;
 
                 // DF APIs only generate an action once, otherwise we'll get duplicate executions
-                if (task.orchestrationAction == null)
+                if (task.action == null)
                 {
-                    var action = task.OrchestrationAction; // generate and cache action
-                    OrchestrationContext.SharedMemory.Add(action);
+                    // generate and cache action
+                    OrchestrationContext.SharedMemory.Add(task.GetOrCreateAction());
                 }
 
                 // Signal orchestration thread to await the Task.
