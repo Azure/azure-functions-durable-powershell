@@ -2,4 +2,4 @@ using namespace System.Net
 
 param($Context)
 
-Invoke-DurableActivityE -FunctionName 'DurableActivityWritesToQueue' -Input 'QueueData'
+Invoke-DurableActivity -FunctionName 'DurableActivityWritesToQueue' -Input 'QueueData'

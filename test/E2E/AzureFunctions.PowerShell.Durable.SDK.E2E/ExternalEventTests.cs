@@ -51,10 +51,10 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         }
 
         [Fact]
-        private async Task ExternalEventClientSendsExternalEvents()
+        private async Task SendDurableExternalEventsRaisesEvent()
         {
             var initialResponse = await Utilities.GetHttpStartResponse(
-                "ComplexExternalEventOrchestrator",
+                "SendDurableExternalEventOrchestrator",
                 clientRoute: "externalEventOrchestrators");
 
             await ValidateDurableWorkflowResults(
