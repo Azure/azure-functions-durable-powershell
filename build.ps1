@@ -12,6 +12,7 @@ $durableEnginePath = "$PSScriptRoot/src/DurableEngine"
 $durableAppPath = "$PSScriptRoot/test/E2E/durableApp/Modules/$packageName"
 $powerShellModulePath = "$PSScriptRoot/src/$packageName.psm1"
 $manifestPath = "$PSScriptRoot/src/$packageName.psd1"
+$viewPath = "$PSScriptRoot/src/task.format.ps1xml"
 
 $outputPath = "$PSScriptRoot/src/out/"
 if ($Configuration -eq "Debug")
@@ -99,8 +100,9 @@ Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
     Where-Object { $_.Extension -in '.dll','.pdb' -and -not $commonFiles.Contains($_.Name) } |
     ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
 
-# Move Durable SDK manifest into the output directory
-Write-Log "Copying PowerShell module and manifest from the Durable SDK source code into $outputPath" "Gray"
+# Move Durable SDK manifest and ps1xml into the output directory
+Write-Log "Copying PowerShell module, manifest, and ps1xml from the Durable SDK source code into $outputPath" "Gray"
 Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
+Copy-Item -Path $viewPath -Destination $outputPath
 Write-Log "Build succeeded!"

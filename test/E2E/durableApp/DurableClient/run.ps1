@@ -13,7 +13,7 @@ $Response = New-DurableOrchestrationCheckStatusResponse -Request $Request -Insta
 Push-OutputBinding -Name Response -Value $Response
 
 $Status = Get-DurableStatus -InstanceId $InstanceId
-Write-Host "Orchestration $InstanceId status: $($Status | ConvertTo-Json)"
+#Write-Host "Orchestration $InstanceId status: $($Status | ConvertTo-Json)"
 if ($Status.RuntimeStatus -notin 'Pending', 'Running', 'Failed', 'Completed') {
     throw "Unexpected orchestration $InstanceId runtime status: $($Status.RuntimeStatus)"
 }

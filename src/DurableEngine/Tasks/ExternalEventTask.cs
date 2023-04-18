@@ -13,7 +13,7 @@ namespace DurableEngine.Tasks
     
     public class ExternalEventTask : DurableTask
     {
-        internal string ExternalEventName { get; }
+        public string ExternalEventName { get; internal set; }
 
         public ExternalEventTask(
             string externalEventName,

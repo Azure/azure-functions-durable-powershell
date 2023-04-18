@@ -13,12 +13,12 @@ namespace DurableEngine.Tasks
 {
     public class SubOrchestratorTask : DurableTask
     {
-        internal string FunctionName { get; }
-        internal string InstanceId { get; }
+        public string FunctionName { get; internal set; }
+        public string InstanceId { get; internal set;}
 
-        internal object Input { get; }
+        public object Input { get; internal set; }
 
-        private RetryOptions RetryOptions { get; }
+        public RetryOptions RetryOptions { get; internal set; }
 
         public SubOrchestratorTask(
             string functionName,
