@@ -79,7 +79,8 @@
        'Start-DurableExternalEventListener'
        'Start-DurableTimer',
        'Stop-DurableTimerTask',
-       'Wait-DurableTask'
+       'Wait-DurableTask',
+       'Get-DurableTaskResult'
     )
     
     # Variables to export from this module
