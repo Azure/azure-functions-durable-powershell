@@ -91,7 +91,8 @@
         'Invoke-ActivityFunction',
         'New-OrchestrationCheckStatusResponse',
         'Start-NewOrchestration',
-        'Wait-ActivityFunction'
+        'Wait-ActivityFunction',
+        'New-DurableRetryOptions'
     )
     
     # DSC resources to export from this module
