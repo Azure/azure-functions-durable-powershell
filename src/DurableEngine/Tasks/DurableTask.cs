@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Management.Automation;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 namespace DurableEngine.Tasks
 {
@@ -15,6 +16,20 @@ namespace DurableEngine.Tasks
         {
             NoWait = noWait;
             OrchestrationContext = (OrchestrationContext)privateData[OrchestrationInvoker.ContextKey];
+        }
+
+        private OrchestrationAction orchestrationAction;
+
+        internal OrchestrationAction OrchestrationAction
+        {
+            get
+            {
+                if (this.orchestrationAction == null)
+                {
+                    this.orchestrationAction = this.CreateOrchestrationAction();
+                }
+                return this.orchestrationAction;
+            }
         }
 
         /// <summary>
@@ -49,7 +64,13 @@ namespace DurableEngine.Tasks
             {
                 // Flag this task as the current "task-to-await"
                 OrchestrationContext.SharedMemory.currTask = task;
-                OrchestrationContext.SharedMemory.Add(task.CreateOrchestrationAction());
+
+                // DF APIs only generate an action once, otherwise we'll get duplicate executions
+                if (task.orchestrationAction == null)
+                {
+                    var action = task.OrchestrationAction; // generate and cache action
+                    OrchestrationContext.SharedMemory.Add(action);
+                }
 
                 // Signal orchestration thread to await the Task.
                 // This is necessary for DTFx to determine if a result exists for the Task.

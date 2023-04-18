@@ -15,7 +15,7 @@ Set-Alias -Name Start-NewOrchestrationE -Value Start-DurableOrchestrationExterna
 function GetDurableClientFromModulePrivateData {
     $PrivateData = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData
     if ($null -eq $PrivateData -or $null -eq $PrivateData['DurableClient']) {
-        throw "No binding of the type 'durableClient' was defined."
+        throw "Could not find `DurableClient` private data. This can occur when you have not set application setting 'ExternalDurablePowerShellSDK' to 'true' or if you're using a DurableClient CmdLet but have no DurableClient binding declared in `function.json`."
     }
     else {
         $PrivateData['DurableClient']
