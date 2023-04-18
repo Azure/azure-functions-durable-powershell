@@ -10,7 +10,27 @@ Set-Alias -Name Wait-ActivityFunction -Value Wait-DurableTask
 Set-Alias -Name Invoke-ActivityFunction -Value Invoke-DurableActivity
 Set-Alias -Name New-OrchestrationCheckStatusResponse -Value New-DurableOrchestrationCheckStatusResponse
 Set-Alias -Name Start-NewOrchestration -Value Start-DurableOrchestration
-Set-Alias -Name New-DurableRetryOptions -Value New-DurableRetryOpts 
+
+function New-DurableRetryOptions(
+    [Parameter(Mandatory = $true)]
+    [timespan]
+    $FirstRetryInterval,
+
+    [Parameter(Mandatory = $true)]
+    [int]
+    $MaxNumberOfAttempts,
+    
+    [double]
+    $BackoffCoefficient,
+    
+    [timespan]
+    $MaxRetryInterval,
+    
+    [timespan]
+    $RetryTimeout) {
+
+    New-DurableRetryOpts -FirstRetryInterval $FirstRetryInterval -MaxNumberOfAttempts $MaxNumberOfAttempts -BackoffCoefficient $BackoffCoefficient -MaxRetryInterval $MaxRetryInterval -RetryOptions $RetryTimeout
+}
 
 function GetDurableClientFromModulePrivateData {
     $PrivateData = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData
