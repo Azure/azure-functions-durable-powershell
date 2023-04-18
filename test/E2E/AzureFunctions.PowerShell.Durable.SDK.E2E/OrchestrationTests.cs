@@ -20,8 +20,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 
             await ValidateDurableWorkflowResults(
                 initialResponse,
-                null,
-                (dynamic finalStatusResponseBody) =>
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
                     Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
                     Assert.Equal("Hello world", finalStatusResponseBody.output.ToString());
