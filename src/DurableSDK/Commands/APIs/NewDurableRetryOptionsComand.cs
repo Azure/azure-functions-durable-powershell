@@ -50,7 +50,7 @@ namespace DurableSDK.Commands.APIs
 
         protected override void EndProcessing()
         {
-            WriteObject(new RetryOptions(
+            WriteObject(new RetryPolicy(
                 MaxNumberOfAttempts,
                 FirstRetryInterval,
                 BackoffCoefficient,

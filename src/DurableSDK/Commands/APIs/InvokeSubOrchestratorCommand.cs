@@ -41,7 +41,7 @@ namespace DurableSDK.Commands.APIs
         /// </summary>
         [Parameter]
         [ValidateNotNull]
-        public RetryOptions RetryOptions { get; set; }
+        public RetryPolicy RetryOptions { get; set; }
 
         /// <summary>
         /// If provided, the Task will block and be scheduled immediately.

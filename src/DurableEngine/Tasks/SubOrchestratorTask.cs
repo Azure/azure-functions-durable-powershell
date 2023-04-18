@@ -18,13 +18,13 @@ namespace DurableEngine.Tasks
 
         internal object Input { get; }
 
-        private RetryOptions RetryOptions { get; }
+        private RetryPolicy RetryOptions { get; }
 
         public SubOrchestratorTask(
             string functionName,
             string instanceId,
             object functionInput,
-            RetryOptions retryOptions,
+            RetryPolicy retryOptions,
             SwitchParameter noWait,
             Hashtable privateData) : base(noWait, privateData)
         {
