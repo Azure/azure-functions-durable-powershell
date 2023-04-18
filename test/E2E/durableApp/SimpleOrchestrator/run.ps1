@@ -4,6 +4,6 @@ param($Context)
 
 $ErrorActionPreference = 'Stop'
 
-$output = Invoke-DurableActivityE -FunctionName "Hello" -Input "Tokyo"
+$output = Invoke-DurableActivity -FunctionName "Hello" -Input "Tokyo"
 
 return $output

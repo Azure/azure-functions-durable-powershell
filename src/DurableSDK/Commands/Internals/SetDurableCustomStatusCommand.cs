@@ -11,7 +11,7 @@ namespace DurableSDK.Commands.APIs
     using System.Management.Automation;
     using DurableEngine.Models;
 
-    [Cmdlet("Set", "DurableCustomStatusE")]
+    [Cmdlet("Set", "DurableCustomStatus")]
     public class SetDurableCustomStatusCommand : PSCmdlet
     {
         [Parameter(

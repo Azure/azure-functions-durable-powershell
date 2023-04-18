@@ -45,7 +45,7 @@ $output = @()
 
 # TEST CASE 4: Basic external event
 Write-Host "TEST 4: Basic external event"
-$approvalEvent1 = Start-DurableExternalEventListenerE -EventName "ApprovalEvent1"
+$approvalEvent1 = Start-DurableExternalEventListener -EventName "ApprovalEvent1"
 if ($approvalEvent1)
 {
     Write-Host "Approved event 1 successfully."
@@ -58,14 +58,14 @@ else
 
 # TEST CASE 5: External event without waiting
 Write-Host "TEST 5: External event without waiting"
-$approvalEvent2 = Start-DurableExternalEventListenerE -EventName "ApprovalEvent2" -NoWait
-$timer3 = Start-DurableTimerE -Duration (New-Timespan -Seconds 60) -NoWait
-$winner2 = Wait-DurableTaskE -Task @($approvalEvent2, $timer3) -Any
+$approvalEvent2 = Start-DurableExternalEventListener -EventName "ApprovalEvent2" -NoWait
+$timer3 = Start-DurableTimer -Duration (New-Timespan -Seconds 60) -NoWait
+$winner2 = Wait-DurableTask -Task @($approvalEvent2, $timer3) -Any
 if ($approvalEvent2 -eq $winner2)
 {
     Write-Host "Approved event 2 successfully within time."
     $output += $approvalEvent2
-    Stop-DurableTimerTaskE -Task $timer3
+    Stop-DurableTimerTask -Task $timer3
 }
 else
 {

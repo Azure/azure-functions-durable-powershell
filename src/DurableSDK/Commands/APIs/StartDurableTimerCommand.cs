@@ -15,7 +15,7 @@ namespace DurableSDK.Commands.APIs
     /// <summary>
     /// Start the Durable Functions timer
     /// </summary>
-    [Cmdlet("Start", "DurableTimerE")]
+    [Cmdlet("Start", "DurableTimer")]
     public class StartDurableTimerCommand : DurableSDKCmdlet
     {
         /// <summary>

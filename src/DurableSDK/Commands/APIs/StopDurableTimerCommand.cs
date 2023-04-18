@@ -13,7 +13,7 @@ namespace DurableSDK.Commands.APIs
     /// <summary>
     /// Stop the Durable Timer
     /// </summary>
-    [Cmdlet("Stop", "DurableTimerTaskE")]
+    [Cmdlet("Stop", "DurableTimerTask")]
     public class StopDurableTimerCommand : PSCmdlet
     {
         /// <summary>

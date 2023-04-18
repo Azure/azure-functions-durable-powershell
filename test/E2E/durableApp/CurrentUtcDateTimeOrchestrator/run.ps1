@@ -25,7 +25,7 @@ Add-Content -Value $("{0:MM_dd_yyyy_hh_mm_ss.fff}" -f $Context.CurrentUtcDateTim
 Add-Content -Value $("{0:MM_dd_yyyy_hh_mm_ss.fff}" -f $Context.CurrentUtcDateTime) -Path $path
 
 # Checks that CurrentUtcDateTime updates following a completed activity function
-$activityResults += Invoke-DurableActivityE -FunctionName "Hello" -Input "Tokyo"
+$activityResults += Invoke-DurableActivity -FunctionName "Hello" -Input "Tokyo"
 # <Timestamp2>
 Add-Content -Value $("{0:MM_dd_yyyy_hh_mm_ss.fff}" -f $Context.CurrentUtcDateTime) -Path $path
 
@@ -33,18 +33,18 @@ Write-Host "About to start asynchronous calls."
 
 # Checks that CurrentUtcDateTime does not update following an asynchronous call
 $tasks = @()
-$tasks += Invoke-DurableActivityE -FunctionName "Hello" -Input "Seattle" -NoWait
+$tasks += Invoke-DurableActivity -FunctionName "Hello" -Input "Seattle" -NoWait
 # <Timestamp2>
 Add-Content -Value $("{0:MM_dd_yyyy_hh_mm_ss.fff}" -f $Context.CurrentUtcDateTime) -Path $path
 
-$tasks += Invoke-DurableActivityE -FunctionName "Hello" -Input "London" -NoWait
+$tasks += Invoke-DurableActivity -FunctionName "Hello" -Input "London" -NoWait
 # <Timestamp2>
 Add-Content -Value $("{0:MM_dd_yyyy_hh_mm_ss.fff}" -f $Context.CurrentUtcDateTime) -Path $path
 
 Write-Host "Finished the asynchronous calls."
 
 # Checks that CurrentUtcDateTime updates only after all awaited activity functions completed
-$activityResults += Wait-DurableTaskE -Task $tasks
+$activityResults += Wait-DurableTask -Task $tasks
 # <Timestamp3>
 Add-Content -Value $("{0:MM_dd_yyyy_hh_mm_ss.fff}" -f $Context.CurrentUtcDateTime) -Path $path
 
