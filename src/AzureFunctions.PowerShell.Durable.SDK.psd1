@@ -73,7 +73,7 @@
     CmdletsToExport = @(
        'Invoke-DurableActivity',
        'Invoke-DurableSubOrchestrator',
-       'New-DurableRetryOpts',
+       'New-DurableRetryPolicy',
        'Set-DurableCustomStatus',
        'Set-FunctionInvocationContext',
        'Start-DurableExternalEventListener'
