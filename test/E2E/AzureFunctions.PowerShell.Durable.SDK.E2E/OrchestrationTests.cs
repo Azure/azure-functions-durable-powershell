@@ -12,28 +12,20 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
     {
         public OrchestrationTests(DurableAppFixture fixture) : base(fixture) {}
 
-        // [Fact]
-        // public async Task OrchestratationCanAlwaysObtainTaskResult()
-        // {
-        //     var initialResponse = await Utilities.GetHttpStartResponse("GetDurableTaskResultOrchestrator");
-        //     Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
+        [Fact]
+        public async Task OrchestrationCanAlwaysObtainTaskResult()
+        {
+            var initialResponse = await Utilities.GetHttpStartResponse("GetDurableTaskResultOrchestrator");
+            Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
-        //     await ValidateDurableWorkflowResults(
-        //         initialResponse,
-        //         null,
-        //         (dynamic intermediateStatusResponseBody) =>
-        //         {
-        //             var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
-        //             Assert.True(
-        //                 runtimeStatus == "Running" || runtimeStatus == "Pending",
-        //                 $"Unexpected runtime status: {runtimeStatus}");
-        //         },
-        //         (dynamic finalStatusResponseBody) =>
-        //         {
-        //             Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
-        //             Assert.Equal("Hello world", finalStatusResponseBody.output.ToString());
-        //         });
-        // }
+            await ValidateDurableWorkflowResults(
+                initialResponse,
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
+                {
+                    Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
+                    Assert.Equal("Hello world", finalStatusResponseBody.output.ToString());
+                });
+        }
 
         [Fact]
         public async Task LegacyDurableCommandNamesStillWork()

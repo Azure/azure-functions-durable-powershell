@@ -22,12 +22,12 @@ namespace DurableEngine.Tasks
 
         internal object Input { get; }
 
-        private RetryOptions RetryOptions { get; }
+        private DurableEngine.RetryPolicy RetryOptions { get; }
 
         public ActivityInvocationTask(
             string functionName,
             object functionInput,
-            RetryOptions retryOptions,
+            DurableEngine.RetryPolicy retryOptions,
             SwitchParameter noWait,
             Hashtable privateData) : base(noWait, privateData)
         {

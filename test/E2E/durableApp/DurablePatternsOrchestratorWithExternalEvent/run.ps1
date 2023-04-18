@@ -19,7 +19,7 @@ $tasks += Invoke-DurableActivity -FunctionName "Hello" -Input "London" -NoWait
 $output += Wait-DurableTask -Task $tasks
 
 # Retries
-$retryOptions = New-DurableRetryOptionsE -FirstRetryInterval (New-Timespan -Seconds 2) -MaxNumberOfAttempts 5
+$retryOptions = New-DurableRetryOptions -FirstRetryInterval (New-Timespan -Seconds 2) -MaxNumberOfAttempts 5
 $inputData = @{ Name = 'Toronto'; StartTime = $Context.CurrentUtcDateTime }
 $output += Invoke-DurableActivity -FunctionName "FlakyFunction" -Input $inputData -RetryOptions $retryOptions
 

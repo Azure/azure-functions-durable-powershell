@@ -73,13 +73,14 @@
     CmdletsToExport = @(
        'Invoke-DurableActivity',
        'Invoke-DurableSubOrchestrator',
-       'New-DurableRetryOptionsE',
+       'New-DurableRetryPolicy',
        'Set-DurableCustomStatus',
        'Set-FunctionInvocationContext',
        'Start-DurableExternalEventListener'
        'Start-DurableTimer',
        'Stop-DurableTimerTask',
-       'Wait-DurableTask'
+       'Wait-DurableTask',
+       'Get-DurableTaskResult'
     )
     
     # Variables to export from this module
@@ -90,7 +91,8 @@
         'Invoke-ActivityFunction',
         'New-OrchestrationCheckStatusResponse',
         'Start-NewOrchestration',
-        'Wait-ActivityFunction'
+        'Wait-ActivityFunction',
+        'New-DurableRetryOptions'
     )
     
     # DSC resources to export from this module

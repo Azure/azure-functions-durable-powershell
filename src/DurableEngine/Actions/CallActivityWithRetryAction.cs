@@ -28,12 +28,12 @@ namespace DurableEngine
         /// </summary>
         public readonly Dictionary<string, object> RetryOptions;
 
-        internal CallActivityWithRetryAction(string functionName, object input, RetryOptions retryOptions)
+        internal CallActivityWithRetryAction(string functionName, object input, RetryPolicy retryOptions)
             : base(ActionType.CallActivityWithRetry)
         {
             FunctionName = functionName;
             Input = input;
-            RetryOptions = retryOptions.RetryOptionsDictionary;
+            RetryOptions = retryOptions.RetryPolicyDictionary;
         }  
     }
 }

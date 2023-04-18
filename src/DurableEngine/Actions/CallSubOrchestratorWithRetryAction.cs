@@ -29,13 +29,13 @@ namespace DurableEngine.Actions
         /// </summary>
         public readonly Dictionary<string, object> RetryOptions;
 
-        internal CallSubOrchestratorWithRetryAction(string functionName, object input, string instanceId, RetryOptions retryOptions)
+        internal CallSubOrchestratorWithRetryAction(string functionName, object input, string instanceId, RetryPolicy retryOptions)
             : base(ActionType.CallSubOrchestratorWithRetry)
         {
             FunctionName = functionName;
             InstanceId = instanceId;
             Input = input;
-            RetryOptions = retryOptions.RetryOptionsDictionary;
+            RetryOptions = retryOptions.RetryPolicyDictionary;
         }
     }
 }
