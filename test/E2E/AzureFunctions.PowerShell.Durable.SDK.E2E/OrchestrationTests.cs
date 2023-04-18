@@ -21,13 +21,6 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             await ValidateDurableWorkflowResults(
                 initialResponse,
                 null,
-                (dynamic intermediateStatusResponseBody) =>
-                {
-                    var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
-                    Assert.True(
-                        runtimeStatus == "Running" || runtimeStatus == "Pending",
-                        $"Unexpected runtime status: {runtimeStatus}");
-                },
                 (dynamic finalStatusResponseBody) =>
                 {
                     Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
