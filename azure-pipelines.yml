@@ -34,9 +34,11 @@ steps:
     Write-Host "Setting IsReleaseBuild to $isReleaseBuild because SimulateReleaseBuild is $env:SimulateReleaseBuild"
     Write-Host "##vso[task.setvariable variable=IsReleaseBuild]$isReleaseBuild"
     Write-Host "IsReleaseBuild: $isReleaseBuild"
+  displayName: Set IsReleaseBuild pipeline variable
 
 - pwsh: |
       # We only generate an SBOM for release or simulated release builds
+      Write-Host "Running ./build.ps1 -Configuration Release -AddSBOM:$shouldAddSBOM"
       ./build.ps1 -Configuration Release -AddSBOM:$shouldAddSBOM
   displayName: 'Build Durable SDK'
   env:

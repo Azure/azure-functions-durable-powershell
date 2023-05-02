@@ -157,6 +157,4 @@ if ($AddSBOM) {
     # Discard telemetry generated
     Remove-Item -Path $telemetryFilePath
 }
-
-dotnet pack -c $Configuration
 #endregion
