@@ -19,7 +19,30 @@ pool:
       - ImageOverride -equals $(imageName)
 
 steps:
-- pwsh: ./test/E2E/Start-E2ETest.ps1 -UseCoreToolsBuildFromIntegrationTests
+- pwsh: |
+    $simulateReleaseBuild = $null
+    if (-not([bool]::TryParse($env:SimulateReleaseBuild, [ref] $simulateReleaseBuild)))
+    {
+        throw "SimulateReleaseBuild can only be set to true or false."
+    }
+
+    $isReleaseBuild = $false
+    if ($env:BuildSourceBranchName -like "release_*" -or $simulateReleaseBuild)
+    {
+        $isReleaseBuild = $true
+    }
+    Write-Host "Setting IsReleaseBuild to $isReleaseBuild because SimulateReleaseBuild is $env:SimulateReleaseBuild"
+    Write-Host "##vso[task.setvariable variable=IsReleaseBuild]$isReleaseBuild"
+    Write-Host "IsReleaseBuild: $isReleaseBuild"
+
+- pwsh: |
+      # We only generate an SBOM for release or simulated release builds
+      ./build.ps1 -Configuration Release -AddSBOM:$shouldAddSBOM
+  displayName: 'Build Durable SDK'
+  env:
+    SBOMUtilSASUrl: $(SBOMUtilSASUrl)
+
+- pwsh: ./test/E2E/Start-E2ETest.ps1 -NoBuild -UseCoreToolsBuildFromIntegrationTests
   env:
     AzureWebJobsStorage: $(AzureWebJobsStorage)
   displayName: 'Run E2E tests'

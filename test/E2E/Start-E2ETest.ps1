@@ -5,6 +5,8 @@
 param
 (
     [Switch]
+    $NoBuild,
+    [Switch]
     $UseCoreToolsBuildFromIntegrationTests,
     [Switch]
     $SkipCoreToolsDownload
@@ -148,16 +150,17 @@ if (-not $SkipCoreToolsDownload.IsPresent)
 $env:FUNC_PATH = $funcPath
 Write-Host "Set FUNC_PATH environment variable to $env:FUNC_PATH"
 
-# For both integration build test runs and regular test runs, we copy binaries to durableApp/Modules
-Write-Host "Building the DurableSDK module and copying binaries to the durableApp/Modules directory..."
-$configuration = if ($env:CONFIGURATION) { $env:CONFIGURATION } else { 'Debug' }
-
-Push-Location "$PSScriptRoot/../.."
-try {
-    & ./build.ps1 -Configuration 'Debug'
-}
-finally {
-    Pop-Location
+if (-not $NoBuild.IsPresent) {
+    # For both integration build test runs and regular test runs, we copy binaries to durableApp/Modules
+    Write-Host "Building the DurableSDK module and copying binaries to the durableApp/Modules directory..."
+    
+    Push-Location "$PSScriptRoot/../.."
+    try {
+        & ./build.ps1 -Configuration 'Debug'
+    }
+    finally {
+        Pop-Location
+    }
 }
 
 Write-Host "Starting Core Tools..."

@@ -3,7 +3,9 @@
 param(
     [ValidateSet('Debug', 'Release')]
     [string]
-    $Configuration = 'Debug'
+    $Configuration = 'Debug',
+    [switch]
+    $AddSBOM
 )
 
 $packageName = "AzureFunctions.PowerShell.Durable.SDK"
@@ -24,6 +26,7 @@ $sharedDependenciesPath = "$outputPath/Dependencies/"
 $netCoreTFM = 'net6.0'
 $publishPathSuffix = "bin/$Configuration/$netCoreTFM/publish"
 
+#region HELPER FUNCTIONS ==========================================================================
 function Write-Log
 {
     param (
@@ -53,6 +56,38 @@ function Write-Log
     Write-Host -ForegroundColor $foregroundColor $Message
 }
 
+function Install-SBOMUtil
+{
+    if ([string]::IsNullOrEmpty($env:SBOMUtilSASUrl))
+    {
+        throw "The `$SBOMUtilSASUrl environment variable cannot be null or empty when specifying the `$AddSBOM switch"
+    }
+
+    $MANIFESTOOLNAME = "ManifestTool"
+    Write-Log "Installing $MANIFESTOOLNAME..."
+
+    $MANIFESTOOL_DIRECTORY = Join-Path $PSScriptRoot $MANIFESTOOLNAME
+    Remove-Item -Recurse -Force $MANIFESTOOL_DIRECTORY -ErrorAction Ignore
+
+    Invoke-RestMethod -Uri $env:SBOMUtilSASUrl -OutFile "$MANIFESTOOL_DIRECTORY.zip"
+    Expand-Archive "$MANIFESTOOL_DIRECTORY.zip" -DestinationPath $MANIFESTOOL_DIRECTORY
+
+    $dllName = "Microsoft.ManifestTool.dll"
+    $manifestToolPath = Join-Path "$MANIFESTOOL_DIRECTORY" "$dllName"
+
+    if (-not (Test-Path $manifestToolPath))
+    {
+        throw "$MANIFESTOOL_DIRECTORY does not contain '$dllName'"
+    }
+
+    Write-Log 'Done.'
+
+    return $manifestToolPath
+}
+
+#endregion
+
+#region BUILD ARTIFACTS ===========================================================================
 Write-Log "Build started..."
 Write-Log "Configuration: '$Configuration'`nOutput folder '$outputPath'`nShared dependencies folder: '$sharedDependenciesPath'" "Gray"
 
@@ -89,13 +124,13 @@ foreach ($project in $projects.GetEnumerator()) {
 $commonFiles = [System.Collections.Generic.HashSet[string]]::new()
 
 Write-Log "Copying assemblies from the Durable Engine project into $sharedDependenciesPath" "Gray"
-Get-ChildItem -Path "$durableEnginePath/$publishPathSuffix" |
+Get-ChildItem -Path (Join-Path "$durableEnginePath" "$publishPathSuffix") |
     Where-Object { $_.Extension -in '.dll','.pdb' } |
     ForEach-Object { [void]$commonFiles.Add($_.Name); Copy-Item -LiteralPath $_.FullName -Destination $sharedDependenciesPath }
 
 # Copy all *unique* assemblies from Durable SDK into output directory
 Write-Log "Copying unique assemblies from the Durable SDK project into $outputPath" "Gray"
-Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
+Get-ChildItem -Path (Join-Path "$shimPath" "$publishPathSuffix") |
     Where-Object { $_.Extension -in '.dll','.pdb' -and -not $commonFiles.Contains($_.Name) } |
     ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
 
@@ -104,3 +139,24 @@ Write-Log "Copying PowerShell module and manifest from the Durable SDK source co
 Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
 Write-Log "Build succeeded!"
+#endregion
+
+#region ADD SBOM ==================================================================================
+if ($AddSBOM) {
+    # Install manifest tool
+    $manifestToolPath = Install-SBOMUtil
+    Write-Log "Manifest tool path": $manifestToolPath
+
+    # Generate manifest
+    $telemetryFilePath = Join-Path $PSScriptRoot ((New-Guid).Guid + ".json")
+    $packageName = "AzureFunctions.PowerShell.Durable.SDK.nuspec"
+
+    Write-Log "Running: dotnet $manifestTool generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath"
+    & { dotnet $manifestTool generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath -PackageName $packageName }
+
+    # Discard telemetry generated
+    Remove-Item -Path $telemetryFilePath
+}
+
+dotnet pack -c $Configuration
+#endregion
