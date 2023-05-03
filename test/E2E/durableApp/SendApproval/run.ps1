@@ -12,8 +12,8 @@ if (-not $instanceId) {
     throw "Instance ID not passed successfully to the SendApproval function!"
 }
 
-Send-DurableExternalEventE -InstanceId $instanceId -EventName "ApprovalEvent1" -EventData "true"
-Send-DurableExternalEventE -InstanceId $instanceId -EventName "ApprovalEvent2" -EventData "true"
+Send-DurableExternalEvent -InstanceId $instanceId -EventName "ApprovalEvent1" -EventData "true"
+Send-DurableExternalEvent -InstanceId $instanceId -EventName "ApprovalEvent2" -EventData "true"
 
 $body = "This HTTP triggered function executed successfully."
 

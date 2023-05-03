@@ -62,22 +62,25 @@
     
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
-        'Get-DurableStatusExternal',
-        'New-DurableOrchestrationCheckStatusResponseExternal',
-        'Send-DurableExternalEventE',
-        'Start-DurableOrchestrationExternal'
-        # 'Stop-DurableOrchestration'
+        'Get-DurableStatus',
+        'New-DurableOrchestrationCheckStatusResponse',
+        'Send-DurableExternalEvent',
+        'Start-DurableOrchestration'
+        'Stop-DurableOrchestration'
     )
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @(
-       'Invoke-DurableActivityE',
-       'New-DurableRetryOptionsE',
-       'Set-FunctionInvocationContext'
-       'Start-DurableTimerE',
-       'Stop-DurableTimerTaskE',
-       'Wait-DurableTaskE'
-       'Start-DurableExternalEventListenerE'
+       'Invoke-DurableActivity',
+       'Invoke-DurableSubOrchestrator',
+       'New-DurableRetryPolicy',
+       'Set-DurableCustomStatus',
+       'Set-FunctionInvocationContext',
+       'Start-DurableExternalEventListener'
+       'Start-DurableTimer',
+       'Stop-DurableTimerTask',
+       'Wait-DurableTask',
+       'Get-DurableTaskResult'
     )
     
     # Variables to export from this module
@@ -85,10 +88,11 @@
     
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
     AliasesToExport = @(
-        # 'Invoke-ActivityFunction',
+        'Invoke-ActivityFunction',
         'New-OrchestrationCheckStatusResponse',
         'Start-NewOrchestration',
-        'Wait-ActivityFunction'
+        'Wait-ActivityFunction',
+        'New-DurableRetryOptions'
     )
     
     # DSC resources to export from this module

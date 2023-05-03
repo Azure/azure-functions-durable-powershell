@@ -3,23 +3,26 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+using namespace System.Net
+
 # Set aliases for cmdlets to export
-# Set-Alias -Name Wait-ActivityFunction -Value Wait-DurableTask
-# Set-Alias -Name Invoke-ActivityFunction -Value Invoke-DurableActivity
-Set-Alias -Name New-OrchestrationCheckStatusResponse -Value New-DurableOrchestrationCheckStatusResponseExternal
-Set-Alias -Name Start-NewOrchestration -Value Start-DurableOrchestrationExternal
+Set-Alias -Name Wait-ActivityFunction -Value Wait-DurableTask
+Set-Alias -Name Invoke-ActivityFunction -Value Invoke-DurableActivity
+Set-Alias -Name New-OrchestrationCheckStatusResponse -Value New-DurableOrchestrationCheckStatusResponse
+Set-Alias -Name Start-NewOrchestration -Value Start-DurableOrchestration
+Set-Alias -Name New-DurableRetryOptions -Value New-DurableRetryPolicy
 
 function GetDurableClientFromModulePrivateData {
     $PrivateData = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData
     if ($null -eq $PrivateData -or $null -eq $PrivateData['DurableClient']) {
-        throw "No binding of the type 'durableClient' was defined."
+        throw "Could not find `DurableClient` private data. This can occur when you have not set application setting 'ExternalDurablePowerShellSDK' to 'true' or if you're using a DurableClient CmdLet but have no DurableClient binding declared in `function.json`."
     }
     else {
         $PrivateData['DurableClient']
     }
 }
 
-function Get-DurableStatusExternal {
+function Get-DurableStatus {
     [CmdletBinding()]
     param(
         [Parameter(
@@ -39,9 +42,6 @@ function Get-DurableStatusExternal {
 
         [switch] $ShowInput
     )
-
-    # TODO: Remove this line before publishing
-    Write-Host "EXTERNAL CHECK STATUS"
 
     $ErrorActionPreference = 'Stop'
 
@@ -84,7 +84,7 @@ function Get-DurableStatusExternal {
 .PARAMETER DurableClient
     The orchestration client object.
 #>
-function Start-DurableOrchestrationExternal {
+function Start-DurableOrchestration {
     [CmdletBinding()]
     param(
         [Parameter(
@@ -101,10 +101,12 @@ function Start-DurableOrchestrationExternal {
 
 		[Parameter(
             ValueFromPipelineByPropertyName=$true)]
-        [object] $DurableClient
+        [object] $DurableClient,
+
+        [Parameter(
+            ValueFromPipelineByPropertyName=$true)]
+        [string] $InstanceId
     )
-    # MICHAELPENG TODO: Remove this line before publishing
-    Write-Host "EXTERNAL START ORCHESTRATION"
 
     $ErrorActionPreference = 'Stop'
 
@@ -112,7 +114,9 @@ function Start-DurableOrchestrationExternal {
         $DurableClient = GetDurableClientFromModulePrivateData
     }
 
-    $InstanceId = (New-Guid).Guid
+    if (-not $InstanceId) {
+        $InstanceId = (New-Guid).Guid
+    }
 
     $Uri =
         if ($DurableClient.rpcBaseUrl) {
@@ -131,34 +135,34 @@ function Start-DurableOrchestrationExternal {
     return $instanceId
 }
 
-# function Stop-DurableOrchestration {
-#     [CmdletBinding()]
-#     param(
-#         [Parameter(
-#             Mandatory = $true,
-#             Position = 0,
-#             ValueFromPipelineByPropertyName = $true)]
-#         [ValidateNotNullOrEmpty()]
-#         [string] $InstanceId,
+function Stop-DurableOrchestration {
+    [CmdletBinding()]
+    param(
+        [Parameter(
+            Mandatory = $true,
+            Position = 0,
+            ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $InstanceId,
 
-#         [Parameter(
-#             Mandatory = $true,
-#             Position = 1,
-#             ValueFromPipelineByPropertyName = $true)]
-#         [ValidateNotNullOrEmpty()]
-#         [string] $Reason
-#     )
+        [Parameter(
+            Mandatory = $true,
+            Position = 1,
+            ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Reason
+    )
 
-#     $ErrorActionPreference = 'Stop'
+    $ErrorActionPreference = 'Stop'
 
-#     if ($null -eq $DurableClient) {
-#         $DurableClient = GetDurableClientFromModulePrivateData
-#     }
+    if ($null -eq $DurableClient) {
+        $DurableClient = GetDurableClientFromModulePrivateData
+    }
 
-#     $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId/terminate?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
+    $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId/terminate?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
 
-#     Invoke-RestMethod -Uri $requestUrl
-# }
+    Invoke-RestMethod -Uri $requestUrl -Method 'POST'
+}
 
 function IsValidUrl([uri]$Url) {
     $Url.IsAbsoluteUri -and ($Url.Scheme -in 'http', 'https')
@@ -172,7 +176,7 @@ function GetUrlOrigin([uri]$Url) {
     $fixedOriginUrl.ToString()
 }
 
-function New-DurableOrchestrationCheckStatusResponseExternal {
+function New-DurableOrchestrationCheckStatusResponse {
     [CmdletBinding()]
     param(
         [Parameter(
@@ -189,9 +193,7 @@ function New-DurableOrchestrationCheckStatusResponseExternal {
             ValueFromPipelineByPropertyName=$true)]
         [object] $DurableClient
     )
-    # TODO: Remove this before publishing
-    Write-Host "EXTERNAL CHECK STATUS"
-    
+
     if ($null -eq $DurableClient) {
         $DurableClient = GetDurableClientFromModulePrivateData
     }
@@ -243,7 +245,7 @@ function New-DurableOrchestrationCheckStatusResponseExternal {
 .PARAMETER ConnectionName
     The name of the connection string associated with TaskHubName
 #>
-function Send-DurableExternalEventE {
+function Send-DurableExternalEvent {
     [CmdletBinding()]
     param(
         [Parameter(
@@ -275,14 +277,14 @@ function Send-DurableExternalEventE {
     
     $DurableClient = GetDurableClientFromModulePrivateData
 
-    $RequestUrl = GetRaiseEventUrlE -DurableClient $DurableClient -InstanceId $InstanceId -EventName $EventName -TaskHubName $TaskHubName -ConnectionName $ConnectionName
+    $RequestUrl = GetRaiseEventUrl -DurableClient $DurableClient -InstanceId $InstanceId -EventName $EventName -TaskHubName $TaskHubName -ConnectionName $ConnectionName
 
     $Body = $EventData | ConvertTo-Json -Compress
               
     $null = Invoke-RestMethod -Uri $RequestUrl -Method 'POST' -ContentType 'application/json' -Body $Body
 }
 
-function GetRaiseEventUrlE(
+function GetRaiseEventUrl(
     $DurableClient,
     [string] $InstanceId,
     [string] $EventName,

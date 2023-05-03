@@ -12,7 +12,7 @@ namespace DurableSDK.Commands.APIs
     using System.Collections;
     using System.Management.Automation;
 
-    [Cmdlet("Wait", "DurableTaskE")]
+    [Cmdlet("Wait", "DurableTask")]
     public class WaitDurableTaskCommand : DurableSDKCmdlet
     {
         [Parameter]

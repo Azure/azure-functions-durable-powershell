@@ -43,7 +43,7 @@ namespace DurableEngine.Tasks
 
         internal override OrchestrationAction CreateOrchestrationAction()
         {
-            var compoundActions = Tasks.Select((task) => task.CreateOrchestrationAction()).ToArray();
+            var compoundActions = Tasks.Select((task) => task.GetOrCreateAction()).ToArray();
             var orchestrationAction = new WhenAllAction(compoundActions);
             return orchestrationAction;
         }
