@@ -62,8 +62,8 @@ steps:
     $modulePath = $env:modulePath
     $artifactName = $env:artifactName
     $buildNumber = $env:buildNumber
-    Write-Host "Running 'tar -czvf $modulePath/$artifactName-$buildNumber).tar.gz -C $modulePath/**'"
-    tar -czvf $modulePath/$artifactName-$buildNumber).tar.gz -C $modulePath/**
+    Write-Host "Running 'tar -czvf $modulePath/$artifactName-$buildNumber.tar.gz -C $modulePath/**'"
+    tar -czvf $modulePath/$artifactName-$buildNumber.tar.gz -C $modulePath/**
   displayName: 'Tar build artifacts'
   condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
 
