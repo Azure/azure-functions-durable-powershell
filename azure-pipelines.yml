@@ -29,7 +29,7 @@ steps:
     $simulateReleaseBuild = $null
     if (-not([bool]::TryParse($env:SimulateReleaseBuild, [ref] $simulateReleaseBuild)))
     {
-        throw "SimulateReleaseBuild can only be set to true or false."
+        throw "SimulateReleaseBuild set to $env:SimulateReleaseBuild. It can only be set to true or false."
     }
 
     $isReleaseBuild = $false
@@ -57,9 +57,11 @@ steps:
 
 - pwsh: |
     tar -czvf $(modulePath)/$(artifactName)-$(buildNumber).tar.gz -C $(modulePath)
+  displayName: 'Tar build artifacts'
+  condition: eq(variables['IsReleaseBuild'], 'true')
 
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: package'
+  displayName: 'Publish .tar artifact'
   inputs:
     PathtoPublish: $(modulePath)
     ArtifactName: $(artifactName)

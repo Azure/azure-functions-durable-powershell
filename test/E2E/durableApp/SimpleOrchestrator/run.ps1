@@ -6,4 +6,4 @@ $ErrorActionPreference = 'Stop'
 
 $output = Invoke-DurableActivity -FunctionName "Hello" -Input "Tokyo"
 
-return $output
+$output
