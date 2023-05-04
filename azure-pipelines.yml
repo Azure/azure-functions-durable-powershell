@@ -61,13 +61,14 @@ steps:
 - pwsh: |
     tar -czvf $(modulePath)/$(artifactName)-$(buildNumber).tar.gz -C $(modulePath)
   displayName: 'Tar build artifacts'
-  condition: eq(variables['IsReleaseBuild'], 'true')
+  condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish .tar artifact'
   inputs:
     PathtoPublish: $(modulePath)
     ArtifactName: $(artifactName)
+  condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
 
 - task: PublishTestResults@2
   inputs:
