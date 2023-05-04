@@ -59,21 +59,27 @@ steps:
   displayName: 'Run E2E tests'
 
 - pwsh: |
-    $modulePath = $env:modulePath
     $artifactName = $env:artifactName
     $buildNumber = $env:buildNumber
+    $modulePath = $env:modulePath
+    $src = $env:src
     
     Write-Host "Creating 'package' directory..."
-    New-Item "./package" -ItemType Directory
-    Write-Host "Running 'tar -czvf ./package/$artifactName-$buildNumber.tar.gz -C $modulePath .'..."
-    tar -czvf ./package/$artifactName-$buildNumber.tar.gz -C $modulePath .
+    New-Item "$src/package" -ItemType Directory
+    Write-Host "Running 'tar -czvf $src/package/$artifactName-$buildNumber.tar.gz -C $modulePath .'..."
+    tar -czvf $src/package/$artifactName-$buildNumber.tar.gz -C $modulePath .
   displayName: 'Tar build artifacts'
   condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
+  env:
+    artifactName: $(artifactName)
+    buildNumber: $(buildNumber)
+    modulePath: $(modulePath)
+    src: $(Build.SourcesDirectory)
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish .tar artifact'
   inputs:
-    PathtoPublish: ./package
+    PathtoPublish: $(Build.SourcesDirectory)/package
     ArtifactName: $(artifactName)-$(buildNumber).tar.gz
   condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
 
