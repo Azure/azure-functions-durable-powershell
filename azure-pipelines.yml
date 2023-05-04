@@ -60,10 +60,10 @@ steps:
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)\test\E2E\durableApp\Modules\AzureFunctions.PowerShell.Durable.SDK'
+    rootFolderOrFile: 'test\E2E\durableApp\Modules\AzureFunctions.PowerShell.Durable.SDK'
     includeRootFolder: false
     archiveType: 'tar'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/$(artifactName)-$(buildNumber).tar.gz'
+    archiveFile: '$(Build.ArtifactStagingDirectory)\$(artifactName)-$(buildNumber).tar.gz'
     replaceExistingArchive: true
   displayName: 'Tar build artifacts'
   condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
@@ -71,7 +71,7 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish .tar artifact'
   inputs:
-    PathtoPublish: $(Build.SourcesDirectory)/package
+    PathtoPublish: $(Build.ArtifactStagingDirectory)
     ArtifactName: $(artifactName)-$(buildNumber).tar.gz
   condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
 
