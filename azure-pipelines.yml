@@ -18,6 +18,12 @@ pool:
     demands:
       - ImageOverride -equals $(imageName)
 
+variables:
+  artifactName: 'azure-functions-durable-ps'
+  # Every build will increment
+  buildNumber: $[counter('build', 001) ]
+  modulePath: './test/E2E/durableApp/Modules/AzureFunctions.PowerShell.Durable.SDK'
+
 steps:
 - pwsh: |
     $simulateReleaseBuild = $null
@@ -48,6 +54,15 @@ steps:
   env:
     AzureWebJobsStorage: $(AzureWebJobsStorage)
   displayName: 'Run E2E tests'
+
+- pwsh: |
+    tar -czvf $(modulePath)/$(artifactName)-$(buildNumber).tar.gz -C $(modulePath)
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: package'
+  inputs:
+    PathtoPublish: $(modulePath)
+    ArtifactName: $(artifactName)
 
 - task: PublishTestResults@2
   inputs:
