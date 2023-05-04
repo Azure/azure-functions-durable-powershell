@@ -42,6 +42,8 @@ steps:
     Write-Host "##vso[task.setvariable variable=IsReleaseBuild]$isReleaseBuild"
     Write-Host "IsReleaseBuild: $isReleaseBuild"
   displayName: Set IsReleaseBuild pipeline variable
+  env:
+    SimulateReleaseBuild: $(SimulateReleaseBuild)
 
 - pwsh: |
       # We only generate an SBOM for release or simulated release builds
