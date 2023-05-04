@@ -47,7 +47,7 @@ steps:
 
 - pwsh: |
       # We only generate an SBOM for release or simulated release builds
-      Write-Host "Running ./build.ps1 -Configuration Release -AddSBOM:$shouldAddSBOM"
+      Write-Host "Running ./build.ps1 -Configuration Release -AddSBOM:$shouldAddSBOM..."
       ./build.ps1 -Configuration Release -AddSBOM:$shouldAddSBOM
   displayName: 'Build Durable SDK'
   env:
@@ -62,16 +62,19 @@ steps:
     $modulePath = $env:modulePath
     $artifactName = $env:artifactName
     $buildNumber = $env:buildNumber
-    Write-Host "Running 'tar -czvf $modulePath/$artifactName-$buildNumber.tar.gz -C $modulePath/**'"
-    tar -czvf $modulePath/$artifactName-$buildNumber.tar.gz -C $modulePath/**
+    
+    Write-Host "Creating 'package' directory..."
+    New-Item "./package" -ItemType Directory
+    Write-Host "Running 'tar -czvf ./package/$artifactName-$buildNumber.tar.gz -C $modulePath .'..."
+    tar -czvf ./package/$artifactName-$buildNumber.tar.gz -C $modulePath .
   displayName: 'Tar build artifacts'
   condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish .tar artifact'
   inputs:
-    PathtoPublish: $(modulePath)
-    ArtifactName: $(artifactName)
+    PathtoPublish: ./package
+    ArtifactName: $(artifactName)-$(buildNumber).tar.gz
   condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
 
 - task: PublishTestResults@2
