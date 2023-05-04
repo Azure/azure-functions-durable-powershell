@@ -22,7 +22,7 @@ variables:
   artifactName: 'azure-functions-durable-ps'
   # Every build will increment
   buildNumber: $[counter('build', 001) ]
-  modulePath: './test/E2E/durableApp\Modules/AzureFunctions.PowerShell.Durable.SDK'
+  modulePath: './test/E2E/durableApp/Modules/AzureFunctions.PowerShell.Durable.SDK'
 
 steps:
 - pwsh: |
