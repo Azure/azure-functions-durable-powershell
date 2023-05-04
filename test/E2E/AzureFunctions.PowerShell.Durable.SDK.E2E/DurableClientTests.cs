@@ -51,7 +51,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 });
         }
 
-        [Fact]
+        [SkippableFact]
         public async Task DurableSubOrchestratorCompletes()
         {
             var initialResponse = await Utilities.GetHttpStartResponse("SubOrchestrator");

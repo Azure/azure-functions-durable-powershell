@@ -29,7 +29,7 @@ steps:
     $simulateReleaseBuild = $null
     if (-not([bool]::TryParse($env:SimulateReleaseBuild, [ref] $simulateReleaseBuild)))
     {
-        throw "SimulateReleaseBuild set to $env:SimulateReleaseBuild. It can only be set to true or false."
+        throw "SimulateReleaseBuild set to $($env:SimulateReleaseBuild). It can only be set to true or false."
     }
 
     $isReleaseBuild = $false
