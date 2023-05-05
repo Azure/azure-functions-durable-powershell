@@ -84,7 +84,6 @@ steps:
   displayName: 'Tar build tartifacts'
 
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish .tar artifact'
   inputs:
     PathtoPublish: $(Build.ArtifactStagingDirectory)
     ArtifactName: $(artifactName).tar.gz
