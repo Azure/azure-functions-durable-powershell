@@ -58,20 +58,30 @@ steps:
     AzureWebJobsStorage: $(AzureWebJobsStorage)
   displayName: 'Run E2E tests'
 
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: 'test\E2E\durableApp\Modules\AzureFunctions.PowerShell.Durable.SDK'
-    includeRootFolder: false
-    archiveType: 'tar'
-    archiveFile: '$(Build.ArtifactStagingDirectory)\$(artifactName)-$(buildNumber).tar.gz'
-    replaceExistingArchive: true
+- pwsh: |
+    $artifactName = $env:artifactName
+    $buildNumber = $env:buildNumber
+    $modulePath = $env:modulePath
+    $src = $env:src
+    
+    Write-Host "Creating '$src/package' directory..."
+    New-Item "$src/package" -ItemType Directory
+    cd ./test/E2E/durableApp
+    ls
+    Write-Host "Running 'tar -czvf $src/package/$artifactName-$buildNumber.tar.gz -C $modulePath .'..."
+    tar -czvf $src/package/$artifactName-$buildNumber.tar.gz -C $modulePath .
   displayName: 'Tar build artifacts'
   condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
+  env:
+    artifactName: $(artifactName)
+    buildNumber: $(buildNumber)
+    modulePath: $(modulePath)
+    src: $(Build.SourcesDirectory)
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish .tar artifact'
   inputs:
-    PathtoPublish: $(Build.ArtifactStagingDirectory)
+    PathtoPublish: $(Build.SourcesDirectory)/package
     ArtifactName: $(artifactName)-$(buildNumber).tar.gz
   condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
 
