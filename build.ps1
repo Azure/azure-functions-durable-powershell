@@ -149,8 +149,8 @@ if ($AddSBOM) {
     New-Item -ItemType File -Path $telemetryFilePath
     $packageName = "AzureFunctions.PowerShell.Durable.SDK"
 
-    Write-Log "Running: dotnet $manifestTool generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath -PackageName $packageName"
-    dotnet $manifestTool generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath -PackageName $packageName
+    Write-Log "Running: dotnet $manifestToolPath generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath -PackageName $packageName"
+    dotnet $manifestToolPath generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath -PackageName $packageName
 
     # Discard telemetry generated
     Remove-Item -Path $telemetryFilePath -ErrorAction Ignore
