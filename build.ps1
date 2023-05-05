@@ -142,7 +142,7 @@ Write-Log "Build succeeded!"
 if ($AddSBOM) {
     # Install manifest tool
     $manifestToolPath = Install-SBOMUtil
-    Write-Log "Manifest tool path": $manifestToolPath
+    Write-Log "Manifest tool path: $manifestToolPath"
 
     # Generate manifest
     $telemetryFilePath = Join-Path $PSScriptRoot ((New-Guid).Guid + ".json")
