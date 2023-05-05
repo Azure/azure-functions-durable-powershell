@@ -47,10 +47,12 @@ steps:
 
 - pwsh: |
       Write-Host "IsReleaseBuild set to $env:IsReleaseBuild"
+      $isReleaseBuild = $false
       if (-not([bool]::TryParse($env:IsReleaseBuild, [ref] $isReleaseBuild)))
       {
           throw "SimulateReleaseBuild can only be set to true or false."
       }
+
       # We only generate an SBOM for release or simulated release builds
       Write-Host "Running ./build.ps1 -Configuration Release -AddSBOM:$isReleaseBuild..."
       ./build.ps1 -Configuration Release -AddSBOM:$isReleaseBuild
