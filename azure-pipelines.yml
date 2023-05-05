@@ -46,11 +46,18 @@ steps:
     SimulateReleaseBuild: $(SimulateReleaseBuild)
 
 - pwsh: |
+      Write-Host "IsReleaseBuild set to $env:IsReleaseBuild"
+      if (-not([bool]::TryParse($env:IsReleaseBuild, [ref] $isReleaseBuild)))
+      {
+          throw "SimulateReleaseBuild can only be set to true or false."
+      }
       # We only generate an SBOM for release or simulated release builds
-      Write-Host "Running ./build.ps1 -Configuration Release -AddSBOM:$env:IsReleaseBuild..."
-      ./build.ps1 -Configuration Release -AddSBOM:$env:IsReleaseBuild
+      Write-Host "Running ./build.ps1 -Configuration Release -AddSBOM:$isReleaseBuild..."
+      ./build.ps1 -Configuration Release -AddSBOM:$isReleaseBuild
   displayName: 'Build Durable SDK'
   env:
+    # We include IsReleaseBuild as an environment variable since Linux agents don't seem to support including
+    # pipeline variables in scripts with the $(variable) syntax
     IsReleaseBuild: $(IsReleaseBuild)
     SBOMUtilSASUrl: $(SBOMUtilSASUrl)
 
