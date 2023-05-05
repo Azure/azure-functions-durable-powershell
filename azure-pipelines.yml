@@ -19,7 +19,7 @@ pool:
       - ImageOverride -equals $(imageName)
 
 variables:
-  artifactName: 'azure-functions-durable-ps'
+  artifactName: 'azure-functions-durable-powershell-$(Build.SourceVersion)'
   # Every build will increment
   buildNumber: $[counter('build', 001) ]
   modulePath: './test/E2E/durableApp/Modules/AzureFunctions.PowerShell.Durable.SDK'
@@ -64,14 +64,14 @@ steps:
     rootFolderOrFile: '$(Build.SourcesDirectory)/test/E2E/durableApp/Modules/AzureFunctions.PowerShell.Durable.SDK'
     includeRootFolder: false
     archiveType: 'tar'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/azure-functions-durable-powershell-$(Build.SourceVersion).tar.gz'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(artifactName).tar.gz'
     replaceExistingArchive: true
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish .tar artifact'
   inputs:
-    PathtoPublish: $(Build.SourcesDirectory)/package
-    ArtifactName: $(artifactName)-$(buildNumber).tar.gz
+    PathtoPublish: $(Build.ArtifactStagingDirectory)
+    ArtifactName: $(artifactName).tar.gz
   condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
 
 - task: PublishTestResults@2
