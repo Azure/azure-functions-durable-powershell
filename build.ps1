@@ -15,12 +15,9 @@ $durableAppPath = "$PSScriptRoot/test/E2E/durableApp/Modules/$packageName"
 $powerShellModulePath = "$PSScriptRoot/src/$packageName.psm1"
 $manifestPath = "$PSScriptRoot/src/$packageName.psd1"
 
-$outputPath = "$PSScriptRoot/src/out/"
-if ($Configuration -eq "Debug")
-{
-    # Publish directly to the test durable app for testing
-    $outputPath = $durableAppPath
-}
+# Publish directly to the test durable app for testing
+$outputPath = $durableAppPath
+
 $sharedDependenciesPath = "$outputPath/Dependencies/"
 
 $netCoreTFM = 'net6.0'
