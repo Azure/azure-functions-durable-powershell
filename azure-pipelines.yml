@@ -81,6 +81,7 @@ steps:
     archiveType: 'tar'
     archiveFile: '$(Build.ArtifactStagingDirectory)/$(artifactName).tar.gz'
     replaceExistingArchive: true
+  displayName: 'Tar build tartifacts'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish .tar artifact'
@@ -88,6 +89,7 @@ steps:
     PathtoPublish: $(Build.ArtifactStagingDirectory)
     ArtifactName: $(artifactName).tar.gz
   condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
+  displayName: 'Publish build artifacts'
 
 - task: PublishTestResults@2
   inputs:
