@@ -152,6 +152,6 @@ if ($AddSBOM) {
     dotnet $manifestTool generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath -PackageName $packageName
 
     # Discard telemetry generated
-    Remove-Item -Path $telemetryFilePath
+    Remove-Item -Path (Join-Path $outputPath $telemetryFilePath) -ErrorAction Ignore
 }
 #endregion
