@@ -146,12 +146,13 @@ if ($AddSBOM) {
 
     # Generate manifest
     $telemetryFilePath = Join-Path $PSScriptRoot ((New-Guid).Guid + ".json")
+    New-Item -ItemType File -Path $telemetryFilePath
     $packageName = "AzureFunctions.PowerShell.Durable.SDK"
 
-    Write-Log "Running: dotnet $manifestTool generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath"
+    Write-Log "Running: dotnet $manifestTool generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath -PackageName $packageName"
     dotnet $manifestTool generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath -PackageName $packageName
 
     # Discard telemetry generated
-    Remove-Item -Path (Join-Path $outputPath $telemetryFilePath) -ErrorAction Ignore
+    Remove-Item -Path $telemetryFilePath -ErrorAction Ignore
 }
 #endregion
