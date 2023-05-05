@@ -8,6 +8,8 @@ param(
     $AddSBOM
 )
 
+Import-Module "$PSScriptRoot\pipelineUtilities.psm1" -Force
+
 $packageName = "AzureFunctions.PowerShell.Durable.SDK"
 $shimPath = "$PSScriptRoot/src/DurableSDK"
 $durableEnginePath = "$PSScriptRoot/src/DurableEngine"
@@ -22,67 +24,6 @@ $sharedDependenciesPath = "$outputPath/Dependencies/"
 
 $netCoreTFM = 'net6.0'
 $publishPathSuffix = "bin/$Configuration/$netCoreTFM/publish"
-
-#region HELPER FUNCTIONS ==========================================================================
-function Write-Log
-{
-    param (
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Message,
-
-        [Switch]
-        $Warning,
-
-        [Switch]
-        $Throw,
-
-        [System.String]
-        $Color
-    )
-
-    $Message = (Get-Date -Format G)  + " -- $Message"
-
-    if ($Throw)
-    {
-        throw $Message
-    }
-
-    $foregroundColor = if ($Warning.IsPresent) { 'Yellow' } elseif ($Color) { $Color } else { 'Green' }
-    Write-Host -ForegroundColor $foregroundColor $Message
-}
-
-function Install-SBOMUtil
-{
-    if ([string]::IsNullOrEmpty($env:SBOMUtilSASUrl))
-    {
-        throw "The `$SBOMUtilSASUrl environment variable cannot be null or empty when specifying the `$AddSBOM switch"
-    }
-
-    $MANIFESTOOLNAME = "ManifestTool"
-    Write-Log "Installing $MANIFESTOOLNAME..."
-
-    $MANIFESTOOL_DIRECTORY = Join-Path $PSScriptRoot $MANIFESTOOLNAME
-    Remove-Item -Recurse -Force $MANIFESTOOL_DIRECTORY -ErrorAction Ignore
-
-    Invoke-RestMethod -Uri $env:SBOMUtilSASUrl -OutFile "$MANIFESTOOL_DIRECTORY.zip"
-    Expand-Archive "$MANIFESTOOL_DIRECTORY.zip" -DestinationPath $MANIFESTOOL_DIRECTORY
-
-    $dllName = "Microsoft.ManifestTool.dll"
-    $manifestToolPath = Join-Path "$MANIFESTOOL_DIRECTORY" "$dllName"
-
-    if (-not (Test-Path $manifestToolPath))
-    {
-        throw "$MANIFESTOOL_DIRECTORY does not contain '$dllName'"
-    }
-
-    Write-Log 'Done.'
-
-    return $manifestToolPath
-}
-
-#endregion
 
 #region BUILD ARTIFACTS ===========================================================================
 Write-Log "Build started..."
