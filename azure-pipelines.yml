@@ -47,10 +47,11 @@ steps:
 
 - pwsh: |
       # We only generate an SBOM for release or simulated release builds
-      Write-Host "Running ./build.ps1 -Configuration Release -AddSBOM:$shouldAddSBOM..."
-      ./build.ps1 -Configuration Release -AddSBOM:$shouldAddSBOM
+      Write-Host "Running ./build.ps1 -Configuration Release -AddSBOM:$env:IsReleaseBuild..."
+      ./build.ps1 -Configuration Release -AddSBOM:$env:IsReleaseBuild
   displayName: 'Build Durable SDK'
   env:
+    IsReleaseBuild: $(IsReleaseBuild)
     SBOMUtilSASUrl: $(SBOMUtilSASUrl)
 
 - pwsh: |
