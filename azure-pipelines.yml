@@ -46,9 +46,9 @@ steps:
     SimulateReleaseBuild: $(SimulateReleaseBuild)
 
 - pwsh: |
-      Import-Module ".\pipelineUtilities.psm1" -Force
-      Install-Dotnet
-    displayName: 'Install .NET 3.1'
+    Import-Module ".\pipelineUtilities.psm1" -Force
+    Install-Dotnet
+  displayName: 'Install .NET 3.1'
 
 - pwsh: |
       Write-Host "IsReleaseBuild set to $env:IsReleaseBuild"
