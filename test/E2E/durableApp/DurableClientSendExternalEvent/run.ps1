@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 
 Write-Host "DurableClientSendExternalEvent started"
 
-$OrchestratorInputs = @{ FirstDuration = 5; SecondDuration = 30 }
+$OrchestratorInputs = @{ FirstDuration = 5; SecondDuration = 60 }
 
 $InstanceId = Start-DurableOrchestration -FunctionName "SendDurableExternalEventOrchestrator" -InputObject $OrchestratorInputs
 Write-Host "Started orchestration with ID = '$InstanceId'"
