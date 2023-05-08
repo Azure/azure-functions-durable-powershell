@@ -55,7 +55,7 @@ steps:
       $isReleaseBuild = $false
       if (-not([bool]::TryParse($env:IsReleaseBuild, [ref] $isReleaseBuild)))
       {
-          throw "SimulateReleaseBuild can only be set to true or false."
+          throw "IsReleaseBuild can only be set to true or false."
       }
 
       # We only generate an SBOM for release or simulated release builds
