@@ -5,6 +5,8 @@
 param
 (
     [Switch]
+    $NoBuild,
+    [Switch]
     $UseCoreToolsBuildFromIntegrationTests,
     [Switch]
     $SkipCoreToolsDownload
@@ -98,11 +100,11 @@ Write-Host "Deleting $FUNC_CLI_DIRECTORY if it exists..."
 Remove-Item -Force "$FUNC_CLI_DIRECTORY.zip" -ErrorAction Ignore
 Remove-Item -Recurse -Force $FUNC_CLI_DIRECTORY -ErrorAction Ignore
 
-if (-not $SkipCoreToolsDownload.IsPresent)
+if (-not $SkipCoreToolsDownload)
 {
     Write-Host "Downloading Core Tools because SkipCoreToolsDownload switch parameter is not present..."
     $coreToolsDownloadURL = $null
-    if ($UseCoreToolsBuildFromIntegrationTests.IsPresent)
+    if ($UseCoreToolsBuildFromIntegrationTests)
     {
         $coreToolsDownloadURL = "https://functionsintegclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest/Azure.Functions.Cli.$os-$arch.zip"
         $env:CORE_TOOLS_URL = "https://functionsintegclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest"
@@ -148,16 +150,17 @@ if (-not $SkipCoreToolsDownload.IsPresent)
 $env:FUNC_PATH = $funcPath
 Write-Host "Set FUNC_PATH environment variable to $env:FUNC_PATH"
 
-# For both integration build test runs and regular test runs, we copy binaries to durableApp/Modules
-Write-Host "Building the DurableSDK module and copying binaries to the durableApp/Modules directory..."
-$configuration = if ($env:CONFIGURATION) { $env:CONFIGURATION } else { 'Debug' }
-
-Push-Location "$PSScriptRoot/../.."
-try {
-    & ./build.ps1 -Configuration 'Debug'
-}
-finally {
-    Pop-Location
+if (-not $NoBuild) {
+    # For both integration build test runs and regular test runs, we copy binaries to durableApp/Modules
+    Write-Host "Building the DurableSDK module and copying binaries to the durableApp/Modules directory..."
+    
+    Push-Location "$PSScriptRoot/../.."
+    try {
+        & ./build.ps1 -Configuration 'Debug'
+    }
+    finally {
+        Pop-Location
+    }
 }
 
 Write-Host "Starting Core Tools..."

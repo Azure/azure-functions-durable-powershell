@@ -18,11 +18,77 @@ pool:
     demands:
       - ImageOverride -equals $(imageName)
 
+variables:
+  artifactName: 'azure-functions-durable-powershell-$(Build.SourceVersion)'
+  # Every build will increment
+  buildNumber: $[counter('build', 001) ]
+  modulePath: './test/E2E/durableApp/Modules/AzureFunctions.PowerShell.Durable.SDK'
+
 steps:
-- pwsh: ./test/E2E/Start-E2ETest.ps1 -UseCoreToolsBuildFromIntegrationTests
+- pwsh: |
+    $simulateReleaseBuild = $null
+    Write-Host "SimulateReleaseBuild set to $env:SimulateReleaseBuild"
+    if (-not([bool]::TryParse($env:SimulateReleaseBuild, [ref] $simulateReleaseBuild)))
+    {
+        throw "SimulateReleaseBuild can only be set to true or false."
+    }
+
+    $isReleaseBuild = $false
+    if ($env:BuildSourceBranchName -like "release_*" -or $simulateReleaseBuild)
+    {
+        $isReleaseBuild = $true
+    }
+    Write-Host "Setting IsReleaseBuild to $isReleaseBuild because SimulateReleaseBuild is $env:SimulateReleaseBuild"
+    Write-Host "##vso[task.setvariable variable=IsReleaseBuild]$isReleaseBuild"
+    Write-Host "IsReleaseBuild: $isReleaseBuild"
+  displayName: Set IsReleaseBuild pipeline variable
+  env:
+    SimulateReleaseBuild: $(SimulateReleaseBuild)
+
+- pwsh: |
+    Import-Module ".\pipelineUtilities.psm1" -Force
+    Install-Dotnet
+  displayName: 'Install .NET 3.1'
+
+- pwsh: |
+      Write-Host "IsReleaseBuild set to $env:IsReleaseBuild"
+      $isReleaseBuild = $false
+      if (-not([bool]::TryParse($env:IsReleaseBuild, [ref] $isReleaseBuild)))
+      {
+          throw "SimulateReleaseBuild can only be set to true or false."
+      }
+
+      # We only generate an SBOM for release or simulated release builds
+      Write-Host "Running ./build.ps1 -Configuration Release -AddSBOM:$isReleaseBuild..."
+      ./build.ps1 -Configuration Release -AddSBOM:$isReleaseBuild
+  displayName: 'Build Durable SDK'
+  env:
+    # We include IsReleaseBuild as an environment variable since Linux agents don't seem to support including
+    # pipeline variables in scripts with the $(variable) syntax
+    IsReleaseBuild: $(IsReleaseBuild)
+    SBOMUtilSASUrl: $(SBOMUtilSASUrl)
+
+- pwsh: |
+    ./test/E2E/Start-E2ETest.ps1 -NoBuild -UseCoreToolsBuildFromIntegrationTests
   env:
     AzureWebJobsStorage: $(AzureWebJobsStorage)
   displayName: 'Run E2E tests'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)/test/E2E/durableApp/Modules/AzureFunctions.PowerShell.Durable.SDK'
+    includeRootFolder: false
+    archiveType: 'tar'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(artifactName).tar.gz'
+    replaceExistingArchive: true
+  displayName: 'Tar build tartifacts'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: $(Build.ArtifactStagingDirectory)
+    ArtifactName: $(artifactName).tar.gz
+  condition: and(succeeded(), eq(variables['IsReleaseBuild'], 'true'))
+  displayName: 'Publish build artifacts'
 
 - task: PublishTestResults@2
   inputs:
