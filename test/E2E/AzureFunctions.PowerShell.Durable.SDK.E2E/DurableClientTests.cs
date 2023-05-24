@@ -90,7 +90,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         [Fact]
         public async Task CanReceiveArrayFromActivity()
         {
-            var initialResponse = await Utilities.GetHttpStartResponse("ReceiveArrayFromActivity");
+            var initialResponse = await Utilities.GetHttpStartResponse("CanReceiveArrayOrchestrator");
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
             var location = initialResponse.Headers.Location;
