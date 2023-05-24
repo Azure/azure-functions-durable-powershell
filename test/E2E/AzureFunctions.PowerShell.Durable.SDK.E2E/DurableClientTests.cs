@@ -88,6 +88,78 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         }
 
         [Fact]
+        public async Task CanReceiveArrayFromActivity()
+        {
+            var initialResponse = await Utilities.GetHttpStartResponse("ReceiveArrayFromActivity");
+            Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
+
+            var location = initialResponse.Headers.Location;
+            Assert.NotNull(location);
+
+            await ValidateDurableWorkflowResults(
+                initialResponse,
+                validateInitialResponse: (dynamic initialStatusResponseBody) =>
+                {
+                    Assert.NotNull(initialStatusResponseBody.id);
+                    var statusQueryGetUri = (string)initialStatusResponseBody.statusQueryGetUri;
+                    Assert.Equal(location?.ToString(), statusQueryGetUri);
+                    Assert.NotNull(initialStatusResponseBody.sendEventPostUri);
+                    Assert.NotNull(initialStatusResponseBody.purgeHistoryDeleteUri);
+                    Assert.NotNull(initialStatusResponseBody.terminatePostUri);
+                    Assert.NotNull(initialStatusResponseBody.rewindPostUri);
+                },
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
+                {
+                    var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
+                    Assert.True(
+                        runtimeStatus == "Running" || runtimeStatus == "Pending",
+                        $"Unexpected runtime status: {runtimeStatus}");
+                },
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
+                {
+                    Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
+                    Assert.Equal("An", finalStatusResponseBody.output[0].ToString());
+                    Assert.Equal("Array", finalStatusResponseBody.output[1].ToString());
+                });
+        }
+
+        [Fact]
+        public async Task CanReceiveDeeplyNestedClientInput()
+        {
+            var initialResponse = await Utilities.GetHttpStartResponse("OrchestratorReturnInput", clientRoute: "orchestratorsSendComplexInput");
+            Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
+
+            var location = initialResponse.Headers.Location;
+            Assert.NotNull(location);
+
+            await ValidateDurableWorkflowResults(
+                initialResponse,
+                validateInitialResponse: (dynamic initialStatusResponseBody) =>
+                {
+                    Assert.NotNull(initialStatusResponseBody.id);
+                    var statusQueryGetUri = (string)initialStatusResponseBody.statusQueryGetUri;
+                    Assert.Equal(location?.ToString(), statusQueryGetUri);
+                    Assert.NotNull(initialStatusResponseBody.sendEventPostUri);
+                    Assert.NotNull(initialStatusResponseBody.purgeHistoryDeleteUri);
+                    Assert.NotNull(initialStatusResponseBody.terminatePostUri);
+                    Assert.NotNull(initialStatusResponseBody.rewindPostUri);
+                },
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
+                {
+                    var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
+                    Assert.True(
+                        runtimeStatus == "Running" || runtimeStatus == "Pending",
+                        $"Unexpected runtime status: {runtimeStatus}");
+                },
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
+                {
+                    Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
+                    // our input is 7 levels deep, with a number on each level. If we see 7, we know it was not truncated
+                    Assert.Contains("7", finalStatusResponseBody.output[0].ToString());
+                });
+        }
+
+        [Fact]
         public async Task DurableClientTerminatesOrchestration()
         {
             var initialResponse = await Utilities.GetHttpStartResponse(

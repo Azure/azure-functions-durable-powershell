@@ -128,7 +128,7 @@ function Start-DurableOrchestration {
             $UriTemplate.Replace('{functionName}', $FunctionName).Replace('[/{instanceId}]', "/$InstanceId")
         }
 
-    $Body = $InputObject | ConvertTo-Json -Compress
+    $Body = $InputObject | ConvertTo-Json -Compress -Depth 100
               
     $null = Invoke-RestMethod -Uri $Uri -Method 'POST' -ContentType 'application/json' -Body $Body
     
@@ -202,7 +202,7 @@ function New-DurableOrchestrationCheckStatusResponse {
     $requestHasValidUrl = IsValidUrl $requestUrl
     $requestUrlOrigin = GetUrlOrigin $requestUrl
     
-    $httpManagementPayload = @{ }
+    $httpManagementPayload = [ordered]@{ }
     foreach ($entry in $DurableClient.managementUrls.GetEnumerator()) {
         $value = $entry.Value
     
@@ -279,7 +279,7 @@ function Send-DurableExternalEvent {
 
     $RequestUrl = GetRaiseEventUrl -DurableClient $DurableClient -InstanceId $InstanceId -EventName $EventName -TaskHubName $TaskHubName -ConnectionName $ConnectionName
 
-    $Body = $EventData | ConvertTo-Json -Compress
+    $Body = $EventData | ConvertTo-Json -Compress -Depth 100
               
     $null = Invoke-RestMethod -Uri $RequestUrl -Method 'POST' -ContentType 'application/json' -Body $Body
 }
