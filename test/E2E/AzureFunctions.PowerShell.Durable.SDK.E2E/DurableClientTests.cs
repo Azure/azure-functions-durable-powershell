@@ -126,7 +126,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         [Fact]
         public async Task CanReceiveDeeplyNestedClientInput()
         {
-            var initialResponse = await Utilities.GetHttpStartResponse("OrchestratorReturnInput", clientRoute: "orchestratorsSendComplexInput");
+            var initialResponse = await Utilities.GetHttpStartResponse("OrchestratorReturnInput");
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
             var location = initialResponse.Headers.Location;
@@ -155,7 +155,20 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 {
                     Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
                     // our input is 7 levels deep, with a number on each level. If we see 7, we know it was not truncated
-                    Assert.Contains("7", finalStatusResponseBody.output[0].ToString());
+                    var expectedInput = "" +
+                    "{\r\n        \"1\": " +
+                    "{\r\n            \"2\": " +
+                    "{\r\n                \"3\": " +
+                    "{\r\n                    \"4\": " +
+                    "{\r\n                        \"5\": " +
+                    "{\r\n                            \"6\": 7\r\n" +
+                    "                        }\r\n" +
+                    "                    }\r\n" +
+                    "                }\r\n" +
+                    "            }\r\n" +
+                    "        }\r\n" +
+                    "    }";
+                    Assert.Equal("7", finalStatusResponseBody.input.ToString());
                 });
         }
 
