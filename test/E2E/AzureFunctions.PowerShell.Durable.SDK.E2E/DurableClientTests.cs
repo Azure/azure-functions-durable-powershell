@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using AzureFunctions.PowerShell.Durable.SDK.Tests.E2E;
+using Newtonsoft.Json;
 using System.Net;
 using Xunit;
 
@@ -126,7 +127,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         [Fact]
         public async Task CanReceiveDeeplyNestedClientInput()
         {
-            var initialResponse = await Utilities.GetHttpStartResponse("OrchestratorReturnInput");
+            var initialResponse = await Utilities.GetHttpStartResponse("OrchestratorReturnInput", clientRoute: "orchestratorsSendComplexInput");
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
             var location = initialResponse.Headers.Location;
@@ -154,21 +155,16 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
                     Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
-                    // our input is 7 levels deep, with a number on each level. If we see 7, we know it was not truncated
-                    var expectedInput = "" +
-                    "{\r\n        \"1\": " +
-                    "{\r\n            \"2\": " +
-                    "{\r\n                \"3\": " +
-                    "{\r\n                    \"4\": " +
-                    "{\r\n                        \"5\": " +
-                    "{\r\n                            \"6\": 7\r\n" +
-                    "                        }\r\n" +
-                    "                    }\r\n" +
-                    "                }\r\n" +
-                    "            }\r\n" +
-                    "        }\r\n" +
-                    "    }";
-                    Assert.Equal("7", finalStatusResponseBody.input.ToString());
+                    // our input is a JSON 7 levels deep, with a number on each level.
+                    // We check an integer for evidence of each level being preserved
+                    string inputStr = finalStatusResponseBody.input.ToString();
+                    Assert.Contains("1", inputStr);
+                    Assert.Contains("2", inputStr);
+                    Assert.Contains("3", inputStr);
+                    Assert.Contains("4", inputStr);
+                    Assert.Contains("5", inputStr);
+                    Assert.Contains("6", inputStr);
+                    Assert.Contains("7", inputStr);
                 });
         }
 
