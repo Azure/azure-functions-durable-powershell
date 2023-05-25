@@ -19,6 +19,8 @@ namespace DurableEngine.Utilities
             /// <inheritdoc/>
             public override string Serialize(object value)
             {
+                // JsonObject is used here rather than JsonConvert because of a shared dependency with the PowerShell worker.
+                // If the PowerShell worker ever changes the JSON serializer, then this repository would need to align with that.
                 var context = new JsonObject.ConvertToJsonContext(
                     maxDepth: 100,
                     enumsAsStrings: false,
