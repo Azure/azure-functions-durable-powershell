@@ -89,7 +89,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         }
 
         [Fact]
-        public async Task CanReceiveArrayFromActivity()
+        public async Task OrchestratorCanReceiveArrayFromActivity()
         {
             var initialResponse = await Utilities.GetHttpStartResponse("CanReceiveArrayOrchestrator");
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
