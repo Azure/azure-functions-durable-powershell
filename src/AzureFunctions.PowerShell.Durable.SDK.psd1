@@ -82,7 +82,7 @@
             ProjectUri = 'https://github.com/Azure/azure-functions-durable-powershell'
     
             # ReleaseNotes of this module
-            # ReleaseNotes = '' #TODO: add relase notes.
+            # ReleaseNotes = '' #TODO: add release notes.
     
             # Prerelease string of this module
             Prerelease = 'alpha' # TODO: remove alpha on initial release.
