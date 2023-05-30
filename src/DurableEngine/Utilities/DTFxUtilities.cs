@@ -1,7 +1,7 @@
 using Microsoft.DurableTask;
+using Microsoft.PowerShell.Commands;
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
 
 namespace DurableEngine.Utilities
 {
@@ -12,41 +12,27 @@ namespace DurableEngine.Utilities
         /// </summary>
         internal class JsonDataConverter : DataConverter
         {
-            // WARNING: Changing default serialization options could potentially be breaking for in-flight orchestrations.
-            static readonly JsonSerializerOptions DefaultOptions = new()
+            internal JsonDataConverter()
             {
-                IncludeFields = true,
-            };
-
-            /// <summary>
-            /// An instance of the <see cref="JsonDataConverter"/> with default configuration.
-            /// </summary>
-            internal static JsonDataConverter Default { get; } = new JsonDataConverter();
-
-            readonly JsonSerializerOptions options;
-
-            JsonDataConverter(JsonSerializerOptions options = null)
-            {
-                if (options != null)
-                {
-                    this.options = options;
-                }
-                else
-                {
-                    this.options = DefaultOptions;
-                }
             }
 
             /// <inheritdoc/>
             public override string Serialize(object value)
             {
-                return value != null ? System.Text.Json.JsonSerializer.Serialize(value, this.options) : null;
+                // JsonObject is used here rather than JsonConvert because of a shared dependency with the PowerShell worker.
+                // If the PowerShell worker ever changes the JSON serializer, then this repository would need to align with that.
+                var context = new JsonObject.ConvertToJsonContext(
+                    maxDepth: 100,
+                    enumsAsStrings: false,
+                    compressOutput: true);
+
+                return value != null ? JsonObject.ConvertToJson(value, context) : null;
             }
 
             /// <inheritdoc/>
             public override object Deserialize(string data, Type targetType)
             {
-                return data != null ? System.Text.Json.JsonSerializer.Deserialize(data, targetType, this.options) : null;
+                return data != null ? JsonObject.ConvertFromJson(data, error: out _) : null;
             }
         }
 

@@ -17,6 +17,17 @@ namespace DurableEngine.Tasks
             OrchestrationContext = (OrchestrationContext)privateData[OrchestrationInvoker.ContextKey];
         }
 
+        private OrchestrationAction action;
+
+        internal OrchestrationAction GetOrCreateAction()
+        {
+            if (this.action == null)
+            {
+                this.action = this.CreateOrchestrationAction();
+            }
+            return this.action;
+        }
+
         /// <summary>
         /// The orchestrator context.
         /// </summary>
@@ -49,7 +60,13 @@ namespace DurableEngine.Tasks
             {
                 // Flag this task as the current "task-to-await"
                 OrchestrationContext.SharedMemory.currTask = task;
-                OrchestrationContext.SharedMemory.Add(task.CreateOrchestrationAction());
+
+                // DF APIs only generate an action once, otherwise we'll get duplicate executions
+                if (task.action == null)
+                {
+                    // generate and cache action
+                    OrchestrationContext.SharedMemory.Add(task.GetOrCreateAction());
+                }
 
                 // Signal orchestration thread to await the Task.
                 // This is necessary for DTFx to determine if a result exists for the Task.
@@ -69,8 +86,10 @@ namespace DurableEngine.Tasks
                     }
                     else
                     {
-                        // Feed result to pipeline
+                        // TODO: add extension to guarantee termination or else fail fast
                         var result = OrchestrationContext.SharedMemory.currTask.Result;
+
+                        // Feed result to pipeline
                         write(result);
                     }
                 }
@@ -131,7 +150,7 @@ namespace DurableEngine.Tasks
         internal Task DTFxTask;
 
         /// <summary>
-        /// Whether this Task finished executing.
+        /// Whether this Task finished executing AND has a result to write to the output pipe.
         /// </summary>
         internal virtual bool HasResult()
         {

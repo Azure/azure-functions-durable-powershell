@@ -14,12 +14,12 @@ namespace DurableEngine
     /// <summary>
     /// Defines retry policies that can be passed as parameters to various operations.
     /// </summary>
-    public class RetryOptions : RetryPolicy
+    public class RetryPolicy : Microsoft.DurableTask.RetryPolicy
     {
-        internal Dictionary<string, object> RetryOptionsDictionary { get; set; }
+        internal Dictionary<string, object> RetryPolicyDictionary { get; set; }
 
         /// <inheritdoc/>
-        public RetryOptions(
+        public RetryPolicy(
             int maxNumberOfAttempts,
             TimeSpan firstRetryInterval,
             double backoffCoefficient,
@@ -40,14 +40,14 @@ namespace DurableEngine
             // defaults for the optional MaxRetryInterval and RetryTimeOut parameters. Furthermore,
             // of RetryOptions cannot be modified after construction, so it is safe to do this eager
             // serialization in the constructor.
-            RetryOptionsDictionary = new Dictionary<string, object>()
+            RetryPolicyDictionary = new Dictionary<string, object>()
                             {
                                 { "firstRetryIntervalInMilliseconds", ToIntMilliseconds(firstRetryInterval) },
                                 { "maxNumberOfAttempts", maxNumberOfAttempts },
                                 { "backoffCoefficient", backoffCoefficient }
                             };
-            AddOptionalValue(RetryOptionsDictionary, "maxRetryIntervalInMilliseconds", maxRetryInterval, ToIntMilliseconds);
-            AddOptionalValue(RetryOptionsDictionary, "maxRetryIntervalInMilliseconds", retryTimeout, ToIntMilliseconds);
+            AddOptionalValue(RetryPolicyDictionary, "maxRetryIntervalInMilliseconds", maxRetryInterval, ToIntMilliseconds);
+            AddOptionalValue(RetryPolicyDictionary, "maxRetryIntervalInMilliseconds", retryTimeout, ToIntMilliseconds);
         }
 
         private static void AddOptionalValue<T>(

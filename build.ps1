@@ -3,8 +3,12 @@
 param(
     [ValidateSet('Debug', 'Release')]
     [string]
-    $Configuration = 'Debug'
+    $Configuration = 'Debug',
+    [switch]
+    $AddSBOM
 )
+
+Import-Module "$PSScriptRoot\pipelineUtilities.psm1" -Force
 
 $packageName = "AzureFunctions.PowerShell.Durable.SDK"
 $shimPath = "$PSScriptRoot/src/DurableSDK"
@@ -13,44 +17,17 @@ $durableAppPath = "$PSScriptRoot/test/E2E/durableApp/Modules/$packageName"
 $powerShellModulePath = "$PSScriptRoot/src/$packageName.psm1"
 $manifestPath = "$PSScriptRoot/src/$packageName.psd1"
 
-$outputPath = "$PSScriptRoot/src/out/"
-if ($Configuration -eq "Debug")
-{
-    # Publish directly to the test durable app for testing
-    $outputPath = $durableAppPath
-}
+# Publish directly to the test durable app for testing
+$outputPath = $durableAppPath
+
 $sharedDependenciesPath = "$outputPath/Dependencies/"
 
 $netCoreTFM = 'net6.0'
 $publishPathSuffix = "bin/$Configuration/$netCoreTFM/publish"
 
-function Write-Log
-{
-    param (
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Message,
-
-        [Switch]
-        $Warning,
-
-        [Switch]
-        $Throw
-    )
-
-    $Message = (Get-Date -Format G)  + " -- $Message"
-
-    if ($Throw)
-    {
-        throw $Message
-    }
-
-    $foregroundColor = if ($Warning.IsPresent) { 'Yellow' } else { 'Green' }
-    Write-Host -ForegroundColor $foregroundColor $Message
-}
-
-Write-Log "Build started...`nConfiguration: '$Configuration'`nOutput folder '$outputPath'`nShared dependencies folder: '$sharedDependenciesPath'"
+#region BUILD ARTIFACTS ===========================================================================
+Write-Log "Build started..."
+Write-Log "Configuration: '$Configuration'`nOutput folder '$outputPath'`nShared dependencies folder: '$sharedDependenciesPath'" "Gray"
 
 # Map from project names to the folder containing the corresponding .csproj
 $projects = @{
@@ -59,13 +36,13 @@ $projects = @{
 }
 
 # Remove previous build if it exists
-Write-Log "Removing previous build from $outputPath if it exists..."
+Write-Log "Removing previous build from $outputPath if it exists..." "Cyan"
 if (Test-Path $outputPath)
 {
-    Remove-Item -Path $outputPath -Recurse
+    Remove-Item -Path $outputPath -Recurse -Force -ErrorAction Ignore
 }
 # Create output folder and its inner dependencies directory
-Write-Log "Creating a new output and shared dependencies folder at $outputPath and $sharedDependenciesPath..."
+Write-Log "Creating a new output and shared dependencies folder at $outputPath and $sharedDependenciesPath..." "Cyan"
 [void](New-Item -Path $sharedDependenciesPath -ItemType Directory)
 
 # Build the Durable SDK and Durable Engine project
@@ -84,19 +61,38 @@ foreach ($project in $projects.GetEnumerator()) {
 
 $commonFiles = [System.Collections.Generic.HashSet[string]]::new()
 
-Write-Log "Copying assemblies from the Durable Engine project into $sharedDependenciesPath"
-Get-ChildItem -Path "$durableEnginePath/$publishPathSuffix" |
+Write-Log "Copying assemblies from the Durable Engine project into $sharedDependenciesPath" "Gray"
+Get-ChildItem -Path (Join-Path "$durableEnginePath" "$publishPathSuffix") |
     Where-Object { $_.Extension -in '.dll','.pdb' } |
     ForEach-Object { [void]$commonFiles.Add($_.Name); Copy-Item -LiteralPath $_.FullName -Destination $sharedDependenciesPath }
 
 # Copy all *unique* assemblies from Durable SDK into output directory
-Write-Log "Copying unique assemblies from the Durable SDK project into $outputPath"
-Get-ChildItem -Path "$shimPath/$publishPathSuffix" |
+Write-Log "Copying unique assemblies from the Durable SDK project into $outputPath" "Gray"
+Get-ChildItem -Path (Join-Path "$shimPath" "$publishPathSuffix") |
     Where-Object { $_.Extension -in '.dll','.pdb' -and -not $commonFiles.Contains($_.Name) } |
     ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $outputPath }
 
 # Move Durable SDK manifest into the output directory
-Write-Log "Copying PowerShell module and manifest from the Durable SDK source code into $outputPath"
+Write-Log "Copying PowerShell module and manifest from the Durable SDK source code into $outputPath" "Gray"
 Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
 Write-Log "Build succeeded!"
+#endregion
+
+#region ADD SBOM ==================================================================================
+if ($AddSBOM) {
+    # Install manifest tool
+    $manifestToolPath = Install-SBOMUtil
+    Write-Log "Manifest tool path: $manifestToolPath"
+
+    # Generate manifest
+    $telemetryFilePath = Join-Path $PSScriptRoot ((New-Guid).Guid + ".json")
+    $packageName = "AzureFunctions.PowerShell.Durable.SDK"
+
+    Write-Log "Running: dotnet $manifestToolPath generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath -PackageName $packageName"
+    dotnet $manifestToolPath generate -BuildDropPath $outputPath -BuildComponentPath $outputPath -Verbosity Information -t $telemetryFilePath -PackageName $packageName
+
+    # Discard telemetry generated
+    Remove-Item -Path $telemetryFilePath -ErrorAction Ignore
+}
+#endregion

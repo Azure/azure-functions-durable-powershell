@@ -15,7 +15,7 @@ namespace DurableSDK.Commands.APIs
     /// <summary>
     /// Creates retry plicies that can be passed as parameters to various Durable cmdlets
     /// </summary>
-    [Cmdlet("New", "DurableRetryOptionsE")]
+    [Cmdlet("New", "DurableRetryPolicy")]
     public class NewDurableRetryOptions : PSCmdlet
     {
         /// <summary>
@@ -50,7 +50,7 @@ namespace DurableSDK.Commands.APIs
 
         protected override void EndProcessing()
         {
-            WriteObject(new RetryOptions(
+            WriteObject(new RetryPolicy(
                 MaxNumberOfAttempts,
                 FirstRetryInterval,
                 BackoffCoefficient,
