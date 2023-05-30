@@ -1,6 +1,6 @@
 @{    
     # Version number of this module.
-    ModuleVersion = '0.0.2'
+    ModuleVersion = '1.0.0'
 
     # Supported PSEditions
     CompatiblePSEditions = @('Core')
@@ -76,10 +76,10 @@
             Tags = @('Microsoft', 'Azure', 'Functions', 'Serverless', 'Cloud', 'Workflows', 'Durable', 'DUrableTask')
     
             # A URL to the license for this module.
-            # LicenseUri = '' #TODO: add license
+            LicenseUri = 'https://github.com/Azure/azure-functions-durable-powershell/blob/main/LICENSE'
     
             # A URL to the main website for this project.
-            # ProjectUri = '' #TODO: list repo URL
+            ProjectUri = 'https://github.com/Azure/azure-functions-durable-powershell'
     
             # ReleaseNotes of this module
             # ReleaseNotes = '' #TODO: add relase notes.
