@@ -73,7 +73,7 @@
         PSData = @{
     
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags = @('Microsoft', 'Azure', 'Functions', 'Serverless', 'Cloud', 'Workflows', 'Durable', 'DUrableTask')
+            Tags = @('Microsoft', 'Azure', 'Functions', 'Serverless', 'Cloud', 'Workflows', 'Durable', 'DurableTask')
     
             # A URL to the license for this module.
             LicenseUri = 'https://github.com/Azure/azure-functions-durable-powershell/blob/main/LICENSE'
