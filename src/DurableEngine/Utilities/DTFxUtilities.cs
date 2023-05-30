@@ -1,5 +1,5 @@
 using Microsoft.DurableTask;
-using Newtonsoft.Json;
+using Microsoft.PowerShell.Commands;
 using System;
 using System.Collections.Generic;
 
@@ -19,13 +19,20 @@ namespace DurableEngine.Utilities
             /// <inheritdoc/>
             public override string Serialize(object value)
             {
-                return value != null ? JsonConvert.SerializeObject(value) : null;
+                // JsonObject is used here rather than JsonConvert because of a shared dependency with the PowerShell worker.
+                // If the PowerShell worker ever changes the JSON serializer, then this repository would need to align with that.
+                var context = new JsonObject.ConvertToJsonContext(
+                    maxDepth: 100,
+                    enumsAsStrings: false,
+                    compressOutput: true);
+
+                return value != null ? JsonObject.ConvertToJson(value, context) : null;
             }
 
             /// <inheritdoc/>
             public override object Deserialize(string data, Type targetType)
             {
-                return data != null ? JsonConvert.DeserializeObject(data, targetType) : null;
+                return data != null ? JsonObject.ConvertFromJson(data, error: out _) : null;
             }
         }
 
