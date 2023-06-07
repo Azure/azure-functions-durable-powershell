@@ -85,7 +85,7 @@
             # ReleaseNotes = '' #TODO: add release notes.
     
             # Prerelease string of this module
-            Prerelease = 'alpha' # TODO: remove alpha on initial release.
+            #Prerelease = 'alpha'
     
         } # End of PSData hashtable
     } # End of PrivateData hashtable   
