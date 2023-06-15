@@ -1,6 +1,6 @@
 param($Context)
 
-# iterate over inputs, create the "Hello" activity task per input
+# iterate over inputs, create a "Hello" activity task per input
 $tasks = @()
 foreach ($input in $Context.Input)
 {
