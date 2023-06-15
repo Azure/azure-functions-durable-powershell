@@ -23,7 +23,8 @@ namespace DurableEngine.Models
         /// Input to the orchestrator.
         /// </summary>
         [DataMember]
-        public object Input { 
+        public object Input
+        { 
             get => DTFxContext?.GetInput<object>();
         }
 
