@@ -1,4 +1,4 @@
-# Function Chaining sample
+# Sub Orchestrator sample
 
 ## Pre-requisites
 
