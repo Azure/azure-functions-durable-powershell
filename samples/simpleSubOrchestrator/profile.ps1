@@ -20,4 +20,6 @@ if ($env:MSI_SECRET) {
 # Enable-AzureRmAlias
 
 # You can also define functions or aliases that can be referenced in any of your PowerShell functions.
+
+# Import standalone Durable Functions SDK
 Import-Module AzureFunctions.PowerShell.Durable.SDK -ErrorAction Stop

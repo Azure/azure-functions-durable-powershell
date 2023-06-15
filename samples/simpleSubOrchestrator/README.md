@@ -3,6 +3,7 @@
 ## Pre-requisites
 
 You'll need core tools version v4.0.5095+. Please run `func --version` to ensure your core tools version is compatible.
+If you need to install core tools, please see these [installation instructions](https://github.com/Azure/azure-functions-core-tools#installing).
 
 ## How to try it out
 

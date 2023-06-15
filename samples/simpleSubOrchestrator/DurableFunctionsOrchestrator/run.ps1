@@ -5,7 +5,7 @@ $output = @()
 # inputs to process
 $inputs = @('Tokyo', 'Seattle', 'London', 'Lima', 'Cairo', 'New York', 'Sydney', 'Berlin', 'Paris')
 
-#batch inputs into sub-lists of 3 items
+# batch inputs into sub-lists of 3 items
 $subOrchestrators = @()
 for ($i = 0; $i -lt $inputs.Length; $i += 3) {
     # create a sub-orchestration task for each batch
