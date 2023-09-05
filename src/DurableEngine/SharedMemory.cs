@@ -38,11 +38,11 @@ namespace DurableEngine
         /// </summary>
         public void YieldToInvokerThread()
         {
+            // Get user-code thread ready to block.
+            userCodeThreadTurn.Reset();
+
             // Wake invoker thread.
             invokerThreadTurn.Set();
-
-            // Block user-code thread.
-            userCodeThreadTurn.Reset();
             userCodeThreadTurn.WaitOne();
         }
 
@@ -54,11 +54,11 @@ namespace DurableEngine
         /// <returns>True if the user-code thread completed, False if it requests an API to be awaited.</returns>
         public bool YieldToUserCodeThread(WaitHandle completionHandle)
         {
-            // Wake user-code thread
-            userCodeThreadTurn.Set();
-
             // Get invoker thread ready to block
             invokerThreadTurn.Reset();
+
+            // Wake user-code thread
+            userCodeThreadTurn.Set();
 
             // Wake up when either the user-code returns, or when we're yielded-to for `await`'ing.
             var index = WaitHandle.WaitAny(new[] { completionHandle, invokerThreadTurn });
