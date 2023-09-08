@@ -5,6 +5,7 @@
 
 namespace DurableEngine
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -51,23 +52,11 @@ namespace DurableEngine
         /// <returns>True if the user-code thread completed, False if it requests an API to be awaited.</returns>
         public bool YieldToUserCodeThread(WaitHandle completionHandle)
         {
-            // Wake user-code thread
-            userCodeThreadTurn.Set();
 
             // Wake up when either the user-code returns, or when we're yielded-to for `await`'ing.
             var index = WaitHandle.WaitAny(new[] { completionHandle, invokerThreadTurn });
             var shouldStop = index == 0;
             return shouldStop;
-        }
-
-        /// <summary>
-        /// Blocks user code thread if the orchestrator-invoker thread is currently running.
-        /// This guarantees that the user-code thread and the orchestration-invoker thread run one
-        /// at a time after this point.
-        /// </summary>
-        public void GuaranteeUserCodeTurn()
-        {
-            userCodeThreadTurn.WaitOne();
         }
     }
 }

@@ -69,6 +69,7 @@ namespace DurableEngine
 
                 // Start user-code thread, which contains the "actual" PS orchestrator
                 var outputBuffer = new PSDataCollection<object>();
+
                 var asyncResult = powerShellServices.BeginInvoke(outputBuffer);
                 var orchestratorReturnedHandle = asyncResult.AsyncWaitHandle;
 
@@ -109,6 +110,7 @@ namespace DurableEngine
                         await task.GetDTFxTask();
                     } // Exceptions are ignored at this point, they will be re-surfaced by the PS code if left unhandled.
                     catch { }
+                    context.SharedMemory.userCodeThreadTurn.Set();
                 }
             };
 
