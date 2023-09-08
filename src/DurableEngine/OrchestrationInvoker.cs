@@ -69,7 +69,6 @@ namespace DurableEngine
 
                 // Start user-code thread, which contains the "actual" PS orchestrator
                 var outputBuffer = new PSDataCollection<object>();
-
                 var asyncResult = powerShellServices.BeginInvoke(outputBuffer);
                 var orchestratorReturnedHandle = asyncResult.AsyncWaitHandle;
 
