@@ -59,5 +59,15 @@ namespace DurableEngine
             var shouldStop = index == 0;
             return shouldStop;
         }
+
+        /// <summary>
+        /// Blocks user code thread if the orchestrator-invoker thread is currently running.
+        /// This guarantees that the user-code thread and the orchestration-invoker thread run one
+        /// at a time after this point.
+        /// </summary>
+        public void GuaranteeUserCodeTurn()
+        {
+            userCodeThreadTurn.WaitOne();
+        }
     }
 }
