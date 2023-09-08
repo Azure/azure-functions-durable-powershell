@@ -49,6 +49,10 @@ namespace DurableEngine.Tasks
         /// <param name="writeErr">Function to write an exception to the pipeline.</param>
         public void Execute(Action<object> write, Action<ErrorRecord> writeErr)
         {
+            // Ensure that a DurableTask in the usercode thread
+            // only executes while the orchestration-invoker thread is blocked.
+            OrchestrationContext.SharedMemory.GuaranteeUserCodeTurn();
+
             DurableTask task = this;
 
             if (NoWait)
