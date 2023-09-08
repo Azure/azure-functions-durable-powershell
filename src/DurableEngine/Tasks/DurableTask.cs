@@ -68,7 +68,6 @@ namespace DurableEngine.Tasks
                     OrchestrationContext.SharedMemory.Add(task.GetOrCreateAction());
                 }
 
-
                 // Signal orchestration thread to await the Task.
                 // This is necessary for DTFx to determine if a result exists for the Task.
                 OrchestrationContext.SharedMemory.YieldToInvokerThread();
