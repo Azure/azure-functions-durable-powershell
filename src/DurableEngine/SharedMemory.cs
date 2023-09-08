@@ -45,18 +45,26 @@ namespace DurableEngine
         }
 
         /// <summary>
-        /// Blocks Orchestration-invoker thread, wakes up user-code thread.
-        /// This is usually used after the invoker has a result for the PS orchestrator.
+        /// Blocks Orchestration-invoker thread until the user-code thread completes or yields.
         /// </summary>
         /// <param name="completionHandle">The WaitHandle tracking if the user-code thread completed.</param>
         /// <returns>True if the user-code thread completed, False if it requests an API to be awaited.</returns>
-        public bool YieldToUserCodeThread(WaitHandle completionHandle)
+        public bool WaitForInvokerThreadTurn(WaitHandle completionHandle)
         {
 
             // Wake up when either the user-code returns, or when we're yielded-to for `await`'ing.
             var index = WaitHandle.WaitAny(new[] { completionHandle, invokerThreadTurn });
             var shouldStop = index == 0;
             return shouldStop;
+        }
+
+        /// <summary>
+        /// Wakes up the user-code thread without blocking the invoker thread.
+        /// The invoker thread should block itself afterwards to prevent races.
+        /// </summary>
+        public void WakeUserCodeThread()
+        {
+            userCodeThreadTurn.Set();
         }
     }
 }

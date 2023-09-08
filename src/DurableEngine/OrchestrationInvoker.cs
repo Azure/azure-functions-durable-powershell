@@ -77,7 +77,7 @@ namespace DurableEngine
                 while (true)
                 {
                     // block this thread until user-code thread (the PS orchestrator) invokes a DF CmdLet or completes.
-                    var orchestratorReturned = context.SharedMemory.YieldToUserCodeThread(orchestratorReturnedHandle);
+                    var orchestratorReturned = context.SharedMemory.WaitForInvokerThreadTurn(orchestratorReturnedHandle);
                     if (orchestratorReturned)
                     {
                         // The PS orchestrator has a return value, there's no more DF APIs to await.
@@ -110,7 +110,12 @@ namespace DurableEngine
                         await task.GetDTFxTask();
                     } // Exceptions are ignored at this point, they will be re-surfaced by the PS code if left unhandled.
                     catch { }
-                    context.SharedMemory.userCodeThreadTurn.Set();
+
+                    // Wake up user-code thread. For a small moment, both the user code thread and the invoker thread
+                    // will be running at the same time.
+                    // However, the invoker thread will block itself again at the start of the next loop until the user-code
+                    // thread yields control.
+                    context.SharedMemory.WakeUserCodeThread();
                 }
             };
 
