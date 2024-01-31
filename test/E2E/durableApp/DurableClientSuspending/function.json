@@ -5,7 +5,7 @@
         "name": "Request",
         "type": "httpTrigger",
         "direction": "in",
-        "route": "terminatingOrchestrators/{FunctionName}",
+        "route": "suspendingOrchestrators/{FunctionName}",
         "methods": [
           "post",
           "get"        

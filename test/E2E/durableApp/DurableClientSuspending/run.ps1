@@ -1,25 +1,15 @@
-{
-    "bindings": [
-      {
-        "authLevel": "function",
-        "name": "Request",
-        "type": "httpTrigger",
-        "direction": "in",
-        "route": "terminatingOrchestrators/{FunctionName}",
-        "methods": [
-          "post",
-          "get"        
-        ]
-      },
-      {
-        "type": "http",
-        "direction": "out",
-        "name": "Response"
-      },
-      {
-        "name": "starter",
-        "type": "durableClient",
-        "direction": "in"
-      }    
-    ]
-  }
+param($Request, $TriggerMetadata)
+$ErrorActionPreference = 'Stop'
+
+Write-Host "DurableClientSuspending started"
+
+$FunctionName = $Request.Params.FunctionName
+$InstanceId = Start-DurableOrchestration -FunctionName $FunctionName -InputObject 'Hello'
+Write-Host "Started orchestration with ID = '$InstanceId'"
+
+Suspend-DurableOrchestration -InstanceId $InstanceId -Reason 'Suspended intentionally'
+
+$Response = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $InstanceId
+Push-OutputBinding -Name Response -Value $Response
+
+Write-Host "DurableClientSuspended completed"
