@@ -164,6 +164,64 @@ function Stop-DurableOrchestration {
     Invoke-RestMethod -Uri $requestUrl -Method 'POST'
 }
 
+function Suspend-DurableOrchestration {
+    [CmdletBinding()]
+    param(
+        [Parameter(
+            Mandatory = $true,
+            Position = 0,
+            ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $InstanceId,
+
+        [Parameter(
+            Mandatory = $true,
+            Position = 1,
+            ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Reason
+    )
+
+    $ErrorActionPreference = 'Stop'
+
+    if ($null -eq $DurableClient) {
+        $DurableClient = GetDurableClientFromModulePrivateData
+    }
+
+    $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId/suspend?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
+
+    Invoke-RestMethod -Uri $requestUrl -Method 'POST'
+}
+
+function Resume-DurableOrchestration {
+    [CmdletBinding()]
+    param(
+        [Parameter(
+            Mandatory = $true,
+            Position = 0,
+            ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $InstanceId,
+
+        [Parameter(
+            Mandatory = $true,
+            Position = 1,
+            ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Reason
+    )
+
+    $ErrorActionPreference = 'Stop'
+
+    if ($null -eq $DurableClient) {
+        $DurableClient = GetDurableClientFromModulePrivateData
+    }
+
+    $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId/resume?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
+
+    Invoke-RestMethod -Uri $requestUrl -Method 'POST'
+}
+
 function IsValidUrl([uri]$Url) {
     $Url.IsAbsoluteUri -and ($Url.Scheme -in 'http', 'https')
 }
