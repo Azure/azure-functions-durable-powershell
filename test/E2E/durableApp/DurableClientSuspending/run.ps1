@@ -12,4 +12,4 @@ Suspend-DurableOrchestration -InstanceId $InstanceId -Reason 'Suspended intentio
 $Response = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $InstanceId
 Push-OutputBinding -Name Response -Value $Response
 
-Write-Host "DurableClientSuspended completed"
+Write-Host "DurableClientSuspending completed"
