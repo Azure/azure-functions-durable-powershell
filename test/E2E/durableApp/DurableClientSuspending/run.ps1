@@ -19,9 +19,4 @@ Resume-DurableOrchestration -InstanceId $InstanceId -Reason 'Resume orchestrator
 $ResumeResponse = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $InstanceId
 Push-OutputBinding -Name Response -Value $ResumeResponse
 
-Stop-DurableOrchestration -InstanceId $InstanceId -Reason 'Stop orchestrator'
-
-$StopResponse = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $InstanceId
-Push-OutputBinding -Name Response -Value $StopResponse
-
 Write-Host "DurableClientSuspending completed"

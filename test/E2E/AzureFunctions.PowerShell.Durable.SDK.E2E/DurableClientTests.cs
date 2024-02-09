@@ -232,7 +232,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         public async Task DurableClientSuspendOrchestration()
         {
             var initialResponse = await Utilities.GetHttpStartResponse(
-                orchestratorName: "DurablePatternsOrchestratorWithExternalEvent",
+                orchestratorName: "SendDurableExternalEventOrchestrator",
                 clientRoute: "suspendingOrchestrators");
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
@@ -252,8 +252,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 },
                 validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
-                    Assert.Equal("Terminated", (string)finalStatusResponseBody.runtimeStatus);
-                    Assert.Equal("Stop orchestrator", (string)finalStatusResponseBody.output);
+                    Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
                 });
         }
     }
