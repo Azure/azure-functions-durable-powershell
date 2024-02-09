@@ -240,15 +240,20 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 initialResponse,
                 validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
                 {
-                    var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
-                    Assert.True(
-                        runtimeStatus == "Running" || runtimeStatus == "Pending",
-                        $"Unexpected runtime status: {runtimeStatus}");
+                    Assert.Equal("Suspended", (string)intermediateStatusResponseBody.runtimeStatus);
+                    Assert.Equal("Suspend orchestrator", (string)intermediateStatusResponseBody.output);
+                });
+
+            await ValidateDurableWorkflowResults(
+                initialResponse,
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
+                {
+                    Assert.Equal("Running", (string)finalStatusResponseBody.runtimeStatus);
                 },
                 validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
-                    Assert.Equal("Suspended", (string)finalStatusResponseBody.runtimeStatus);
-                    Assert.Equal("Suspended intentionally", (string)finalStatusResponseBody.output);
+                    Assert.Equal("Terminated", (string)finalStatusResponseBody.runtimeStatus);
+                    Assert.Equal("Stop orchestrator", (string)finalStatusResponseBody.output);
                 });
         }
     }
