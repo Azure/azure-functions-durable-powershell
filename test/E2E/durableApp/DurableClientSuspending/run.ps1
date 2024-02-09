@@ -12,7 +12,6 @@ Suspend-DurableOrchestration -InstanceId $InstanceId -Reason 'Suspend orchestrat
 $SuspendResponse = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $InstanceId
 Push-OutputBinding -Name Response -Value $SuspendResponse
 
-Start-Sleep -Seconds 15
 Resume-DurableOrchestration -InstanceId $InstanceId -Reason 'Resume orchestrator'
 
 $ResumeResponse = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $InstanceId
