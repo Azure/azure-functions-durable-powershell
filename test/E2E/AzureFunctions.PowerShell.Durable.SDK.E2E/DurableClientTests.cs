@@ -253,6 +253,8 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
                     Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
+                    Assert.Equal("FirstTimeout", finalStatusResponseBody.output[0].ToString());
+                    Assert.Equal("SecondExternalEvent", finalStatusResponseBody.output[1].ToString());
                 });
         }
     }
