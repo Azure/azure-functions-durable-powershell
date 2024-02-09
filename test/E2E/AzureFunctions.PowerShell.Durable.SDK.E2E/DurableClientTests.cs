@@ -248,7 +248,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 initialResponse,
                 validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
                 {
-                    Assert.Equal("Running", (string)finalStatusResponseBody.runtimeStatus);
+                    Assert.Equal("Running", (string)intermediateStatusResponseBody.runtimeStatus);
                 },
                 validateFinalResponse: (dynamic finalStatusResponseBody) =>
                 {
