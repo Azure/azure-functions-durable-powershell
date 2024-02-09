@@ -238,7 +238,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 
             await ValidateDurableWorkflowResults(
                 initialResponse,
-                validateIntermediateResponse: (dynamic finalStatusResponseBody) =>
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
                 {
                     Assert.Equal("Suspended", (string)intermediateStatusResponseBody.runtimeStatus);
                     Assert.Equal("Suspend orchestrator", (string)intermediateStatusResponseBody.output);
