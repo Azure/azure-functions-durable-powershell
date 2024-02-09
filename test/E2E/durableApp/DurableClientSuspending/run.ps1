@@ -12,11 +12,12 @@ Suspend-DurableOrchestration -InstanceId $InstanceId -Reason 'Suspend orchestrat
 $SuspendResponse = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $InstanceId
 Push-OutputBinding -Name Response -Value $SuspendResponse
 
-Start-Sleep -Seconds 10
-
+Start-Sleep -Seconds 15
 Resume-DurableOrchestration -InstanceId $InstanceId -Reason 'Resume orchestrator'
 
 $ResumeResponse = New-DurableOrchestrationCheckStatusResponse -Request $Request -InstanceId $InstanceId
 Push-OutputBinding -Name Response -Value $ResumeResponse
+
+Send-DurableExternalEvent -InstanceId $InstanceId -EventName "SecondExternalEvent"
 
 Write-Host "DurableClientSuspending completed"
