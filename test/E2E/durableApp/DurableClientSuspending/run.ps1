@@ -3,8 +3,10 @@ $ErrorActionPreference = 'Stop'
 
 Write-Host "DurableClientSuspending started"
 
+$OrchestratorInputs = @{ FirstDuration = 5; SecondDuration = 10 }
+
 $FunctionName = $Request.Params.FunctionName
-$InstanceId = Start-DurableOrchestration -FunctionName $FunctionName -InputObject 'Hello'
+$InstanceId = Start-DurableOrchestration -FunctionName $FunctionName -InputObject $OrchestratorInputs
 Write-Host "Started orchestration with ID = '$InstanceId'"
 
 Suspend-DurableOrchestration -InstanceId $InstanceId -Reason 'Suspend orchestrator'
