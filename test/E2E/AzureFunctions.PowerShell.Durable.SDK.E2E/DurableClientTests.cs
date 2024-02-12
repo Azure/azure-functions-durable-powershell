@@ -227,5 +227,35 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     Assert.Equal("Terminated intentionally", (string)finalStatusResponseBody.output);
                 });
         }
+
+        [Fact]
+        public async Task DurableClientSuspendOrchestration()
+        {
+            var initialResponse = await Utilities.GetHttpStartResponse(
+                orchestratorName: "SendDurableExternalEventOrchestrator",
+                clientRoute: "suspendingOrchestrators");
+            Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
+
+            await ValidateDurableWorkflowResults(
+                initialResponse,
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
+                {
+                    Assert.Equal("Suspended", (string)intermediateStatusResponseBody.runtimeStatus);
+                    Assert.Equal("Suspend orchestrator", (string)intermediateStatusResponseBody.output);
+                });
+
+            await ValidateDurableWorkflowResults(
+                initialResponse,
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
+                {
+                    Assert.Equal("Running", (string)intermediateStatusResponseBody.runtimeStatus);
+                },
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
+                {
+                    Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
+                    Assert.Equal("FirstTimeout", finalStatusResponseBody.output[0].ToString());
+                    Assert.Equal("SecondExternalEvent", finalStatusResponseBody.output[1].ToString());
+                });
+        }
     }
 }
