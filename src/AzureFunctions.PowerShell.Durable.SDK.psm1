@@ -188,7 +188,7 @@ function Suspend-DurableOrchestration {
         $DurableClient = GetDurableClientFromModulePrivateData
     }
 
-    $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId/suspend?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
+    $requestUrl = "$($DurableClient.rpcBaseUrl)/instances/$InstanceId/suspend?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
 
     Invoke-RestMethod -Uri $requestUrl -Method 'POST'
 }
@@ -217,7 +217,7 @@ function Resume-DurableOrchestration {
         $DurableClient = GetDurableClientFromModulePrivateData
     }
 
-    $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId/resume?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
+    $requestUrl = "$($DurableClient.rpcBaseUrl)/instances/$InstanceId/resume?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
 
     Invoke-RestMethod -Uri $requestUrl -Method 'POST'
 }
