@@ -49,7 +49,7 @@ function Get-DurableStatus {
         $DurableClient = GetDurableClientFromModulePrivateData
     }
 
-    $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId"
+    $requestUrl = "$($DurableClient.rpcBaseUrl)/instances/$InstanceId"
 
     $query = @()
     if ($ShowHistory.IsPresent) {
@@ -159,7 +159,7 @@ function Stop-DurableOrchestration {
         $DurableClient = GetDurableClientFromModulePrivateData
     }
 
-    $requestUrl = "$($DurableClient.BaseUrl)/instances/$InstanceId/terminate?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
+    $requestUrl = "$($DurableClient.rpcBaseUrl)/instances/$InstanceId/terminate?reason=$([System.Web.HttpUtility]::UrlEncode($Reason))"
 
     Invoke-RestMethod -Uri $requestUrl -Method 'POST'
 }
@@ -349,7 +349,7 @@ function GetRaiseEventUrl(
     [string] $TaskHubName,
     [string] $ConnectionName) {
 
-    $RequestUrl = $DurableClient.BaseUrl + "/instances/$InstanceId/raiseEvent/$EventName"
+    $RequestUrl = $DurableClient.rpcBaseUrl + "/instances/$InstanceId/raiseEvent/$EventName"
     
     $query = @()
     if ($null -eq $TaskHubName) {
