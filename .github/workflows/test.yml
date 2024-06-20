@@ -15,6 +15,7 @@ on:
 env:
   AzureWebJobsStorage: UseDevelopmentStorage=true
 
+
 jobs:
   build:
     runs-on: windows-latest
@@ -23,6 +24,14 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: true
+
+    - name: 'Install .NET 3.1'
+      run: |
+          Import-Module ".\pipelineUtilities.psm1" -Force
+          Install-Dotnet
+
+    - name: 'Build'
+      run: ./build.ps1 -Configuration Release
 
     # Install Azurite
     - name: Set up Node.js (needed for Azurite)
