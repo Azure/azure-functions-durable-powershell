@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ['csharp', 'powershell']
+        language: ['csharp'] # note: There are no powershell CodeQL queries, so powershell is not a requirement for CodeQL (at time of writing)
         # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
