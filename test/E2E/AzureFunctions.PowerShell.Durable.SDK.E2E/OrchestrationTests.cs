@@ -72,6 +72,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     Assert.Equal("True", finalStatusResponseBody.output[0].ToString());
                     Assert.Equal("Hello myInstanceId", finalStatusResponseBody.output[1].ToString());
                     Assert.Equal("False", finalStatusResponseBody.output[2].ToString());
+                    Assert.Equal("1.0", finalStatusResponseBody.output[3].ToString());
                 });
         }
     }
