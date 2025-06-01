@@ -84,7 +84,8 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 {
                     Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
                     Assert.Equal("Hello Tokyo", finalStatusResponseBody.output[0].ToString());
-                    Assert.Equal("Hello Seattle", finalStatusResponseBody.output[1].ToString());
+                    Assert.Equal("Context.Version: 1.0", finalStatusResponseBody.output[1].ToString());
+                    Assert.Equal("Hello Seattle", finalStatusResponseBody.output[2].ToString());
                 });
         }
 

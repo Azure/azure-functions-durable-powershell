@@ -7,3 +7,5 @@ $ErrorActionPreference = 'Stop'
 $output = Invoke-DurableActivity -FunctionName "Hello" -Input "Tokyo"
 
 $output
+
+"Context.Version: $($Context.Version)"
