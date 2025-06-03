@@ -61,7 +61,7 @@ function NewTaskHubName
 }
 
 $FUNC_RUNTIME_VERSION = '4'
-$POWERSHELL_VERSION = '7.2'
+$POWERSHELL_VERSION = '7.4'
 $FUNC_CMDLET_NAME = "func"
 
 # Set the appropriate environment variables
