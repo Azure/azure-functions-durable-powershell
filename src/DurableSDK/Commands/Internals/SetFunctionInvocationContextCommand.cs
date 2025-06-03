@@ -52,7 +52,7 @@ namespace DurableSDK.Commands.Internals
                     // De-serialize the orchestration context
                     JsonSerializerSettings serializerSettings = new JsonSerializerSettings
                     {
-                        TypeNameHandling = TypeNameHandling.All
+                        TypeNameHandling = TypeNameHandling.None
                     };
 
                     var context = JsonConvert.DeserializeObject<OrchestrationContext>(OrchestrationContext, serializerSettings);
