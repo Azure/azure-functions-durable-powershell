@@ -1,6 +1,6 @@
 @{    
     # Version number of this module.
-    ModuleVersion = '1.1.0'
+    ModuleVersion = '2.0.0'
 
     # Supported PSEditions
     CompatiblePSEditions = @('Core')
@@ -21,7 +21,7 @@
     Description = 'Initial release of the Durable Functions SDK for PowerShell. This package is to be used exclusively with the Azure Functions PowerShell worker.'
     
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion = '7.2'
+    PowerShellVersion = '7.4'
     
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @() # TODO: use this for pretty-printing DF tasks
