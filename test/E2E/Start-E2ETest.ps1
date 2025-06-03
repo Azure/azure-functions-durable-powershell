@@ -60,6 +60,11 @@ function NewTaskHubName
     $sb.ToString()
 }
 
+if ($UseCoreToolsBuildFromIntegrationTests.IsPresent)
+{
+    Write-Warning "UseCoreToolsBuildFromIntegrationTests switch is ignored"
+}
+
 $FUNC_RUNTIME_VERSION = '4'
 $POWERSHELL_VERSION = '7.2'
 $FUNC_CMDLET_NAME = "func"
@@ -104,7 +109,7 @@ Remove-Item -Recurse -Force $FUNC_CLI_DIRECTORY -ErrorAction Ignore
 if (-not $SkipCoreToolsDownload)
 {
     Write-Host "Downloading Core Tools because SkipCoreToolsDownload switch parameter is not present..."
-    
+
     $coreToolsDownloadURL = "https://github.com/Azure/azure-functions-core-tools/releases/download/$CORE_TOOLS_VERSION/Azure.Functions.Cli.$os-$arch.$CORE_TOOLS_VERSION.zip"
     Write-Host "Downloading Functions Core Tools (Version: $CORE_TOOLS_VERSION)..."
 
