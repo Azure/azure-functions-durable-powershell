@@ -63,6 +63,7 @@ function NewTaskHubName
 $FUNC_RUNTIME_VERSION = '4'
 $POWERSHELL_VERSION = '7.2'
 $FUNC_CMDLET_NAME = "func"
+$CORE_TOOLS_VERSION = '4.0.7317'
 
 # Set the appropriate environment variables
 $taskHubName = NewTaskHubName -Length 45
@@ -103,23 +104,9 @@ Remove-Item -Recurse -Force $FUNC_CLI_DIRECTORY -ErrorAction Ignore
 if (-not $SkipCoreToolsDownload)
 {
     Write-Host "Downloading Core Tools because SkipCoreToolsDownload switch parameter is not present..."
-    $coreToolsDownloadURL = $null
-    if ($UseCoreToolsBuildFromIntegrationTests)
-    {
-        $coreToolsDownloadURL = "https://functionsintegclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest/Azure.Functions.Cli.$os-$arch.zip"
-        $env:CORE_TOOLS_URL = "https://functionsintegclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest"
-    }
-    else
-    {
-        $coreToolsDownloadURL = "https://functionsclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest/Azure.Functions.Cli.$os-$arch.zip"
-        if (-not $env:CORE_TOOLS_URL)
-        {
-            $env:CORE_TOOLS_URL = "https://functionsclibuilds.blob.core.windows.net/builds/$FUNC_RUNTIME_VERSION/latest"
-        }
-    }
-
-    $version = Invoke-RestMethod -Uri "$env:CORE_TOOLS_URL/version.txt"
-    Write-Host "Downloading Functions Core Tools (Version: $version)..."
+    
+    $coreToolsDownloadURL = "https://github.com/Azure/azure-functions-core-tools/releases/download/$CORE_TOOLS_VERSION/Azure.Functions.Cli.$os-$arch.$CORE_TOOLS_VERSION.zip"
+    Write-Host "Downloading Functions Core Tools (Version: $CORE_TOOLS_VERSION)..."
 
     $output = "$FUNC_CLI_DIRECTORY.zip"
     Invoke-RestMethod -Uri $coreToolsDownloadURL -OutFile $output
