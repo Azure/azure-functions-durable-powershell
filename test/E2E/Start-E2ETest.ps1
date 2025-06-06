@@ -7,8 +7,6 @@ param
     [Switch]
     $NoBuild,
     [Switch]
-    $UseCoreToolsBuildFromIntegrationTests,
-    [Switch]
     $SkipCoreToolsDownload
 )
 
@@ -58,11 +56,6 @@ function NewTaskHubName
     }
 
     $sb.ToString()
-}
-
-if ($UseCoreToolsBuildFromIntegrationTests.IsPresent)
-{
-    Write-Warning "UseCoreToolsBuildFromIntegrationTests switch is ignored"
 }
 
 $FUNC_RUNTIME_VERSION = '4'
