@@ -58,11 +58,6 @@ function NewTaskHubName
     $sb.ToString()
 }
 
-if ($UseCoreToolsBuildFromIntegrationTests.IsPresent)
-{
-    Write-Warning "UseCoreToolsBuildFromIntegrationTests switch is ignored"
-}
-
 $FUNC_RUNTIME_VERSION = '4'
 $POWERSHELL_VERSION = '7.4'
 $FUNC_CMDLET_NAME = "func"
