@@ -24,7 +24,7 @@ namespace DurableEngine.Models
         /// </summary>
         [DataMember]
         public object Input
-        { 
+        {
             get => DTFxContext?.GetInput<object>();
         }
 
@@ -77,5 +77,10 @@ namespace DurableEngine.Models
         /// </summary>
         [DataMember]
         internal HistoryEvent[] History { get; set; }
+
+        /// <summary>
+        /// Gets the version of the current orchestration instance, which was set when the instance was created.
+        /// </summary>
+        public string Version => DTFxContext?.Version;
     }
 }

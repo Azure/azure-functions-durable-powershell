@@ -10,5 +10,10 @@
   },
   "managedDependency": {
     "enabled": true
+  },
+  "extensions": {
+    "durableTask": {
+      "defaultVersion": "1.0"
+    }
   }
 }
