@@ -81,6 +81,11 @@ $Env:AZURE_FUNCTIONS_ENVIRONMENT = "Development"
 $env:ExternalDurablePowerShellSDK = $true
 Write-Host "Set ExternalDurablePowerShellSDK environment variable to $env:ExternalDurablePowerShellSDK"
 
+if (-not $env:AzureWebJobsStorage) {
+    $env:AzureWebJobsStorage = "UseDevelopmentStorage=true"
+    Write-Host "Set AzureWebJobsStorage environment variable to $env:AzureWebJobsStorage"
+}
+
 $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLowerInvariant()
 if ($IsWindows) {
     $FUNC_EXE_NAME = "$FUNC_CMDLET_NAME.exe"
