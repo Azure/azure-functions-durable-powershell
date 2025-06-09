@@ -18,7 +18,7 @@
     Copyright = '(c) Microsoft Corporation. All rights reserved.'
     
     # Description of the functionality provided by this module
-    Description = 'Initial release of the Durable Functions SDK for PowerShell. This package is to be used exclusively with the Azure Functions PowerShell worker.'
+    Description = 'Durable Functions SDK for PowerShell. This package is to be used exclusively with the Azure Functions PowerShell worker.'
     
     # Minimum version of the PowerShell engine required by this module
     PowerShellVersion = '7.4'
