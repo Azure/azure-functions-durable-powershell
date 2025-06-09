@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>DurableEngine</AssemblyName>
     <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DurableTask.Client" Version="1.10.0" />
-    <PackageReference Include="Microsoft.DurableTask.Worker" Version="1.10.0" />
-    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.1" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.DurableTask.Client" Version="1.11.0" />
+    <PackageReference Include="Microsoft.DurableTask.Worker" Version="1.11.0" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.10" PrivateAssets="all" />
   </ItemGroup>
 </Project>
