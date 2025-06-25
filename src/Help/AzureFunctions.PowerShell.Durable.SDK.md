@@ -16,7 +16,7 @@ The AzureFunctions.PowerShell.Durable.SDK module provides cmdlets for building d
 
 ### [Get-DurableStatus](Get-DurableStatus.md)
 
-Gets the status of a durable orchestration instance, including execution history and input data.
+Gets the status of a durable orchestration instance, including execution history, input data, and output data.
 
 ### [Get-DurableTaskResult](Get-DurableTaskResult.md)
 
