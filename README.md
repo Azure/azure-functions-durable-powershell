@@ -2,7 +2,7 @@
 
 This repo hosts the standalone Durable Functions SDK for PowerShell. Compared to the Durable Functions SDK that comes built-in with the Azure Functions PowerShell worker, this standalone SDK contains performance enhancements, more features, and key bug fixes that would have required a breaking release. For more information on this release, please see [this article](TODO).
 
-> The standalone Durable Functions SDK implementation is **generally available (GA)** and is recommended for production workloads. If necessary, you can continue to use the built-in Durable Functions SDK hosted in [the PowerShell worker repo](https://github.com/Azure/azure-functions-powershell-worker), but it may not receive new features or bug fixes, and it may be eventually removed from the worker.
+> The standalone Durable Functions SDK implementation is **generally available (GA)** and is recommended for production workloads. If necessary, you can continue to use the built-in Durable Functions SDK hosted in [the PowerShell worker repo](https://github.com/Azure/azure-functions-powershell-worker), but it may not receive new features or bug fixes, and it may be eventually removed from the worker. If you are still using the built-in SDK, please review [the migration guidance](https://aka.ms/durable-powershell-sdk).
 
 ⚡ Find us in the [PowerShell Gallery](https://www.powershellgallery.com/packages/AzureFunctions.PowerShell.Durable.SDK) ⚡.
 
