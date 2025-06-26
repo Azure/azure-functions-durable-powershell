@@ -31,22 +31,39 @@ functions to coordinate multiple asynchronous operations and retrieve their resu
 ```powershell
 $task1 = Invoke-DurableActivity -FunctionName "Step1" -Input "data1" -NoWait
 $task2 = Invoke-DurableActivity -FunctionName "Step2" -Input "data2" -NoWait
-$results = Wait-DurableTask -Task @($task1, $task2)
+$completedTasks = Wait-DurableTask -Task @($task1, $task2)
+
+# Get the actual results from the completed tasks
+$results = @()
+foreach ($task in $completedTasks) {
+    $results += Get-DurableTaskResult -Task $task
+}
 Write-Host "Both tasks completed with results: $results"
 ```
 
-This example demonstrates waiting for multiple durable activity tasks to complete and retrieving their results. The activities are invoked with -NoWait to return task objects immediately.
+This example demonstrates waiting for multiple durable activity tasks to complete. Note that Wait-DurableTask returns the task objects themselves, not the results. To get the actual activity results, you need to use Get-DurableTaskResult on each completed task.
 
 ### Example 2
 
 ```powershell
 $task1 = Invoke-DurableActivity -FunctionName "FastOperation" -Input $data1 -NoWait
 $task2 = Invoke-DurableActivity -FunctionName "SlowOperation" -Input $data2 -NoWait
-$firstResult = Wait-DurableTask -Task @($task1, $task2) -Any
-Write-Host "First task completed with result: $firstResult"
+$firstCompletedTask = Wait-DurableTask -Task @($task1, $task2) -Any
+
+# Determine which task completed first and get its result
+if ($firstCompletedTask -eq $task1) {
+    $activityResult = Get-DurableTaskResult -Task $firstCompletedTask
+    Write-Host "FastOperation completed first with result: $activityResult"
+} elseif ($firstCompletedTask -eq $task2) {
+    $activityResult = Get-DurableTaskResult -Task $firstCompletedTask
+    Write-Host "SlowOperation completed first with result: $activityResult"
+} else {
+    # This block should never be hit
+    Write-Host "Unexpected task completion"
+}
 ```
 
-This example demonstrates waiting for any one of the tasks to complete using the -Any parameter. The cmdlet returns as soon as the first task finishes, which is useful for implementing timeout patterns or race conditions.
+This example demonstrates waiting for any one of the tasks to complete using the -Any parameter. The cmdlet returns the first completed task object (not the result), which you can then compare to determine which task finished first and retrieve its actual result using Get-DurableTaskResult.
 
 ## PARAMETERS
 
@@ -112,15 +129,16 @@ This cmdlet does not accept pipeline input. All parameters must be specified dir
 
 ### System.Object
 
-Returns the result(s) of the completed task(s). If waiting for a single task, returns the task result directly. If waiting for multiple tasks, returns an array of results in the same order as the input tasks.
+Returns the completed task object(s), not the task results. If waiting for a single task, returns the task object directly. If waiting for multiple tasks, returns an array of task objects in the same order as the input tasks. To get the actual results from the tasks, use Get-DurableTaskResult on the returned task objects.
 
 ## NOTES
 
 - This cmdlet can only be used within orchestrator functions, not in activity functions or client functions.
-- When using the -Any parameter, only the result of the first completed task is returned. Other tasks continue running in the background.
+- When using the -Any parameter, only the first completed task object is returned. Other tasks continue running in the background.
 - Tasks passed to this cmdlet must be created with the -NoWait parameter from other durable cmdlets.
 - The cmdlet is fault-tolerant and will survive orchestration replays and restarts.
-- When waiting for multiple tasks without -Any, results are returned in the same order as the input tasks, regardless of completion order.
+- When waiting for multiple tasks without -Any, task objects are returned in the same order as the input tasks, regardless of completion order.
+- This cmdlet returns task objects, not task results. Use Get-DurableTaskResult to retrieve the actual results from completed tasks.
 - Use this cmdlet to implement common patterns like fan-out/fan-in, timeouts, and race conditions in orchestrations.
 
 ## RELATED LINKS
