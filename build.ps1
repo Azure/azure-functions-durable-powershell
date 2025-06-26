@@ -76,6 +76,35 @@ Get-ChildItem -Path (Join-Path "$shimPath" "$publishPathSuffix") |
 Write-Log "Copying PowerShell module and manifest from the Durable SDK source code into $outputPath" "Gray"
 Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
+
+#region GENERATE EXTERNAL HELP ===================================================================
+Write-Log "Generating external help files (MAML) from markdown documentation..." "Gray"
+
+# Install PlatyPS module if not already available
+if (-not (Get-Module -ListAvailable -Name PlatyPS)) {
+    Write-Log "Installing PlatyPS module..." "Cyan"
+    Install-Module -Name PlatyPS -Force -Scope CurrentUser
+}
+
+# Import PlatyPS module
+Import-Module PlatyPS -Force
+
+# Define paths for help generation
+$docsPath = "$PSScriptRoot/src/Help"
+$helpPath = "$outputPath/en-US"
+
+# Create the help directory if it doesn't exist
+if (-not (Test-Path $helpPath)) {
+    Write-Log "Creating help directory at $helpPath" "Cyan"
+    New-Item -Path $helpPath -ItemType Directory -Force
+}
+
+# Generate external help files from markdown
+Write-Log "Converting markdown files to MAML help files..." "Gray"
+New-ExternalHelp -Path $docsPath -OutputPath $helpPath -Force
+Write-Log "External help files generated successfully in $helpPath" "Green"
+#endregion
+
 Write-Log "Build succeeded!"
 #endregion
 

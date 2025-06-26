@@ -69,21 +69,6 @@ function Get-DurableStatus {
     Invoke-RestMethod -Uri $requestUrl
 }
 
-<#
-.SYNOPSIS
-    Start an orchestration Azure Function.
-.DESCRIPTION
-    Start an orchestration Azure Function with the given function name and input value.
-.EXAMPLE
-    PS > Start-DurableOrchestration -DurableClient Starter -FunctionName OrchestratorFunction -InputObject "input value for the orchestration function"
-    Return the instance id of the new orchestration.
-.PARAMETER FunctionName
-    The name of the orchestration Azure Function you want to start.
-.PARAMETER InputObject
-    The input value that will be passed to the orchestration Azure Function.
-.PARAMETER DurableClient
-    The orchestration client object.
-#>
 function Start-DurableOrchestration {
     [CmdletBinding()]
     param(
@@ -284,25 +269,6 @@ function New-DurableOrchestrationCheckStatusResponse {
     }
 }
 
-<#
-.SYNOPSIS
-    Send an external event to an orchestration instance.
-.DESCRIPTION
-    Send an external event with the given event name, and event data to an orchestration instance with the given instance ID.
-.EXAMPLE
-    PS > Send-DurableExternalEvent -InstanceId "example-instance-id" -EventName "ExampleExternalEvent" -EventData "data for the external event"
-    Return the instance id of the new orchestration.
-.PARAMETER InstanceId
-    The ID of the orchestration instance that will handle the external event.
-.PARAMETER EventName
-    The name of the external event.
-.PARAMETER EventData
-    The JSON-serializable data associated with the external event.
-.PARAMETER TaskHubName
-    The TaskHubName of the orchestration instance that will handle the external event.
-.PARAMETER ConnectionName
-    The name of the connection string associated with TaskHubName
-#>
 function Send-DurableExternalEvent {
     [CmdletBinding()]
     param(
