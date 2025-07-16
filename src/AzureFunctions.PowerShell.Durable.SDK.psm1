@@ -25,7 +25,6 @@ function GetDurableClientFromModulePrivateData {
 function GetInvocationIdFromModulePrivateData {
     $PrivateData = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData
     if ($null -eq $PrivateData -or $null -eq $PrivateData['InvocationId']) {
-        # Return null instead of throwing - invocation ID is optional for correlation/tracing
         return $null
     }
     else {
