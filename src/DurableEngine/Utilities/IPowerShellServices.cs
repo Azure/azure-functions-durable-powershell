@@ -13,6 +13,8 @@ namespace DurableEngine.Utilities
     {
         void SetDurableClient(object durableClient);
 
+        void SetInvocationId(string invocationId);
+
         void SetOrchestrationContext(OrchestrationContext orchestrationContext);
 
         void ClearOrchestrationContext();

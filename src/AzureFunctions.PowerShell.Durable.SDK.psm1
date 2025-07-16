@@ -22,6 +22,17 @@ function GetDurableClientFromModulePrivateData {
     }
 }
 
+function GetInvocationIdFromModulePrivateData {
+    $PrivateData = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData
+    if ($null -eq $PrivateData -or $null -eq $PrivateData['InvocationId']) {
+        # Return null instead of throwing - invocation ID is optional for correlation/tracing
+        return $null
+    }
+    else {
+        $PrivateData['InvocationId']
+    }
+}
+
 function Get-DurableStatus {
     [CmdletBinding()]
     param(
@@ -114,6 +125,8 @@ function Start-DurableOrchestration {
         }
 
     $Body = $InputObject | ConvertTo-Json -Compress -Depth 100
+
+    $InvocationId = GetInvocationIdFromModulePrivateData
               
     $null = Invoke-RestMethod -Uri $Uri -Method 'POST' -ContentType 'application/json' -Body $Body
     

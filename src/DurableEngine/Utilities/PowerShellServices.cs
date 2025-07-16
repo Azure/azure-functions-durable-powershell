@@ -45,6 +45,15 @@ namespace DurableEngine.Utilities
             _hasSetOrchestrationContext = true;
         }
 
+        public void SetInvocationId(string invocationId)
+        {
+            _pwsh.AddCommand(SetFunctionInvocationContextCommand)
+                .AddParameter("InvocationId", invocationId)
+                .InvokeAndClearCommands();
+
+            _hasSetOrchestrationContext = true;
+        }
+
         public void SetOrchestrationContext(OrchestrationContext orchestrationContext)
         {
             _pwsh.AddCommand(SetFunctionInvocationContextCommand)
