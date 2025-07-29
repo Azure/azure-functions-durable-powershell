@@ -26,7 +26,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 sendExternalEvents: async (HttpClient httpClient) =>
                 {
                     var initialResponseBodyString = await initialResponse.Content.ReadAsStringAsync();
-                    dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString);
+                    dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString)!;
                     var raiseEventUri = (string)initialResponseBody.sendEventPostUri;
 
                     raiseEventUri = raiseEventUri.Replace("{eventName}", "TESTEVENTNAME");

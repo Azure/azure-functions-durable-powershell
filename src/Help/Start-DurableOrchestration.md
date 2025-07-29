@@ -14,7 +14,7 @@ Start a durable orchestration.
 ## SYNTAX
 
 ```
-Start-DurableOrchestration [-FunctionName] <String> [[-InputObject] <Object>] [-DurableClient <Object>] [-InstanceId <String>] [<CommonParameters>]
+Start-DurableOrchestration [-FunctionName] <String> [[-InputObject] <Object>] [-DurableClient <Object>] [-InstanceId <String>] [-Version <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -99,6 +99,24 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
+### -Version
+
+Optional orchestration version.
+The provided value will be available as `$Context.Version` within the orchestrator function context.
+If not specified, the default version specified by the `defaultVersion` property in the Function app's host.json will be used.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
 ### CommonParameters
 
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -ProgressAction, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
@@ -116,6 +134,10 @@ You can pipe objects to the -InputObject parameter to provide input data for the
 ### System.String (InstanceId)
 
 You can pipe strings to the -InstanceId parameter to specify a custom instance ID for the orchestration.
+
+### System.String (Version)
+
+You can pipe strings to the -Version parameter to specify a version for the orchestration function.
 
 ## OUTPUTS
 

@@ -39,7 +39,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             Action<dynamic>? validateFinalResponse = null)
         {
             var initialResponseBodyString = await initialResponse.Content.ReadAsStringAsync();
-            dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString);
+            dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString)!;
             var statusQueryGetUri = (string)initialResponseBody.statusQueryGetUri;
 
             validateInitialResponse?.Invoke(initialResponseBody);
@@ -63,7 +63,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                         {
                             if (DateTime.UtcNow > startTime + _orchestrationCompletionTimeout)
                             {
-                                Assert.True(false, $"The orchestration has not completed after {_orchestrationCompletionTimeout}");
+                                Assert.Fail($"The orchestration has not completed after {_orchestrationCompletionTimeout}");
                             }
 
                             validateIntermediateResponse?.Invoke(statusResponseBody);
@@ -78,7 +78,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                         }
 
                         default:
-                            Assert.True(false, $"Unexpected orchestration status code: {statusResponse.StatusCode}");
+                            Assert.Fail($"Unexpected orchestration status code: {statusResponse.StatusCode}");
                             break;
                     }
                 }
