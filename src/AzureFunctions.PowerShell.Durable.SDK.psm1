@@ -123,7 +123,7 @@ function Start-DurableOrchestration {
     $traceFlags = $activity.TraceFlags
     $traceState = $activity.TraceStateString
 
-    $traceparent = "00-$traceId-$spanId-$traceFlags"
+    $traceparent = "00-$traceId-$spanId-01"
 
     $headers = @{
         "traceparent" = $traceparent
