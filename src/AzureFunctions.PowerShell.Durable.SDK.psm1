@@ -113,6 +113,23 @@ function Start-DurableOrchestration {
         $InstanceId = (New-Guid).Guid
     }
 
+    $invocationId = GetInvocationIdFromModulePrivateData
+
+    $activityResponse = Get-CurrentActivityForInvocation -InvocationId $invocationId
+    $activity = $activityResponse.activity
+
+    $traceId = $activity.TraceId
+    $spanId = $activity.SpanId
+    $traceFlags = $activity.TraceFlags
+    $traceState = $activity.TraceStateString
+
+    $traceparent = "00-$traceId-$spanId-$traceFlags"
+
+    $headers = @{
+        "traceparent" = $traceparent
+        "tracestate"  = $traceState
+    }
+
     $Uri =
         if ($DurableClient.rpcBaseUrl) {
             # Fast local RPC path
@@ -124,10 +141,8 @@ function Start-DurableOrchestration {
         }
 
     $Body = $InputObject | ConvertTo-Json -Compress -Depth 100
-
-    $InvocationId = GetInvocationIdFromModulePrivateData
               
-    $null = Invoke-RestMethod -Uri $Uri -Method 'POST' -ContentType 'application/json' -Body $Body
+    $null = Invoke-RestMethod -Uri $Uri -Method 'POST' -ContentType 'application/json' -Body $Body -Headers $headers
     
     return $instanceId
 }
