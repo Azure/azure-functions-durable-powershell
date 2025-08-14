@@ -114,6 +114,34 @@ function Start-DurableOrchestration {
     }
 
     $invocationId = GetInvocationIdFromModulePrivateData
+    $headers = Get-TraceHeaders -InvocationId $invocationId
+
+    $Uri =
+        if ($DurableClient.rpcBaseUrl) {
+            # Fast local RPC path
+            "$($DurableClient.rpcBaseUrl)orchestrators/$FunctionName$($InstanceId ? "/$InstanceId" : '')"
+        } else {
+            # Legacy app frontend path
+            $UriTemplate = $DurableClient.creationUrls.createNewInstancePostUri
+            $UriTemplate.Replace('{functionName}', $FunctionName).Replace('[/{instanceId}]', "/$InstanceId")
+        }
+
+    $Body = $InputObject | ConvertTo-Json -Compress -Depth 100
+              
+    $null = Invoke-RestMethod -Uri $Uri -Method 'POST' -ContentType 'application/json' -Body $Body -Headers $headers
+    
+    return $instanceId
+}
+
+function Get-TraceHeaders {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $InvocationId
+    )
+
+    if ($null -eq $InvocationId) {
+        return @{} # Return an empty headers object
+    }
 
     $activityResponse = Get-CurrentActivityForInvocation -InvocationId $invocationId
     $activity = $activityResponse.activity
@@ -135,21 +163,7 @@ function Start-DurableOrchestration {
         "tracestate"  = $traceState
     }
 
-    $Uri =
-        if ($DurableClient.rpcBaseUrl) {
-            # Fast local RPC path
-            "$($DurableClient.rpcBaseUrl)orchestrators/$FunctionName$($InstanceId ? "/$InstanceId" : '')"
-        } else {
-            # Legacy app frontend path
-            $UriTemplate = $DurableClient.creationUrls.createNewInstancePostUri
-            $UriTemplate.Replace('{functionName}', $FunctionName).Replace('[/{instanceId}]', "/$InstanceId")
-        }
-
-    $Body = $InputObject | ConvertTo-Json -Compress -Depth 100
-              
-    $null = Invoke-RestMethod -Uri $Uri -Method 'POST' -ContentType 'application/json' -Body $Body -Headers $headers
-    
-    return $instanceId
+    return $headers
 }
 
 function Stop-DurableOrchestration {
