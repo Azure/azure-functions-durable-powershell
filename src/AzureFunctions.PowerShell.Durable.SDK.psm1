@@ -135,11 +135,10 @@ function Start-DurableOrchestration {
 
 function Get-TraceHeaders {
     param(
-        [Parameter(Mandatory = $true)]
         [string] $InvocationId
     )
 
-    if ($null -eq $InvocationId) {
+    if ($null -eq $InvocationId -or $InvocationId -eq "") {
         return @{} # Return an empty headers object
     }
 
