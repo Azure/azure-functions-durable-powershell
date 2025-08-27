@@ -28,7 +28,7 @@ function GetInvocationIdFromModulePrivateData {
         return $null
     }
     else {
-        $PrivateData['InvocationId']
+        return $PrivateData['InvocationId']
     }
 }
 
