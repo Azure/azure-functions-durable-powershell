@@ -142,6 +142,12 @@ function Get-TraceHeaders {
         return @{} # Return an empty headers object
     }
 
+    # Check if Get-CurrentActivityForInvocation is available
+    if (-not (Get-Command -Name Get-CurrentActivityForInvocation -ErrorAction SilentlyContinue)) {
+        Write-Warning "Get-CurrentActivityForInvocation is not available. Skipping call."
+        return @{} # Return an empty headers object
+    }
+
     $activityResponse = Get-CurrentActivityForInvocation -InvocationId $invocationId
     $activity = $activityResponse.activity
 
