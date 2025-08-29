@@ -23,6 +23,7 @@ namespace DurableSDK.Commands.Internals
     {
         private const string ContextKey = "OrchestrationContext";
         private const string DurableClientKey = "DurableClient";
+        private const string InvocationIdKey = "InvocationId";
 
         /// <summary>
         /// The orchestration context.
@@ -35,6 +36,12 @@ namespace DurableSDK.Commands.Internals
         /// </summary>
         [Parameter(Mandatory = true, ParameterSetName = DurableClientKey)]
         public object DurableClient { get; set; }
+
+        /// <summary>
+        /// The function invocation ID.
+        /// </summary>
+        [Parameter(Mandatory = true, ParameterSetName = InvocationIdKey)]
+        public string InvocationId { get; set; }
 
         /// <summary>
         /// Whether or not to clear the privateData of this module.
@@ -70,11 +77,16 @@ namespace DurableSDK.Commands.Internals
                     privateData[DurableClientKey] = DurableClient;
                     break;
 
+                case InvocationIdKey:
+                    privateData[InvocationIdKey] = InvocationId;
+                    break;
+
                 default:
                     if (Clear.IsPresent)
                     {
                         privateData.Remove(ContextKey);
                         privateData.Remove(DurableClientKey);
+                        privateData.Remove(InvocationIdKey);
                     }
                     break;
             }

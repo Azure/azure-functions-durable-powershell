@@ -22,6 +22,16 @@ function GetDurableClientFromModulePrivateData {
     }
 }
 
+function GetInvocationIdFromModulePrivateData {
+    $PrivateData = $PSCmdlet.MyInvocation.MyCommand.Module.PrivateData
+    if ($null -eq $PrivateData -or $null -eq $PrivateData['InvocationId']) {
+        return $null
+    }
+    else {
+        return $PrivateData['InvocationId']
+    }
+}
+
 function Get-DurableStatus {
     [CmdletBinding()]
     param(
@@ -103,6 +113,9 @@ function Start-DurableOrchestration {
         $InstanceId = (New-Guid).Guid
     }
 
+    $invocationId = GetInvocationIdFromModulePrivateData
+    $headers = Get-TraceHeaders -InvocationId $invocationId
+
     $Uri =
         if ($DurableClient.rpcBaseUrl) {
             # Fast local RPC path
@@ -115,9 +128,47 @@ function Start-DurableOrchestration {
 
     $Body = $InputObject | ConvertTo-Json -Compress -Depth 100
               
-    $null = Invoke-RestMethod -Uri $Uri -Method 'POST' -ContentType 'application/json' -Body $Body
+    $null = Invoke-RestMethod -Uri $Uri -Method 'POST' -ContentType 'application/json' -Body $Body -Headers $headers
     
     return $instanceId
+}
+
+function Get-TraceHeaders {
+    param(
+        [string] $InvocationId
+    )
+
+    if ($null -eq $InvocationId -or $InvocationId -eq "") {
+        return @{} # Return an empty headers object
+    }
+
+    # Check if Get-CurrentActivityForInvocation is available
+    if (-not (Get-Command -Name Get-CurrentActivityForInvocation -ErrorAction SilentlyContinue)) {
+        Write-Warning "Get-CurrentActivityForInvocation is not available. Skipping call."
+        return @{} # Return an empty headers object
+    }
+
+    $activityResponse = Get-CurrentActivityForInvocation -InvocationId $invocationId
+    $activity = $activityResponse.activity
+
+    $traceId = $activity.TraceId
+    $spanId = $activity.SpanId
+    $traceFlags = $activity.TraceFlags
+    $traceState = $activity.TraceStateString
+
+    $flag = "00"
+    if ($null -ne $traceFlags -and $traceFlags -eq "Recorded") {
+        $flag = "01"
+    }
+
+    $traceparent = "00-$traceId-$spanId-$flag"
+
+    $headers = @{
+        "traceparent" = $traceparent
+        "tracestate"  = $traceState
+    }
+
+    return $headers
 }
 
 function Stop-DurableOrchestration {
