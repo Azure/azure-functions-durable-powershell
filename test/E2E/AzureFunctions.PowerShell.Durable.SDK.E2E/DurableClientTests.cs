@@ -263,9 +263,9 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         }
 
         [Theory]
-        // [InlineData(null, null, "1.0", "1.0")] // No version specified, should use defaultVersion from host.json for both
-        // [InlineData("0.5", null, "0.5", "1.0")] // Version specified for orchestrator, orchestrator should use it, suborchestrator should use defaultVersion
-        // [InlineData(null, "0.7", "1.0", "0.7")] // Version specified for suborchestrator only, orchestrator should use defaultVersion, suborchestrator should use specified version
+        [InlineData(null, null, "1.0", "1.0")] // No version specified, should use defaultVersion from host.json for both
+        [InlineData("0.5", null, "0.5", "1.0")] // Version specified for orchestrator, orchestrator should use it, suborchestrator should use defaultVersion
+        [InlineData(null, "0.7", "1.0", "0.7")] // Version specified for suborchestrator only, orchestrator should use defaultVersion, suborchestrator should use specified version
         [InlineData("0.5", "0.7", "0.5", "0.7")] // Both versions specified, each should use their respective versions
         public async Task OrchestrationVersionIsPropagatedToContext(
             string orchestratorVersion,
