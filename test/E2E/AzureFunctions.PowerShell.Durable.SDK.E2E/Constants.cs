@@ -13,7 +13,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
         public static class Queue
         {
             public static string QueueName = "outqueue";
-            public static string StorageConnectionStringSetting = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+            public static string StorageConnectionStringSetting = Environment.GetEnvironmentVariable("AzureWebJobsStorage") ?? "AzureWebJobsStorage placeholder";
             public static string OutputBindingName = "test-output-ps";
             public static string InputBindingName = "test-input-ps";
         }    

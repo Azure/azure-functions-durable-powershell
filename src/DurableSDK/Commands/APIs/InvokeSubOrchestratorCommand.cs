@@ -44,6 +44,13 @@ namespace DurableSDK.Commands.APIs
         public RetryPolicy RetryOptions { get; set; }
 
         /// <summary>
+        /// Version of the SubOrchestrator to invoke.
+        /// </summary>
+        [Parameter]
+        [ValidateNotNull]
+        public string Version { get; set; }
+
+        /// <summary>
         /// If provided, the Task will block and be scheduled immediately.
         /// Otherwise, a Task object is returned and the Task is not scheduled yet.
         /// </summary>
@@ -53,7 +60,7 @@ namespace DurableSDK.Commands.APIs
         internal override DurableTask CreateDurableTask()
         {
             var privateData = (Hashtable)MyInvocation.MyCommand.Module.PrivateData;
-            SubOrchestratorTask task = new SubOrchestratorTask(FunctionName, InstanceId, Input, RetryOptions, NoWait, privateData);
+            SubOrchestratorTask task = new SubOrchestratorTask(FunctionName, InstanceId, Input, RetryOptions, Version, NoWait, privateData);
             return task;
         }
     }

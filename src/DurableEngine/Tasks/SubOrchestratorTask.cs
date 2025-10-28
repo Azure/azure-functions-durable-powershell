@@ -20,11 +20,14 @@ namespace DurableEngine.Tasks
 
         private RetryPolicy RetryOptions { get; }
 
+        internal string Version { get; }
+
         public SubOrchestratorTask(
             string functionName,
             string instanceId,
             object functionInput,
             RetryPolicy retryOptions,
+            string version,
             SwitchParameter noWait,
             Hashtable privateData) : base(noWait, privateData)
         {
@@ -32,6 +35,7 @@ namespace DurableEngine.Tasks
             InstanceId = instanceId;
             Input = functionInput;
             RetryOptions = retryOptions;
+            Version = version;
         }
 
         internal override Task<object> CreateDTFxTask()
@@ -45,14 +49,19 @@ namespace DurableEngine.Tasks
                 ? taskOptions :
                 taskOptions.WithInstanceId(InstanceId);
 
-            return DTFxContext.CallSubOrchestratorAsync<object>(FunctionName, Input, taskOptions);
+            var subOrchestrationOptions = new SubOrchestrationOptions(taskOptions, InstanceId)
+            {
+                Version = this.Version
+            };
+
+            return DTFxContext.CallSubOrchestratorAsync<object>(FunctionName, Input, subOrchestrationOptions);
         }
 
         internal override OrchestrationAction CreateOrchestrationAction()
         {
             return RetryOptions == null
-                ? new CallSubOrchestratorAction(FunctionName, Input, InstanceId)
-                : new CallSubOrchestratorWithRetryAction(FunctionName, Input, InstanceId, RetryOptions);
+                ? new CallSubOrchestratorAction(FunctionName, Input, InstanceId, Version)
+                : new CallSubOrchestratorWithRetryAction(FunctionName, Input, InstanceId, RetryOptions, Version);
         }
     }
 }

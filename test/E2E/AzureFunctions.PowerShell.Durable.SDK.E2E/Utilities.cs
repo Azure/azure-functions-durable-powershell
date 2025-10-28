@@ -51,7 +51,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
         public static async Task<dynamic> GetResponseBodyAsync(HttpResponseMessage response)
         {
             var responseBody = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject(responseBody);
+            return JsonConvert.DeserializeObject(responseBody)!;
         }
     }
 }

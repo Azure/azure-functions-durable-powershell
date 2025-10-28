@@ -22,12 +22,18 @@ namespace DurableEngine.Actions
         /// </summary>
         public readonly object Input;
 
-        internal CallSubOrchestratorAction(string functionName, object input, string instanceId)
+        /// <summary>
+        /// The version of the sub-orchestrator function.
+        /// </summary>
+        public readonly string Version;
+
+        internal CallSubOrchestratorAction(string functionName, object input, string instanceId, string version)
             : base(ActionType.CallSubOrchestrator)
         {
             FunctionName = functionName;
             Input = input;
             InstanceId = instanceId;
+            Version = version;
         }
     }
 }

@@ -14,7 +14,7 @@ Invokes a sub-orchestrator function.
 ## SYNTAX
 
 ```
-Invoke-DurableSubOrchestrator -FunctionName <String> [-InstanceId <String>] [-Input <Object>] [-RetryOptions <RetryPolicy>] [-NoWait] [<CommonParameters>]
+Invoke-DurableSubOrchestrator -FunctionName <String> [-InstanceId <String>] [-Input <Object>] [-RetryOptions <RetryPolicy>] [-Version <String>] [-NoWait] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -45,6 +45,15 @@ Write-Host "Sub-orchestrator completed with result: $batchResult"
 ```
 
 This example shows how to invoke a sub-orchestrator function asynchronously using -NoWait, which returns a task object that can be awaited later.
+
+### Example 3 - Specifying a version
+
+```powershell
+$result = Invoke-DurableSubOrchestrator -FunctionName "ChildOrchestrator" -Version "2.0" -Input @{ ProcessId = "proc456" }
+Write-Host "Sub-orchestrator (version 2.0) completed with result: $result"
+```
+
+This example shows how to invoke a sub-orchestrator with a specific version, overriding the default version configured in host.json.
 
 ## PARAMETERS
 
@@ -83,6 +92,22 @@ Accept wildcard characters: False
 ### -InstanceId
 
 An optional instance ID for the sub-orchestrator. If not specified, a unique instance ID will be automatically generated for the sub-orchestrator.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Version
+
+An optional version string for the sub-orchestrator function. When specified, this version overrides the default version configured in host.json for this specific sub-orchestrator invocation. This allows you to invoke specific versions of orchestrator functions.
 
 ```yaml
 Type: String
@@ -152,6 +177,7 @@ Returns the result of the sub-orchestrator execution by default. If -NoWait is s
 - Use the -NoWait parameter when you need to invoke multiple sub-orchestrators concurrently.
 - Sub-orchestrators inherit the fault-tolerance and replay characteristics of the parent orchestration.
 - The sub-orchestrator function name must match a function defined in your Azure Functions app with an orchestration trigger.
+- The -Version parameter allows you to invoke specific versions of orchestrator functions, overriding the default version from host.json.
 - Consider using sub-orchestrators to break down complex workflows into manageable, reusable components.
 
 ## RELATED LINKS

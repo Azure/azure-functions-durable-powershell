@@ -3,6 +3,7 @@
 
 using AzureFunctions.PowerShell.Durable.SDK.Tests.E2E;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Net;
 using Xunit;
 
@@ -258,6 +259,58 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
                     Assert.Equal("FirstTimeout", finalStatusResponseBody.output[0].ToString());
                     Assert.Equal("SecondExternalEvent", finalStatusResponseBody.output[1].ToString());
+                });
+        }
+
+        [Theory]
+        [InlineData(null, null, "1.0", "1.0")] // No version specified, should use defaultVersion from host.json for both
+        [InlineData("0.5", null, "0.5", "1.0")] // Version specified for orchestrator, orchestrator should use it, suborchestrator should use defaultVersion
+        [InlineData(null, "0.7", "1.0", "0.7")] // Version specified for suborchestrator only, orchestrator should use defaultVersion, suborchestrator should use specified version
+        [InlineData("0.5", "0.7", "0.5", "0.7")] // Both versions specified, each should use their respective versions
+        public async Task OrchestrationVersionIsPropagatedToContext(
+            string orchestratorVersion,
+            string subOrchestratorVersion,
+            string expectedOrchestratorVersion,
+            string expectedSubOrchestratorVersion)
+        {
+            var queryParams = new List<string>();
+            if (orchestratorVersion != null)
+                queryParams.Add($"Version={orchestratorVersion}");
+            if (subOrchestratorVersion != null)
+                queryParams.Add($"SubOrchestratorVersion={subOrchestratorVersion}");
+            
+            string queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : string.Empty;
+            
+            var initialResponse = await Utilities.GetHttpStartResponse("VersionedOrchestrator", queryString);
+            Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
+
+            var location = initialResponse.Headers.Location;
+            Assert.NotNull(location);
+
+            await ValidateDurableWorkflowResults(
+                initialResponse,
+                validateInitialResponse: (dynamic initialResponseBody) =>
+                {
+                    Assert.NotNull(initialResponseBody.id);
+                    var statusQueryGetUri = (string)initialResponseBody.statusQueryGetUri;
+                    Assert.Equal(location?.ToString(), statusQueryGetUri);
+                    Assert.NotNull(initialResponseBody.sendEventPostUri);
+                    Assert.NotNull(initialResponseBody.purgeHistoryDeleteUri);
+                    Assert.NotNull(initialResponseBody.terminatePostUri);
+                    Assert.NotNull(initialResponseBody.rewindPostUri);
+                },
+                validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
+                {
+                    var runtimeStatus = (string)intermediateStatusResponseBody.runtimeStatus;
+                    Assert.True(
+                        runtimeStatus == "Running" || runtimeStatus == "Pending",
+                        $"Unexpected runtime status: {runtimeStatus}");
+                },
+                validateFinalResponse: (dynamic finalStatusResponseBody) =>
+                {
+                    Assert.Equal("Completed", (string)finalStatusResponseBody.runtimeStatus);
+                    Assert.Equal(expectedOrchestratorVersion, finalStatusResponseBody.output[0].ToString());
+                    Assert.Equal(expectedSubOrchestratorVersion, finalStatusResponseBody.output[1].ToString());
                 });
         }
     }

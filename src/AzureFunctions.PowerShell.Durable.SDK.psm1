@@ -100,7 +100,11 @@ function Start-DurableOrchestration {
 
         [Parameter(
             ValueFromPipelineByPropertyName=$true)]
-        [string] $InstanceId
+        [string] $InstanceId,
+
+        [Parameter(
+            ValueFromPipelineByPropertyName=$true)]
+        [string] $Version
     )
 
     $ErrorActionPreference = 'Stop'
@@ -125,6 +129,12 @@ function Start-DurableOrchestration {
             $UriTemplate = $DurableClient.creationUrls.createNewInstancePostUri
             $UriTemplate.Replace('{functionName}', $FunctionName).Replace('[/{instanceId}]', "/$InstanceId")
         }
+
+    # Add version parameter to query string if provided
+    if ($Version) {
+        $separator = if ($Uri.Contains('?')) { '&' } else { '?' }
+        $Uri += "$separator" + "version=$([System.Web.HttpUtility]::UrlEncode($Version))"
+    }
 
     $Body = $InputObject | ConvertTo-Json -Compress -Depth 100
               

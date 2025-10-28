@@ -23,7 +23,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
 
             var initialResponseBodyString = await initialResponse.Content.ReadAsStringAsync();
-            dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString);
+            dynamic initialResponseBody = JsonConvert.DeserializeObject(initialResponseBodyString)!;
             var statusQueryGetUri = (string)initialResponseBody.statusQueryGetUri;
 
             var startTime = DateTime.UtcNow;
@@ -41,7 +41,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                             {
                                 if (DateTime.UtcNow > startTime + _orchestrationCompletionTimeout)
                                 {
-                                    Assert.True(false, $"The orchestration has not completed after {_orchestrationCompletionTimeout}");
+                                    Assert.Fail($"The orchestration has not completed after {_orchestrationCompletionTimeout}");
                                 }
                                 await Task.Delay(TimeSpan.FromSeconds(2));
                                 break;
@@ -56,7 +56,7 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                             }
 
                         default:
-                            Assert.True(false, $"Unexpected orchestration status code: {statusResponse.StatusCode}");
+                            Assert.Fail($"Unexpected orchestration status code: {statusResponse.StatusCode}");
                             break;
                     }
                 }
