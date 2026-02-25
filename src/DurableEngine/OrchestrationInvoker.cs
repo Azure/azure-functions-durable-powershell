@@ -130,6 +130,40 @@ namespace DurableEngine
         }
 
         /// <summary>
+        /// Determines the boundary index separating past (played) events from new events in the history.
+        /// Some backends don't set <c>IsPlayed</c> on history events. When that happens, we infer the
+        /// boundary by looking for the last <c>OrchestratorStarted</c> event, which marks the beginning
+        /// of the current replay episode. All events before it belong to previously completed episodes.
+        /// </summary>
+        /// <param name="history">The orchestration history events.</param>
+        /// <returns>The index of the first new (unplayed) event.</returns>
+        internal static int GetNewEventsStartIndex(DurableTask.Core.History.HistoryEvent[] history)
+        {
+            // If any event has IsPlayed set to true, use the original approach.
+            var lastPlayedIndex = Array.FindLastIndex(history, e => e.IsPlayed);
+            if (lastPlayedIndex >= 0)
+            {
+                return lastPlayedIndex + 1;
+            }
+
+            // Fallback: no events have IsPlayed == true, so the backend didn't populate that field.
+            // Infer the boundary by finding the last OrchestratorStarted event. Events in previous
+            // episodes (before the last OrchestratorStarted) are past events; the rest are new.
+            var lastOrchestratorStartedIndex = Array.FindLastIndex(
+                history,
+                e => e.EventType == DurableTask.Core.History.EventType.OrchestratorStarted);
+
+            // If there is only one (or zero) OrchestratorStarted, all events belong to the current
+            // episode and there are no past events.
+            if (lastOrchestratorStartedIndex <= 0)
+            {
+                return 0;
+            }
+
+            return lastOrchestratorStartedIndex;
+        }
+
+        /// <summary>
         /// Creates a DTFx orchestrator executor, which allows DTFx to manage orchestration replay.
         /// Most of the code here is unavoidable boilerplate to prepare DTFx for invocation.
         /// </summary>
@@ -139,8 +173,7 @@ namespace DurableEngine
         {
             // Construct the OrchestratorState object. The key here is to correctly distinguish new events from past ones.
             OrchestratorState state = new OrchestratorState();
-            var lastPlayedIndex = Array.FindLastIndex(context.History, (historyEvent) => historyEvent.IsPlayed == true);
-            var newEventsIndex = lastPlayedIndex + 1;
+            var newEventsIndex = GetNewEventsStartIndex(context.History);
             state.PastEvents = context.History[..newEventsIndex];
             state.NewEvents = context.History[newEventsIndex..];
             state.InstanceId = context.InstanceId;
