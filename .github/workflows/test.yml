@@ -41,6 +41,8 @@ jobs:
 
     - name: Install Azurite
       run: npm install -g azurite
+      env:
+        NPM_CONFIG_USERCONFIG: ${{ github.workspace }}\.github\.npmrc
 
     - name: Run E2E tests
       run: azurite --skipApiVersionCheck --silent --blobPort 10000 --queuePort 10001 --tablePort 10002 & ./test/E2E/Start-E2ETest.ps1 -NoBuild
