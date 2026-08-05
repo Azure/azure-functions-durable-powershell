@@ -13,8 +13,6 @@ namespace DurableSDK.Commands.Internals
     using System.Management.Automation;
     using DurableEngine;
     using DurableEngine.Models;
-    using DurableSDK.Converters;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Sets either the orchestration context or the durableClient in the privateData of this module or clears both.
@@ -57,14 +55,7 @@ namespace DurableSDK.Commands.Internals
             switch (ParameterSetName)
             {
                 case ContextKey:
-                    // De-serialize the orchestration context
-                    JsonSerializerSettings serializerSettings = new JsonSerializerSettings
-                    {
-                        TypeNameHandling = TypeNameHandling.All,
-                        Converters = { new HistoryEventConverter() }
-                    };
-
-                    var context = JsonConvert.DeserializeObject<OrchestrationContext>(OrchestrationContext, serializerSettings);
+                    var context = DurableEngine.Models.OrchestrationContext.Deserialize(this.OrchestrationContext);
 
                     // save orchestration context to privateData
                     privateData[ContextKey] = context;

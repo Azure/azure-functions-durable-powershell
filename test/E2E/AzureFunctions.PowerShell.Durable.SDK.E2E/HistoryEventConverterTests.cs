@@ -1,7 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using DurableSDK.Converters;
+using DurableEngine.Models;
 using DurableTask.Core.History;
 using Newtonsoft.Json;
 using Xunit;
@@ -48,10 +48,10 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                 }
                 """;
 
-            HistoryEvent historyEvent = JsonConvert.DeserializeObject<HistoryEvent>(
-                json,
-                CreateSerializerSettings())!;
+            OrchestrationContext context = OrchestrationContext.Deserialize(
+                $$"""{ "history": [{{json}}], "instanceId": "test" }""");
 
+            HistoryEvent historyEvent = Assert.Single(context.History);
             Assert.IsType(expectedType, historyEvent);
             Assert.Equal(1, historyEvent.EventId);
         }
@@ -63,12 +63,12 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
             string json = JsonConvert.SerializeObject(
                 original,
                 typeof(HistoryEvent),
-                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
 
-            HistoryEvent historyEvent = JsonConvert.DeserializeObject<HistoryEvent>(
-                json,
-                CreateSerializerSettings())!;
+            OrchestrationContext context = OrchestrationContext.Deserialize(
+                $$"""{ "history": [{{json}}], "instanceId": "test" }""");
 
+            HistoryEvent historyEvent = Assert.Single(context.History);
             var taskScheduled = Assert.IsType<TaskScheduledEvent>(historyEvent);
             Assert.Equal(7, taskScheduled.EventId);
             Assert.Equal("Hello", taskScheduled.Name);
@@ -82,16 +82,8 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
         public void RejectsHistoryEventsWithoutConcreteTypes(string json)
         {
             Assert.Throws<JsonSerializationException>(
-                () => JsonConvert.DeserializeObject<HistoryEvent>(json, CreateSerializerSettings()));
-        }
-
-        private static JsonSerializerSettings CreateSerializerSettings()
-        {
-            return new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.All,
-                Converters = { new HistoryEventConverter() },
-            };
+                () => OrchestrationContext.Deserialize(
+                    $$"""{ "history": [{{json}}], "instanceId": "test" }"""));
         }
     }
 }

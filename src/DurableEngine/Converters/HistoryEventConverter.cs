@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-namespace DurableSDK.Converters
+namespace DurableEngine.Converters
 {
     using System;
     using DurableTask.Core.History;
@@ -31,6 +31,11 @@ namespace DurableSDK.Converters
             }
 
             var eventObject = JObject.Load(reader);
+            if (eventObject.Property("$type", StringComparison.Ordinal) != null)
+            {
+                return DeserializeTypePreservingEvent(eventObject, objectType, serializer);
+            }
+
             var eventTypeToken = eventObject.GetValue(
                 nameof(HistoryEvent.EventType),
                 StringComparison.OrdinalIgnoreCase);
@@ -62,6 +67,26 @@ namespace DurableSDK.Converters
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             throw new NotSupportedException();
+        }
+
+        private object DeserializeTypePreservingEvent(
+            JObject eventObject,
+            Type objectType,
+            JsonSerializer serializer)
+        {
+            int converterIndex = serializer.Converters.IndexOf(this);
+            serializer.Converters.RemoveAt(converterIndex);
+
+            try
+            {
+                return eventObject.ToObject(objectType, serializer)
+                    ?? throw new JsonSerializationException(
+                        "Type-preserving history event could not be deserialized.");
+            }
+            finally
+            {
+                serializer.Converters.Insert(converterIndex, this);
+            }
         }
 
         private static ExecutionRewoundEvent DeserializeExecutionRewoundEvent(

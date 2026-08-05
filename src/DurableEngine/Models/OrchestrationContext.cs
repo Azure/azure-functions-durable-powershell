@@ -9,7 +9,9 @@
 namespace DurableEngine.Models
 {
     using global::DurableTask.Core.History;
+    using DurableEngine.Converters;
     using Microsoft.DurableTask;
+    using Newtonsoft.Json;
     using System;
     using System.Runtime.Serialization;
 
@@ -71,6 +73,19 @@ namespace DurableEngine.Models
         /// DTFx context that provides the implementation of DF APis.
         /// </summary>
         internal TaskOrchestrationContext DTFxContext;
+
+        internal static OrchestrationContext Deserialize(string orchestrationContext)
+        {
+            var serializerSettings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.All,
+                Converters = { new HistoryEventConverter() },
+            };
+
+            return JsonConvert.DeserializeObject<OrchestrationContext>(
+                orchestrationContext,
+                serializerSettings);
+        }
 
         /// <summary>
         /// Internal orchestrator history
