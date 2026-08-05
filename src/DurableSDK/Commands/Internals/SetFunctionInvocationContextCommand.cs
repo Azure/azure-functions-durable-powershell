@@ -13,6 +13,7 @@ namespace DurableSDK.Commands.Internals
     using System.Management.Automation;
     using DurableEngine;
     using DurableEngine.Models;
+    using DurableSDK.Converters;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -59,7 +60,8 @@ namespace DurableSDK.Commands.Internals
                     // De-serialize the orchestration context
                     JsonSerializerSettings serializerSettings = new JsonSerializerSettings
                     {
-                        TypeNameHandling = TypeNameHandling.All
+                        TypeNameHandling = TypeNameHandling.All,
+                        Converters = { new HistoryEventConverter() }
                     };
 
                     var context = JsonConvert.DeserializeObject<OrchestrationContext>(OrchestrationContext, serializerSettings);
