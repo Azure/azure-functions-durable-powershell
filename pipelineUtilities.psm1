@@ -107,7 +107,7 @@ function Install-Dotnet {
         Find-Dotnet
         return  # Simply return if we find dotnet SDk with the correct version
     } catch { }
-    $obtainUrl = "https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain"
+    $obtainUrl = "https://dot.net/v1"
     try {
         $installScript = if ($IsWindows) { "dotnet-install.ps1" } else { "dotnet-install.sh" }
         Invoke-WebRequest -Uri $obtainUrl/$installScript -OutFile $installScript

@@ -61,7 +61,6 @@ function NewTaskHubName
 $FUNC_RUNTIME_VERSION = '4'
 $POWERSHELL_VERSION = '7.4'
 $FUNC_CMDLET_NAME = "func"
-$CORE_TOOLS_VERSION = '4.0.7317'
 
 # Set the appropriate environment variables
 $taskHubName = NewTaskHubName -Length 45
@@ -108,8 +107,22 @@ if (-not $SkipCoreToolsDownload)
 {
     Write-Host "Downloading Core Tools because SkipCoreToolsDownload switch parameter is not present..."
 
-    $coreToolsDownloadURL = "https://github.com/Azure/azure-functions-core-tools/releases/download/$CORE_TOOLS_VERSION/Azure.Functions.Cli.$os-$arch.$CORE_TOOLS_VERSION.zip"
-    Write-Host "Downloading Functions Core Tools (Version: $CORE_TOOLS_VERSION)..."
+    $npmConfigPath = Join-Path $PSScriptRoot '..\..\.github\.npmrc'
+    if (-not (Test-Path $npmConfigPath))
+    {
+        throw "The Central Feed Service npm configuration was not found at $npmConfigPath"
+    }
+
+    Write-Host "Resolving the latest Functions Core Tools version through Central Feed Service..."
+    $coreToolsPackage = npm view azure-functions-core-tools@latest version consolidatedBuildId --json --userconfig $npmConfigPath | ConvertFrom-Json
+    if ([string]::IsNullOrWhiteSpace($coreToolsPackage.version) -or [string]::IsNullOrWhiteSpace($coreToolsPackage.consolidatedBuildId))
+    {
+        throw "Central Feed Service did not return the latest Functions Core Tools version metadata."
+    }
+
+    $coreToolsVersion = $coreToolsPackage.version
+    $coreToolsDownloadURL = "https://cdn.functions.azure.com/public/4.0.$($coreToolsPackage.consolidatedBuildId)/Azure.Functions.Cli.$os-$arch.$coreToolsVersion.zip"
+    Write-Host "Downloading Functions Core Tools (Version: $coreToolsVersion)..."
 
     $output = "$FUNC_CLI_DIRECTORY.zip"
     Invoke-RestMethod -Uri $coreToolsDownloadURL -OutFile $output
