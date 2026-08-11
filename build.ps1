@@ -5,9 +5,7 @@ param(
     [string]
     $Configuration = 'Debug',
     [switch]
-    $AddSBOM,
-    [switch]
-    $SkipExternalHelp
+    $AddSBOM
 )
 
 Import-Module "$PSScriptRoot\pipelineUtilities.psm1" -Force
@@ -79,34 +77,23 @@ Write-Log "Copying PowerShell module and manifest from the Durable SDK source co
 Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
 
-#region GENERATE EXTERNAL HELP ===================================================================
-if ($SkipExternalHelp) {
-    Write-Log "Skipping external help generation." "Gray"
+#region INCLUDE EXTERNAL HELP ====================================================================
+Write-Log "Including versioned external help files (MAML)..." "Gray"
+
+# Define paths for generated help
+$docsPath = "$PSScriptRoot/src/Help/en-US"
+$helpPath = "$outputPath/en-US"
+
+# Create the help directory if it doesn't exist
+if (-not (Test-Path $helpPath)) {
+    Write-Log "Creating help directory at $helpPath" "Cyan"
+    New-Item -Path $helpPath -ItemType Directory -Force
 }
-else {
-    $cfsRepositoryName = 'upstream-public'
-    $cfsRepositoryUrl = 'https://pkgs.dev.azure.com/azfunc/public/_packaging/upstream-public/nuget/v2'
 
-    if (-not (Get-PSRepository -Name $cfsRepositoryName -ErrorAction SilentlyContinue)) {
-        Register-PSRepository -Name $cfsRepositoryName -SourceLocation $cfsRepositoryUrl -InstallationPolicy Trusted
-    }
-
-    Write-Log "Installing Microsoft.PowerShell.PlatyPS from Central Feed Service..." "Cyan"
-    Install-Module -Name Microsoft.PowerShell.PlatyPS -Repository $cfsRepositoryName -Force -Scope CurrentUser
-    Import-Module Microsoft.PowerShell.PlatyPS -Force
-
-    $docsPath = "$PSScriptRoot/src/Help"
-    $helpPath = "$outputPath/en-US"
-
-    if (-not (Test-Path $helpPath)) {
-        Write-Log "Creating help directory at $helpPath" "Cyan"
-        New-Item -Path $helpPath -ItemType Directory -Force
-    }
-
-    Write-Log "Converting markdown files to MAML help files..." "Gray"
-    New-ExternalHelp -Path $docsPath -OutputPath $helpPath -Force
-    Write-Log "External help files generated successfully in $helpPath" "Green"
-}
+# Copy the versioned MAML help so builds do not restore PlatyPS from PowerShell Gallery.
+Write-Log "Copying generated MAML help files..." "Gray"
+Copy-Item -Path "$docsPath/*.xml" -Destination $helpPath -Force
+Write-Log "External help files copied successfully to $helpPath" "Green"
 #endregion
 
 Write-Log "Build succeeded!"

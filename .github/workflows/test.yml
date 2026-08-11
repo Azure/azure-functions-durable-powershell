@@ -31,7 +31,7 @@ jobs:
           Install-Dotnet
 
     - name: 'Build'
-      run: ./build.ps1 -Configuration Release -SkipExternalHelp
+      run: ./build.ps1 -Configuration Release
 
     # Install Azurite
     - name: Set up Node.js (needed for Azurite)
