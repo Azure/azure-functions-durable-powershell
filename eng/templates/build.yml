@@ -14,6 +14,9 @@ jobs:
         artifactName: 'azure-functions-durable-powershell-$(Build.SourceVersion)'
 
       steps:
+        - task: NuGetAuthenticate@1
+          displayName: Authenticate Central Feed Service
+
         - pwsh: |
                 $simulateReleaseBuild = $null
                 Write-Host "SimulateReleaseBuild set to $env:SimulateReleaseBuild"
