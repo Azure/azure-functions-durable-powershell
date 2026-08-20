@@ -18,7 +18,7 @@ $durableEnginePath = "$PSScriptRoot/src/DurableEngine"
 $durableAppPath = "$PSScriptRoot/test/E2E/durableApp/Modules/$packageName"
 $powerShellModulePath = "$PSScriptRoot/src/$packageName.psm1"
 $manifestPath = "$PSScriptRoot/src/$packageName.psd1"
-$cfsRepositoryName = 'upstream-public'
+$cfsRepositoryName = 'cfs-upstream-public'
 $cfsFeedUri = 'https://pkgs.dev.azure.com/azfunc/public/_packaging/upstream-public/nuget/v2'
 
 # Publish directly to the test durable app for testing
