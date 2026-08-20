@@ -5,7 +5,9 @@ param(
     [string]
     $Configuration = 'Debug',
     [switch]
-    $AddSBOM
+    $AddSBOM,
+    [switch]
+    $SkipExternalHelp
 )
 
 Import-Module "$PSScriptRoot\pipelineUtilities.psm1" -Force
@@ -16,6 +18,8 @@ $durableEnginePath = "$PSScriptRoot/src/DurableEngine"
 $durableAppPath = "$PSScriptRoot/test/E2E/durableApp/Modules/$packageName"
 $powerShellModulePath = "$PSScriptRoot/src/$packageName.psm1"
 $manifestPath = "$PSScriptRoot/src/$packageName.psd1"
+$cfsRepositoryName = 'upstream-public'
+$cfsFeedUri = 'https://pkgs.dev.azure.com/azfunc/public/_packaging/upstream-public/nuget/v2'
 
 # Publish directly to the test durable app for testing
 $outputPath = $durableAppPath
@@ -77,23 +81,47 @@ Write-Log "Copying PowerShell module and manifest from the Durable SDK source co
 Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
 
-#region INCLUDE EXTERNAL HELP ====================================================================
-Write-Log "Including versioned external help files (MAML)..." "Gray"
-
-# Define paths for generated help
-$docsPath = "$PSScriptRoot/src/Help/en-US"
-$helpPath = "$outputPath/en-US"
-
-# Create the help directory if it doesn't exist
-if (-not (Test-Path $helpPath)) {
-    Write-Log "Creating help directory at $helpPath" "Cyan"
-    New-Item -Path $helpPath -ItemType Directory -Force
+#region GENERATE EXTERNAL HELP ===================================================================
+if ($SkipExternalHelp) {
+    Write-Log "Skipping external help generation." "Gray"
 }
+else {
+    $repositoryParameters = @{
+        Name = $cfsRepositoryName
+        SourceLocation = $cfsFeedUri
+        InstallationPolicy = 'Trusted'
+    }
 
-# Copy the versioned MAML help so builds do not restore PlatyPS from PowerShell Gallery.
-Write-Log "Copying generated MAML help files..." "Gray"
-Copy-Item -Path "$docsPath/*.xml" -Destination $helpPath -Force
-Write-Log "External help files copied successfully to $helpPath" "Green"
+    if ($env:SYSTEM_ACCESSTOKEN) {
+        $secureToken = ConvertTo-SecureString $env:SYSTEM_ACCESSTOKEN -AsPlainText -Force
+        $repositoryParameters.Credential = [System.Management.Automation.PSCredential]::new(
+            'AzurePipelines',
+            $secureToken)
+    }
+
+    if (Get-PSRepository -Name $cfsRepositoryName -ErrorAction SilentlyContinue) {
+        Set-PSRepository @repositoryParameters
+    }
+    else {
+        Register-PSRepository @repositoryParameters
+    }
+
+    Write-Log "Installing PlatyPS from Central Feed Service..." "Cyan"
+    Install-Module -Name PlatyPS -Repository $cfsRepositoryName -Scope CurrentUser -Force
+    Import-Module PlatyPS -Force
+
+    $docsPath = "$PSScriptRoot/src/Help"
+    $helpPath = "$outputPath/en-US"
+
+    if (-not (Test-Path $helpPath)) {
+        Write-Log "Creating help directory at $helpPath" "Cyan"
+        New-Item -Path $helpPath -ItemType Directory -Force
+    }
+
+    Write-Log "Converting markdown files to MAML help files..." "Gray"
+    New-ExternalHelp -Path $docsPath -OutputPath $helpPath -Force
+    Write-Log "External help files generated successfully in $helpPath" "Green"
+}
 #endregion
 
 Write-Log "Build succeeded!"
