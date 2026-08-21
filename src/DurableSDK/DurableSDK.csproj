@@ -10,4 +10,5 @@
     <ProjectReference Include="..\DurableEngine\DurableEngine.csproj" />
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.18" PrivateAssets="all" />
   </ItemGroup>
+
 </Project>
