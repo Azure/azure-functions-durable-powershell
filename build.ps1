@@ -5,7 +5,9 @@ param(
     [string]
     $Configuration = 'Debug',
     [switch]
-    $AddSBOM
+    $AddSBOM,
+    [switch]
+    $SkipExternalHelp
 )
 
 Import-Module "$PSScriptRoot\pipelineUtilities.psm1" -Force
@@ -16,6 +18,8 @@ $durableEnginePath = "$PSScriptRoot/src/DurableEngine"
 $durableAppPath = "$PSScriptRoot/test/E2E/durableApp/Modules/$packageName"
 $powerShellModulePath = "$PSScriptRoot/src/$packageName.psm1"
 $manifestPath = "$PSScriptRoot/src/$packageName.psd1"
+$cfsRepositoryName = 'cfs-upstream-public'
+$cfsFeedUri = 'https://pkgs.dev.azure.com/azfunc/public/_packaging/upstream-public/nuget/v2'
 
 # Publish directly to the test durable app for testing
 $outputPath = $durableAppPath
@@ -78,31 +82,46 @@ Copy-Item -Path $powerShellModulePath -Destination $outputPath
 Copy-Item -Path $manifestPath -Destination $outputPath
 
 #region GENERATE EXTERNAL HELP ===================================================================
-Write-Log "Generating external help files (MAML) from markdown documentation..." "Gray"
-
-# Install PlatyPS module if not already available
-if (-not (Get-Module -ListAvailable -Name PlatyPS)) {
-    Write-Log "Installing PlatyPS module..." "Cyan"
-    Install-Module -Name PlatyPS -Force -Scope CurrentUser
+if ($SkipExternalHelp) {
+    Write-Log "Skipping external help generation." "Gray"
 }
+else {
+    $repositoryParameters = @{
+        Name = $cfsRepositoryName
+        SourceLocation = $cfsFeedUri
+        InstallationPolicy = 'Trusted'
+    }
 
-# Import PlatyPS module
-Import-Module PlatyPS -Force
+    if ($env:SYSTEM_ACCESSTOKEN) {
+        $secureToken = ConvertTo-SecureString $env:SYSTEM_ACCESSTOKEN -AsPlainText -Force
+        $repositoryParameters.Credential = [System.Management.Automation.PSCredential]::new(
+            'AzurePipelines',
+            $secureToken)
+    }
 
-# Define paths for help generation
-$docsPath = "$PSScriptRoot/src/Help"
-$helpPath = "$outputPath/en-US"
+    if (Get-PSRepository -Name $cfsRepositoryName -ErrorAction SilentlyContinue) {
+        Set-PSRepository @repositoryParameters
+    }
+    else {
+        Register-PSRepository @repositoryParameters
+    }
 
-# Create the help directory if it doesn't exist
-if (-not (Test-Path $helpPath)) {
-    Write-Log "Creating help directory at $helpPath" "Cyan"
-    New-Item -Path $helpPath -ItemType Directory -Force
+    Write-Log "Installing PlatyPS from Central Feed Service..." "Cyan"
+    Install-Module -Name PlatyPS -Repository $cfsRepositoryName -Scope CurrentUser -Force
+    Import-Module PlatyPS -Force
+
+    $docsPath = "$PSScriptRoot/src/Help"
+    $helpPath = "$outputPath/en-US"
+
+    if (-not (Test-Path $helpPath)) {
+        Write-Log "Creating help directory at $helpPath" "Cyan"
+        New-Item -Path $helpPath -ItemType Directory -Force
+    }
+
+    Write-Log "Converting markdown files to MAML help files..." "Gray"
+    New-ExternalHelp -Path $docsPath -OutputPath $helpPath -Force
+    Write-Log "External help files generated successfully in $helpPath" "Green"
 }
-
-# Generate external help files from markdown
-Write-Log "Converting markdown files to MAML help files..." "Gray"
-New-ExternalHelp -Path $docsPath -OutputPath $helpPath -Force
-Write-Log "External help files generated successfully in $helpPath" "Green"
 #endregion
 
 Write-Log "Build succeeded!"

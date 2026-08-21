@@ -55,6 +55,7 @@ jobs:
             # We include IsReleaseBuild as an environment variable since Linux agents don't seem to support including
             # pipeline variables in scripts with the $(variable) syntax
             IsReleaseBuild: $(IsReleaseBuild)
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
         - task: ArchiveFiles@2
           inputs:
