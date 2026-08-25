@@ -14,7 +14,14 @@ namespace DurableEngine.Tasks
         public DurableTask(SwitchParameter noWait, Hashtable privateData)
         {
             NoWait = noWait;
-            OrchestrationContext = (OrchestrationContext)privateData[OrchestrationInvoker.ContextKey];
+            OrchestrationContext = (OrchestrationContext)privateData?[OrchestrationInvoker.ContextKey];
+
+            if (OrchestrationContext == null)
+            {
+                throw new InvalidOperationException(
+                    "Durable orchestration cmdlets can only be used within orchestrator functions, " +
+                    "not in activity functions or client functions.");
+            }
         }
 
         private OrchestrationAction action;
