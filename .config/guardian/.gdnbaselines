@@ -1,0 +1,53 @@
+{
+  "properties": {
+    "helpUri": "https://eng.ms/docs/microsoft-security/security/azure-security/cloudai-security-fundamentals-engineering/security-integration/guardian-wiki/microsoft-guardian/general/baselines"
+  },
+  "version": "1.0.0",
+  "baselines": {
+    "default": {
+      "name": "default",
+      "createdDate": "2026-08-11 06:06:41Z",
+      "lastUpdatedDate": "2026-08-11 06:06:41Z"
+    }
+  },
+  "results": {
+    "83bfabb979bde0c783be09cf674b73a4a7be33280f0997262ea40ee0e168667e": {
+      "signature": "83bfabb979bde0c783be09cf674b73a4a7be33280f0997262ea40ee0e168667e",
+      "alternativeSignatures": [
+        "46ebffd96a6a5ef522c6f0397faf2c1cbadf8a77bd9982b051281d81be983232",
+        "03b1382943e6b1ce57ba0a402a39bfd974d3140b14b03bf0084a46a47419a7d1",
+        "5f3c81c9f35057b5a1f6e683f6d5b36d65dc422033065bb8dbbad624ba0c8773"
+      ],
+      "target": "src/DurableSDK/Commands/Internals/SetFunctionInvocationContextCommand.cs",
+      "line": 62,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA2326",
+      "createdDate": "2026-08-11 06:06:41Z",
+      "expirationDate": "2027-01-28 06:08:12Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-08-11 06:08:12Z"
+    },
+    "1a192242e7e866fc26f9cad101a056aca2f82dac87fe3b1e69c85e5ba4d1052c": {
+      "signature": "1a192242e7e866fc26f9cad101a056aca2f82dac87fe3b1e69c85e5ba4d1052c",
+      "alternativeSignatures": [
+        "61972b02bd8efb8d6e65c67e031a6c448858f58ffc13b3fd1f3f52957e6a1456",
+        "6dd6564dc92e36b2ab2cbb7f4d8a464c52108472d44137d7aef743ebd7a79452",
+        "83551f246deb3b20fa9ae76650b9a79950094900649f631347b730abd85add5b"
+      ],
+      "target": "src/DurableSDK/Commands/Internals/SetFunctionInvocationContextCommand.cs",
+      "line": 65,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA2327",
+      "createdDate": "2026-08-11 06:06:41Z",
+      "expirationDate": "2027-01-28 06:08:12Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-08-11 06:08:12Z"
+    }
+  }
+}
