@@ -39,10 +39,13 @@ jobs:
       with:
         node-version: '22.x' # Azurite requires Node 21 or later
 
-    - name: Install test dependencies
-      run: npm install -g azurite azure-functions-core-tools@4 --unsafe-perm true
+    - name: Install Azurite
+      run: npm install -g azurite
       env:
         NPM_CONFIG_LOGLEVEL: verbose
+
+    - name: Install Azure Functions Core Tools
+      run: choco install azure-functions-core-tools --yes --no-progress
 
     - name: Run E2E tests
       run: azurite --skipApiVersionCheck --silent --blobPort 10000 --queuePort 10001 --tablePort 10002 & ./test/E2E/Start-E2ETest.ps1 -NoBuild -SkipCoreToolsDownload
