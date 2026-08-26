@@ -43,7 +43,9 @@ jobs:
       run: npm install -g azurite
       env:
         NPM_CONFIG_LOGLEVEL: verbose
-        NPM_CONFIG_USERCONFIG: ${{ github.workspace }}\.github\.npmrc
+
+    - name: Install Azure Functions Core Tools
+      run: choco install azure-functions-core-tools --yes --no-progress
 
     - name: Run E2E tests
-      run: azurite --skipApiVersionCheck --silent --blobPort 10000 --queuePort 10001 --tablePort 10002 & ./test/E2E/Start-E2ETest.ps1 -NoBuild
+      run: azurite --skipApiVersionCheck --silent --blobPort 10000 --queuePort 10001 --tablePort 10002 & ./test/E2E/Start-E2ETest.ps1 -NoBuild -SkipCoreToolsDownload

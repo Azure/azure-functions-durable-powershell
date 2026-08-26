@@ -93,7 +93,9 @@ else {
     }
 
     if ($env:SYSTEM_ACCESSTOKEN) {
-        $secureToken = ConvertTo-SecureString $env:SYSTEM_ACCESSTOKEN -AsPlainText -Force
+        $secureToken = [System.Net.NetworkCredential]::new(
+            [string]::Empty,
+            $env:SYSTEM_ACCESSTOKEN).SecurePassword
         $repositoryParameters.Credential = [System.Management.Automation.PSCredential]::new(
             'AzurePipelines',
             $secureToken)
