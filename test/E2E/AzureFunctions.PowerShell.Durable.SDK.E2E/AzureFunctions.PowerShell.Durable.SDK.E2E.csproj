@@ -25,4 +25,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\DurableEngine\DurableEngine.csproj" />
+  </ItemGroup>
+
 </Project>
