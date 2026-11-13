@@ -34,7 +34,10 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     // Send external event payload
                     var json = JsonConvert.SerializeObject("helloWorld!");
                     var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-                    await httpClient.PostAsync(raiseEventUri, httpContent);
+                    using var request = Utilities.CreateManagementRequest(
+                        HttpMethod.Post, raiseEventUri);
+                    request.Content = httpContent;
+                    await httpClient.SendAsync(request);
                 },
                 validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
                 {

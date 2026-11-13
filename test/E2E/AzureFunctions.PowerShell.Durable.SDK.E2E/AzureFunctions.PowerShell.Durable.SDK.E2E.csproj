@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\..\src\AzureFunctions.PowerShell.Durable.SDK.psm1"
+          Link="AzureFunctions.PowerShell.Durable.SDK.psm1"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\src\DurableEngine\DurableEngine.csproj" />
     <PackageReference Include="Azure.Storage.Queues" Version="12.25.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />

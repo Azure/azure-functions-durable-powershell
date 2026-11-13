@@ -13,11 +13,29 @@ namespace AzureFunctions.PowerShell.Durable.SDK.Tests.E2E
     {
         private IMessageSink _diagnosticMessageSink;
         private bool _disposed;
-        private Process _funcProcess;
+        private Process? _funcProcess;
 
         public DurableAppFixture(IMessageSink diagnosticMessageSink)
         {
             _diagnosticMessageSink = diagnosticMessageSink;
+            if (bool.TryParse(Environment.GetEnvironmentVariable(
+                    "AzureFunctionsJobHost__extensions__durableTask__httpSettings__excludeManagementKeyFromUrls"),
+                    out bool excludeKey) && excludeKey
+                && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("E2E_TEST_DURABLE_SYSTEM_KEY")))
+            {
+                throw new InvalidOperationException(
+                    "E2E_TEST_DURABLE_SYSTEM_KEY is required when management URL key exclusion is enabled.");
+            }
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("FunctionAppUrl")))
+            {
+                if (!Uri.TryCreate(Constants.FunctionsHostUrl, UriKind.Absolute, out var host)
+                    || (host.Scheme != Uri.UriSchemeHttp && host.Scheme != Uri.UriSchemeHttps))
+                {
+                    throw new InvalidOperationException("FunctionAppUrl must be an absolute HTTP or HTTPS URL.");
+                }
+                WriteDiagnosticMessage("Using the configured external Functions host.");
+                return;
+            }
             // Kill any existing func processes
             WriteDiagnosticMessage("Shutting down any running Functions hosts.");
             FixtureHelpers.KillExistingFuncProcesses();

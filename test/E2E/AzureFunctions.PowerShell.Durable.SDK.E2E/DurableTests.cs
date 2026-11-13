@@ -46,11 +46,13 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 
             var startTime = DateTime.UtcNow;
 
-            using (var httpClient = new HttpClient())
+            using (var httpClient = Utilities.CreateManagementHttpClient())
             {
                 while (true)
                 {
-                    var statusResponse = await httpClient.GetAsync(statusQueryGetUri);
+                    using var request = Utilities.CreateManagementRequest(
+                        HttpMethod.Get, statusQueryGetUri);
+                    var statusResponse = await httpClient.SendAsync(request);
                     var statusResponseBody = await Utilities.GetResponseBodyAsync(statusResponse);
                     if (sendExternalEvents != null)
                     {
