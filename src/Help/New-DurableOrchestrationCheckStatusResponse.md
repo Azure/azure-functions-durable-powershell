@@ -21,6 +21,12 @@ New-DurableOrchestrationCheckStatusResponse [-Request] <Object> [-InstanceId] <S
 
 Creates an HTTP response with status check URLs for a durable orchestration instance.
 This response includes URLs for checking status, terminating, suspending, resuming, and raising events.
+URL query parameters are supplied by the Functions host and preserved by this
+cmdlet. By default, generated URLs contain the Durable system key in `code`.
+On a supporting host, `httpSettings.excludeManagementKeyFromUrls=true` excludes
+that key from generated URLs. HTTP callers must then obtain an authorized key
+independently and send `x-functions-key` on each management request. The response
+does not return authentication headers or credentials.
 
 ## EXAMPLES
 
@@ -106,8 +112,11 @@ Returns an HTTP response context with status code 202 (Accepted) and management 
 
 - This cmdlet is typically used in HTTP trigger functions after starting an orchestration to provide management URLs.
 - The response includes a 202 (Accepted) status code following the standard async HTTP pattern.
-- The generated URLs allow clients to check status, send events, and manage the orchestration without additional authentication.
-- Store the instanceId securely if the orchestration contains sensitive data, as anyone with the URLs can manage the orchestration.
+- The host option defaults to `false`, preserving existing URL authentication. Enable it only after the app's HTTP management callers support independently supplied `x-functions-key` authentication.
+- SDK management commands normally use the local RPC endpoint. Keep RPC enabled for authenticated apps with key-free URLs; the SDK does not automatically supply a key to its legacy public-HTTP fallback.
+- Treat keys as secrets. Do not log them, append them to URLs, or forward them to unrelated origins.
+- The option does not redact incoming requests or existing logs. Keys manually supplied in query strings are still accepted and can still be logged.
+- The key remains an app-wide management credential, not an instance-scoped token.
 - The response follows the Durable Functions HTTP API conventions for orchestration management.
 
 ## RELATED LINKS
