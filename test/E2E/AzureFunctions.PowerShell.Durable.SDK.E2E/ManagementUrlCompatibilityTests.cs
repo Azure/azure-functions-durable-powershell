@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System.Management.Automation.Runspaces;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -95,7 +96,13 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
 
         private static JObject Invoke(JObject binding, string operation)
         {
-            using Ps shell = Ps.Create();
+            InitialSessionState sessionState = InitialSessionState.CreateDefault2();
+            if (OperatingSystem.IsWindows())
+            {
+                // Embedded Windows hosts otherwise block the local module under Restricted policy.
+                sessionState.ExecutionPolicy = Microsoft.PowerShell.ExecutionPolicy.RemoteSigned;
+            }
+            using Ps shell = Ps.Create(sessionState);
             shell.AddScript("""
                 if (-not ('HttpResponseContext' -as [type])) {
                     Add-Type -TypeDefinition @'
