@@ -21,12 +21,6 @@ New-DurableOrchestrationCheckStatusResponse [-Request] <Object> [-InstanceId] <S
 
 Creates an HTTP response with status check URLs for a durable orchestration instance.
 This response includes URLs for checking status, terminating, suspending, resuming, and raising events.
-URL query parameters are supplied by the Functions host and preserved by this
-cmdlet. By default, generated URLs contain the Durable system key in `code`.
-On a supporting host, `httpSettings.excludeManagementKeyFromUrls=true` excludes
-that key from generated URLs. HTTP callers must then obtain an authorized key
-independently and send `x-functions-key` on each management request. The response
-does not return authentication headers or credentials.
 
 ## EXAMPLES
 
@@ -109,6 +103,13 @@ You can pipe instance ID strings to generate status check responses for specific
 Returns an HTTP response context with status code 202 (Accepted) and management URLs for checking orchestration status, sending external events, and terminating the orchestration.
 
 ## NOTES
+
+URL query parameters are supplied by the Functions host and preserved by this
+cmdlet. By default, generated URLs contain the Durable system key in `code`.
+On a supporting host, `httpSettings.excludeManagementKeyFromUrls=true` excludes
+that key from generated URLs. HTTP callers must then obtain an authorized key
+independently and send `x-functions-key` on each management request. The response
+does not return authentication headers or credentials.
 
 - This cmdlet is typically used in HTTP trigger functions after starting an orchestration to provide management URLs.
 - The response includes a 202 (Accepted) status code following the standard async HTTP pattern.

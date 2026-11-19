@@ -8,7 +8,6 @@ Thank you for taking the time to contribute to the Durable Functions PowerShell 
 - [Prerequisites](#prerequisites)
 - [Pull Request Change Flow](#pull-request-change-flow)
 - [Testing with a Durable Functions app](#testing-with-a-durable-functions-app)
-- [Continuous Integration](#continuous-integration)
 - [Debugging .NET packages from a Durable Functions PowerShell app](#debugging-net-packages-from-a-durable-functions-java-app)
 
 ## Relevant Docs
@@ -44,16 +43,6 @@ The following instructions explain how to test changes in a Durable Functions Po
 3. Remove 'AzureFunctions.PowerShell.Durable.SDK' = '2.*' from requirements.psd1 in your test app
 4. Copy the Modules folder from the durableApp E2E test app in the PowerShell SDK to your test app
 5. In Visual Studio Code, run `func host start` or press F5
-
-## Continuous Integration
-
-Code scanning uses GitHub's CodeQL default setup for C# and GitHub Actions.
-Keep default setup enabled; a separate advanced CodeQL workflow cannot upload
-analysis results while default setup is active.
-
-The compatibility tests configure `RemoteSigned` for their embedded Windows
-PowerShell test host so it can import the local module. They do not change user
-or machine execution policies.
 
 ## Debugging .NET packages from a Durable Functions PowerShell app
 
