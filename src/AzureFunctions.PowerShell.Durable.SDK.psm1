@@ -277,7 +277,7 @@ function GetUrlOrigin([uri]$Url) {
     $fixedOriginUrl.Scheme = $Url.Scheme
     $fixedOriginUrl.Host = $Url.Host
     $fixedOriginUrl.Port = $Url.Port
-    $fixedOriginUrl.ToString()
+    $fixedOriginUrl.Uri.AbsoluteUri
 }
 
 function New-DurableOrchestrationCheckStatusResponse {
@@ -315,7 +315,11 @@ function New-DurableOrchestrationCheckStatusResponse {
             $value = $value.Replace($dataOrigin, $requestUrlOrigin)
         }
       
-        $value = $value.Replace($DurableClient.managementUrls.id, $InstanceId)
+        $templateId = [string]$DurableClient.managementUrls.id
+        $index = $value.IndexOf($templateId, [StringComparison]::Ordinal)
+        if ($index -ge 0) {
+            $value = $value.Substring(0, $index) + $InstanceId + $value.Substring($index + $templateId.Length)
+        }
         $httpManagementPayload.Add($entry.Name, $value)
     }
     
