@@ -277,7 +277,7 @@ function GetUrlOrigin([uri]$Url) {
     $fixedOriginUrl.Scheme = $Url.Scheme
     $fixedOriginUrl.Host = $Url.Host
     $fixedOriginUrl.Port = $Url.Port
-    $fixedOriginUrl.ToString()
+    $fixedOriginUrl.Uri.AbsoluteUri
 }
 
 function New-DurableOrchestrationCheckStatusResponse {
@@ -306,16 +306,27 @@ function New-DurableOrchestrationCheckStatusResponse {
     $requestHasValidUrl = IsValidUrl $requestUrl
     $requestUrlOrigin = GetUrlOrigin $requestUrl
     
+    $templateId = [string]$DurableClient.managementUrls.id
     $httpManagementPayload = [ordered]@{ }
     foreach ($entry in $DurableClient.managementUrls.GetEnumerator()) {
         $value = $entry.Value
     
         if ($requestHasValidUrl -and (IsValidUrl $value)) {
-            $dataOrigin = GetUrlOrigin $value
-            $value = $value.Replace($dataOrigin, $requestUrlOrigin)
+            # Replace only the leading origin without normalizing the raw query.
+            $originLength = [regex]::Match($value, '\A[^:/?#]+://[^/?#]+').Length
+            $value = $requestUrlOrigin.TrimEnd('/') + $value.Substring($originLength)
         }
-      
-        $value = $value.Replace($DurableClient.managementUrls.id, $InstanceId)
+
+        # The host appends only fixed operations after the instance segment, so the last path
+        # match is the instance ID. The authority and query remain unchanged.
+        $pathStart = [regex]::Match($value, '\A[^:/?#]+://[^/?#]+').Length
+        $pathEnd = $value.IndexOfAny([char[]]'?#', $pathStart)
+        if ($pathEnd -lt 0) { $pathEnd = $value.Length }
+        $index = $value.Substring($pathStart, $pathEnd - $pathStart).LastIndexOf($templateId, [StringComparison]::Ordinal)
+        if ($index -ge 0) {
+            $index += $pathStart
+            $value = $value.Substring(0, $index) + $InstanceId + $value.Substring($index + $templateId.Length)
+        }
         $httpManagementPayload.Add($entry.Name, $value)
     }
     

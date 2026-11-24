@@ -34,6 +34,11 @@ namespace AzureFunctions.PowerShell.Durable.SDK.E2E
                     Assert.NotNull(initialResponseBody.purgeHistoryDeleteUri);
                     Assert.NotNull(initialResponseBody.terminatePostUri);
                     Assert.NotNull(initialResponseBody.rewindPostUri);
+                    Assert.Null(initialResponseBody.requiredHeaders);
+                    bool excludeKey = bool.TryParse(Environment.GetEnvironmentVariable(
+                        "AzureFunctionsJobHost__extensions__durableTask__httpSettings__excludeManagementKeyFromUrls"),
+                        out bool exclude) && exclude;
+                    Assert.Equal(!excludeKey, new Uri(statusQueryGetUri).Query.Contains("code=", StringComparison.OrdinalIgnoreCase));
                 },
                 validateIntermediateResponse: (dynamic intermediateStatusResponseBody) =>
                 {
