@@ -22,6 +22,9 @@ New-DurableOrchestrationCheckStatusResponse [-Request] <Object> [-InstanceId] <S
 Creates an HTTP response with status check URLs for a durable orchestration instance.
 This response includes URLs for checking status, terminating, suspending, resuming, and raising events.
 
+When a valid request URL is present, only each management URL's scheme and authority are rewritten.
+Host-provided query values are preserved verbatim.
+
 ## EXAMPLES
 
 ### Example 1
